@@ -1,0 +1,24 @@
+.decorative-marks {
+  display: block;
+  width: auto;
+  height: 2.75rem;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.decorative-marks--left {
+  margin-bottom: 1.65rem;
+  margin-inline-end: -0.35rem;
+  transform: rotate(9deg);
+}
+
+.decorative-marks--right {
+  margin-top: 1.35rem;
+  margin-inline-start: -0.35rem;
+}
+
+@media (min-width: 768px) {
+  .decorative-marks {
+    height: 3.25rem;
+  }
+}

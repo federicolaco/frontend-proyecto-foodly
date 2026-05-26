@@ -1,0 +1,125 @@
+.hero {
+  background: var(--celeste);
+  padding-top: 5.5rem;
+  position: relative;
+}
+
+.hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.hero__image-wrap {
+  flex-shrink: 0;
+  width: min(100%, 380px);
+  position: relative;
+}
+
+.hero__image-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72%;
+  height: clamp(18px, 5vw, 32px);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.12) 45%,
+    transparent 72%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero__image {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.22));
+}
+
+.hero__text {
+  width: 100%;
+  text-align: left;
+  padding-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.hero__title {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 6vw, 3.35rem);
+  font-weight: 400;
+  color: var(--blanco);
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+}
+
+.hero__subtitle {
+  font-weight: 800;
+  font-size: clamp(1rem, 3vw, 1.35rem);
+  color: var(--amarillo);
+  margin-bottom: 1.5rem;
+}
+
+.hero__cta {
+  display: inline-block;
+  background: var(--blanco);
+  color: var(--celeste);
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  padding: 0.85rem 2rem;
+  border-radius: 999px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+@media (min-width: 768px) {
+  .hero {
+    padding-top: 6rem;
+  }
+
+  .hero__content {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 2.5rem;
+    padding-top: 1.5rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .hero__image-wrap {
+    flex: 0 1 auto;
+    width: auto;
+    max-width: 480px;
+  }
+
+  .hero__text {
+    flex: 0 1 auto;
+    max-width: 520px;
+    padding-bottom: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero__content {
+    gap: 3rem;
+    margin-bottom: 4rem;
+  }
+
+  .hero__image-wrap {
+    max-width: 520px;
+  }
+}

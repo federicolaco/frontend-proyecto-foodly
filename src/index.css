@@ -1,0 +1,70 @@
+:root {
+  --celeste: #0490d1;
+  --amarillo: #f9ca07;
+  --gris-claro: #efefef;
+  --celeste-oscuro: #0979c8;
+  --gris-intermedio: #545454;
+  --gris-oscuro: #202020;
+  --negro: #000000;
+  --blanco: #ffffff;
+  --font-serif: 'DM Serif Display', Georgia, serif;
+  --font-sans: 'Nunito', system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--gris-intermedio);
+  background: var(--blanco);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  overflow-x: clip;
+  width: 100%;
+}
+
+#root {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.contenedor {
+  width: 100%;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 768px) {
+  .contenedor {
+    padding-inline: 1.5rem;
+  }
+}

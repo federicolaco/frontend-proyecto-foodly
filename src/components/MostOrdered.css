@@ -1,0 +1,135 @@
+.most-ordered {
+  --food-card-min: 240px;
+  --food-card-max: 300px;
+
+  background: var(--blanco);
+  padding: 3rem 0 4rem;
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+.most-ordered__header {
+  text-align: center;
+  margin-inline: auto;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding-inline: 1rem;
+  max-width: 100%;
+}
+
+.most-ordered__title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.85rem, 5vw, 3rem);
+  color: var(--celeste-oscuro);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.most-ordered__subtitle {
+  font-size: clamp(1rem, 2.8vw, 1.2rem);
+  color: var(--gris-intermedio);
+  line-height: 1.5;
+  max-width: 640px;
+  padding-inline: 0.5rem;
+}
+
+.most-ordered__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1rem;
+  padding-bottom: 1rem;
+  margin-inline: 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--celeste) var(--gris-claro);
+  max-width: 100%;
+}
+
+.most-ordered__cards-track {
+  display: flex;
+  justify-content: flex-start;
+  width: max-content;
+}
+
+.most-ordered__cards {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1.25rem;
+  width: max-content;
+  padding-bottom: 0.5rem;
+  padding-inline: 1rem;
+}
+
+/* Tablet y mobile: scroll horizontal sin espacio vacío después de la última tarjeta */
+@media (max-width: 1199px) {
+  .most-ordered__scroll {
+    scroll-padding-inline: 1rem;
+    overscroll-behavior-x: contain;
+  }
+
+  .most-ordered__cards-track {
+    justify-content: flex-start;
+  }
+
+  .most-ordered__cards {
+    padding-inline: 1rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .most-ordered__title {
+    white-space: normal;
+    font-size: clamp(1.45rem, 7vw, 1.85rem);
+  }
+
+  .most-ordered__scroll {
+    margin-inline: 0;
+    scroll-padding-inline: 1rem;
+  }
+
+}
+
+/* Desktop ancho: tarjetas centradas */
+@media (min-width: 1200px) {
+  .most-ordered__scroll {
+    scroll-padding-inline: 1.5rem;
+  }
+
+  .most-ordered__cards-track {
+    justify-content: center;
+    width: auto;
+    min-width: 100%;
+  }
+
+  .most-ordered__cards {
+    padding-inline: 1.5rem;
+  }
+}
+
+.most-ordered__cta-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 2rem;
+}
+
+.most-ordered__cta {
+  background: var(--celeste);
+  color: var(--blanco);
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  padding: 0.9rem 2.25rem;
+  border-radius: 999px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.most-ordered__cta:hover {
+  background: var(--celeste-oscuro);
+  transform: translateY(-2px);
+}
