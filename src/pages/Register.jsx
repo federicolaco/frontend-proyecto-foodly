@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { getHomePathForRole, register, registerWithGoogle } from '../api/auth'
 import { AuthLayout } from '../components/AuthLayout'
 import { PasswordField } from '../components/PasswordField'
 import './AuthPages.css'
@@ -37,14 +39,135 @@ function GoogleIcon() {
 }
 
 export function Register() {
+  const navigate = useNavigate()
+  const [accountType, setAccountType] = useState('cliente')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [address, setAddress] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [showGoogleForm, setShowGoogleForm] = useState(false)
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setError(null)
+
+    if (password !== confirmPassword) {
+      setError('Las contraseñas ingresadas no coinciden. Por favor, verifique e inténtelo de nuevo.')
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      const { user } = await register({
+        firstName,
+        lastName,
+        address,
+        email,
+        password,
+        role: accountType,
+      })
+
+      if (user.role === 'local') {
+        navigate('/registrar-local', { replace: true })
+      } else {
+        navigate(getHomePathForRole(user.role), { replace: true })
+      }
+    } catch (err) {
+      setError(err.message ?? 'No pudimos crear la cuenta.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleRegister = async (event) => {
+    event.preventDefault()
+    setError(null)
+    setLoading(true)
+
+    try {
+      const { user } = await registerWithGoogle({
+        firstName: firstName || 'Usuario',
+        lastName: lastName || 'Google',
+        address,
+        email: email || `google.user.${Date.now()}@foodly.mock`,
+      })
+      navigate(getHomePathForRole(user.role), { replace: true })
+    } catch (err) {
+      setError(err.message ?? 'No fue posible completar la autenticación con Google.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <AuthLayout>
       <h1 className="auth-page__title auth-page__title--register">Registrate en Foodly</h1>
 
-      <button type="button" className="auth-btn auth-btn--outline auth-btn--google">
+      {error && (
+        <p className="auth-page__error" role="alert">
+          {error}
+        </p>
+      )}
+
+      <div className="auth-account-type">
+        <button
+          type="button"
+          className={`auth-account-type__btn${accountType === 'cliente' ? ' auth-account-type__btn--active' : ''}`}
+          onClick={() => setAccountType('cliente')}
+        >
+          Cliente
+        </button>
+        <button
+          type="button"
+          className={`auth-account-type__btn${accountType === 'local' ? ' auth-account-type__btn--active' : ''}`}
+          onClick={() => setAccountType('local')}
+        >
+          Local comercial
+        </button>
+      </div>
+
+      <button
+        type="button"
+        className="auth-btn auth-btn--outline auth-btn--google"
+        onClick={() => setShowGoogleForm(true)}
+      >
         <GoogleIcon />
         CONTINUAR CON GOOGLE
       </button>
+
+      {showGoogleForm && (
+        <form className="auth-form auth-form--google-extra" onSubmit={handleGoogleRegister}>
+          <p className="auth-page__hint">Completá los datos faltantes para finalizar con Google (simulado).</p>
+          <label className="auth-field" htmlFor="google-email">
+            <span className="auth-field__label">Correo de Google</span>
+            <input
+              id="google-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
+          <label className="auth-field" htmlFor="google-address">
+            <span className="auth-field__label">Domicilio</span>
+            <input
+              id="google-address"
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              required
+            />
+          </label>
+          <button type="submit" className="auth-btn auth-btn--primary" disabled={loading}>
+            Finalizar registro Google
+          </button>
+        </form>
+      )}
 
       <div className="auth-divider" aria-hidden="true">
         <span className="auth-divider__line" />
@@ -56,19 +179,35 @@ export function Register() {
         Ingresa tus datos para registrarte
       </h2>
 
-      <form className="auth-form" onSubmit={(event) => event.preventDefault()}>
+      <form className="auth-form" onSubmit={handleSubmit}>
         <div className="auth-form__row">
           <label className="auth-field" htmlFor="register-first-name">
             <span className="auth-field__label">Nombre</span>
             <span className="auth-field__control">
-              <input id="register-first-name" type="text" placeholder="Nombre" autoComplete="given-name" />
+              <input
+                id="register-first-name"
+                type="text"
+                placeholder="Nombre"
+                autoComplete="given-name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+              />
             </span>
           </label>
 
           <label className="auth-field" htmlFor="register-last-name">
             <span className="auth-field__label">Apellido</span>
             <span className="auth-field__control">
-              <input id="register-last-name" type="text" placeholder="Apellido" autoComplete="family-name" />
+              <input
+                id="register-last-name"
+                type="text"
+                placeholder="Apellido"
+                autoComplete="family-name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+              />
             </span>
           </label>
         </div>
@@ -81,6 +220,9 @@ export function Register() {
               type="text"
               placeholder="Domicilio (calle, número)"
               autoComplete="street-address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              required
             />
           </span>
         </label>
@@ -93,6 +235,9 @@ export function Register() {
               type="email"
               placeholder="Correo electrónico"
               autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </span>
         </label>
@@ -102,16 +247,20 @@ export function Register() {
           label="Contraseña"
           placeholder="Contraseña"
           hint={PASSWORD_HINT}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
 
         <PasswordField
           id="register-confirm-password"
           label="Confirmar contraseña"
           placeholder="Confirmar contraseña"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
         />
 
-        <button type="submit" className="auth-btn auth-btn--primary auth-btn--register-submit">
-          REGISTRARSE
+        <button type="submit" className="auth-btn auth-btn--primary auth-btn--register-submit" disabled={loading}>
+          {loading ? 'REGISTRANDO...' : 'REGISTRARSE'}
         </button>
       </form>
 

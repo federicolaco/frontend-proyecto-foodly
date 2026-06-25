@@ -50,8 +50,8 @@
 
 .most-ordered__cards-track {
   display: flex;
-  justify-content: flex-start;
   width: max-content;
+  margin-inline: auto;
 }
 
 .most-ordered__cards {
@@ -68,10 +68,6 @@
   .most-ordered__scroll {
     scroll-padding-inline: 1rem;
     overscroll-behavior-x: contain;
-  }
-
-  .most-ordered__cards-track {
-    justify-content: flex-start;
   }
 
   .most-ordered__cards {
@@ -93,16 +89,10 @@
 
 }
 
-/* Desktop ancho: tarjetas centradas */
+/* Desktop ancho */
 @media (min-width: 1200px) {
   .most-ordered__scroll {
     scroll-padding-inline: 1.5rem;
-  }
-
-  .most-ordered__cards-track {
-    justify-content: center;
-    width: auto;
-    min-width: 100%;
   }
 
   .most-ordered__cards {

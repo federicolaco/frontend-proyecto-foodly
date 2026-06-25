@@ -1,4 +1,5 @@
 import { Fragment } from 'react'
+import { Link } from 'react-router-dom'
 import step1Img from '../../img/step1.png'
 import step2Img from '../../img/step2.png'
 import step3Img from '../../img/step3.png'
@@ -66,9 +67,9 @@ export function HowItWorks() {
 
       <div className="how-it-works__cta-wrap">
         <DecorativeMarks side="left" />
-        <a href="" className="how-it-works__cta">
+        <Link to="/pedidos" className="how-it-works__cta">
           ORDENA AHORA
-        </a>
+        </Link>
         <DecorativeMarks side="right" />
       </div>
     </section>

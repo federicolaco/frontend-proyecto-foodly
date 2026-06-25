@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import burgerCardImg from '../../img/burger-card.png'
 import pizzaCardImg from '../../img/pizza-card.png'
 import pastaCardImg from '../../img/pasta-card.png'
@@ -71,9 +72,9 @@ export function MostOrdered() {
 
       <div className="most-ordered__cta-wrap">
         <DecorativeMarks side="left" />
-        <a href="" className="most-ordered__cta">
+        <Link to="/pedidos" className="most-ordered__cta">
           OTRAS OPCIONES
-        </a>
+        </Link>
         <DecorativeMarks side="right" />
       </div>
     </section>

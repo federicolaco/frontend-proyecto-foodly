@@ -1,0 +1,82 @@
+.orders-page {
+  min-height: 100vh;
+  background: var(--gris-claro);
+}
+
+.orders-page__main {
+  padding-top: 5.5rem;
+  padding-bottom: 2rem;
+}
+
+.orders-page__error {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: #fdecea;
+  color: #c0392b;
+  font-size: 0.9rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.orders-page__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.orders-page__catalog-panel {
+  flex: 1;
+  min-height: 0;
+  background: var(--blanco);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 1.25rem;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .orders-page__main {
+    padding-top: 6rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .orders-page {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .orders-page__main {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    box-sizing: border-box;
+    padding-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .orders-page__layout {
+    flex: 1;
+    min-height: 0;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+
+  .orders-page__layout > :first-child {
+    flex: 0 0 280px;
+    min-height: 0;
+  }
+
+  .orders-page__catalog-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    padding: 1.5rem;
+  }
+}

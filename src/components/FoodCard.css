@@ -7,13 +7,12 @@
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  scroll-snap-align: center;
+  scroll-snap-align: start;
 }
 
 @media (max-width: 767px) {
   .food-card {
     width: min(var(--food-card-max, 300px), 85vw);
-    scroll-snap-align: start;
   }
 }
 

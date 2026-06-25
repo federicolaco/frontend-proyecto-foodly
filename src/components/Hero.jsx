@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import burgerImg from '../../img/burger.png'
 import { WaveDivider } from './WaveDivider'
 import './Hero.css'
@@ -17,9 +18,9 @@ export function Hero() {
             Un solo lugar.
           </h1>
           <p className="hero__subtitle">Todas las comidas, a un clic de distancia</p>
-          <a href="" className="hero__cta">
+          <Link to="/pedidos" className="hero__cta">
             ORDENA AHORA
-          </a>
+          </Link>
         </div>
       </div>
 

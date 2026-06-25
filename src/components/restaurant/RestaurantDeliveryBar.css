@@ -1,0 +1,49 @@
+.restaurant-delivery-bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.restaurant-delivery-bar__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.85rem;
+  background: var(--blanco);
+  border: 2px solid #b8e4f5;
+  border-radius: 0.75rem;
+  font-size: 0.72rem;
+  color: var(--gris-oscuro);
+  text-align: left;
+}
+
+.restaurant-delivery-bar__item svg {
+  flex-shrink: 0;
+  color: var(--celeste);
+}
+
+.restaurant-delivery-bar__item strong {
+  font-weight: 800;
+}
+
+.restaurant-delivery-bar__item--static {
+  cursor: default;
+}
+
+.restaurant-delivery-bar__mode {
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--celeste);
+}
+
+.restaurant-delivery-bar__chevron {
+  margin-left: auto;
+  color: var(--celeste);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .restaurant-delivery-bar {
+    grid-template-columns: 1fr;
+  }
+}

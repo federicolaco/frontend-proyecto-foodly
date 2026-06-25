@@ -243,3 +243,62 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.auth-page__error {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: #fdecea;
+  color: #c0392b;
+  font-size: 0.9rem;
+}
+
+.auth-page__hint {
+  font-size: 0.875rem;
+  color: var(--gris-intermedio);
+  margin-bottom: 0.75rem;
+}
+
+.auth-account-type {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.auth-account-type__btn {
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  border: 2px solid #ddd;
+  font-weight: 700;
+  color: var(--gris-intermedio);
+}
+
+.auth-account-type__btn--active {
+  border-color: var(--celeste);
+  background: var(--celeste);
+  color: var(--blanco);
+}
+
+.auth-form--google-extra {
+  margin-bottom: 1rem;
+}
+
+.auth-demo-accounts {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--gris-intermedio);
+}
+
+.auth-demo-accounts ul {
+  list-style: none;
+  margin-top: 0.5rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.auth-demo-accounts button {
+  color: var(--celeste);
+  font-weight: 700;
+  text-align: left;
+}

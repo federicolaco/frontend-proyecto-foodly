@@ -1,0 +1,55 @@
+.restaurant-banner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--amarillo);
+  border-radius: 1rem;
+}
+
+.restaurant-banner__image {
+  width: 5.5rem;
+  height: 5.5rem;
+  object-fit: contain;
+}
+
+.restaurant-banner__name {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  color: var(--gris-oscuro);
+  line-height: 1.1;
+}
+
+.restaurant-banner__rating {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gris-oscuro);
+}
+
+.restaurant-banner__rating svg {
+  color: var(--celeste);
+}
+
+.restaurant-banner__hours {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gris-oscuro);
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .restaurant-banner {
+    grid-template-columns: auto 1fr;
+  }
+
+  .restaurant-banner__hours {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+}
