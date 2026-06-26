@@ -160,6 +160,8 @@ export const SEED_USERS = [
     password: 'Cliente123!',
     role: 'cliente',
     name: 'Juan Pérez',
+    firstName: 'Juan',
+    lastName: 'Pérez',
     address: 'Av. 18 de Julio 1234',
     blocked: false,
     localEnabled: false,

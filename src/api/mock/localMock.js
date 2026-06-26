@@ -340,7 +340,7 @@ export function mockGetLocalPromotions(token) {
 
   const db = getDb()
   return mockDelay(
-    db.promotions.filter((promo) => promo.restaurantId === user.restaurantId),
+    db.promotions.filter((promo) => promo.restaurantId === user.restaurantId && promo.active !== false),
   )
 }
 
@@ -376,4 +376,61 @@ export function mockSavePromotion(token, payload) {
   })
 
   return mockDelay(result)
+}
+
+export function mockDeletePromotion(token, promotionId) {
+  ensureMockDb()
+  const user = requireUser(token)
+  if (user.role !== 'local' || !user.restaurantId) {
+    throw new MockApiError(403, 'Acceso denegado')
+  }
+
+  const result = updateDb((db) => {
+    const index = db.promotions.findIndex(
+      (promo) => promo.id === Number(promotionId) && promo.restaurantId === user.restaurantId,
+    )
+    if (index < 0) throw new MockApiError(404, 'Promoción no encontrada')
+    db.promotions[index].active = false
+    return db.promotions[index]
+  })
+
+  return mockDelay(result)
+}
+
+export function mockGetLocalStats(token) {
+  ensureMockDb()
+  const user = requireUser(token)
+  if (user.role !== 'local' || !user.restaurantId) {
+    throw new MockApiError(403, 'Acceso denegado')
+  }
+
+  const db = getDb()
+  const orders = db.orders.filter(
+    (o) => o.restaurantId === user.restaurantId && o.status === 'confirmed',
+  )
+
+  const dishCounts = {}
+  orders.forEach((order) => {
+    order.items?.forEach((item) => {
+      dishCounts[item.id] = (dishCounts[item.id] ?? 0) + item.quantity
+    })
+  })
+
+  const topDishes = Object.entries(dishCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([dishId]) => db.dishes.find((d) => d.id === Number(dishId)))
+    .filter(Boolean)
+
+  const monthlyRevenue = orders.reduce((sum, o) => sum + (o.total ?? 0), 0)
+
+  return mockDelay({
+    monthlyRevenue,
+    topDishes: topDishes.map((d) => ({
+      id: d.id,
+      name: d.name,
+      price: d.price,
+      image: d.image,
+    })),
+  })
 }

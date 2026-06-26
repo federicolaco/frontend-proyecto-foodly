@@ -1,0 +1,52 @@
+.profile-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 150;
+  min-width: 12.5rem;
+  background: var(--blanco);
+  border-radius: 0.65rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: profile-menu-fade-in 0.15s ease;
+}
+
+@keyframes profile-menu-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-menu__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gris-oscuro);
+  border-bottom: 1px solid var(--gris-claro);
+  transition: background 0.15s ease;
+}
+
+.profile-menu__item:last-child {
+  border-bottom: none;
+}
+
+.profile-menu__item:hover {
+  background: var(--gris-claro);
+}
+
+.profile-menu__item--danger {
+  color: #c0392b;
+}
+
+.profile-menu__item--danger:hover {
+  background: #fdecea;
+}

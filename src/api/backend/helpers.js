@@ -89,14 +89,47 @@ export function buildSearchFilter(query = '', options = {}) {
   return filtro
 }
 
-export function buildLocalSearchParams(filters = {}) {
-  const params = new URLSearchParams()
-  if (filters.search) params.set('nombre', filters.search)
-  if (filters.openOnly) params.set('estaAbierto', 'true')
-  if (filters.minRating) params.set('calificacionMinima', String(filters.minRating))
-  if (filters.sort === 'rating') params.set('ordenarPor', 'calificacion')
-  if (filters.sort === 'name') params.set('ordenarPor', 'nombre')
-  return params
+export function buildLocalListBody(filters = {}) {
+  const body = {}
+  if (filters.search) body.nombre = filters.search
+  if (filters.openOnly) body.estaAbierto = true
+  if (filters.minRating) body.calificacionMinima = Number(filters.minRating)
+  if (filters.sort === 'rating') {
+    body.ordenarPor = 'calificacion'
+    body.direccion = 'desc'
+  } else if (filters.sort === 'name') {
+    body.ordenarPor = 'nombre'
+    body.direccion = 'asc'
+  }
+  return body
+}
+
+export function buildLocalClientFilterBody(filters = {}) {
+  const body = {}
+  if (filters.search) body.nombre = filters.search
+  if (filters.minRating) body.calificacionMinima = Number(filters.minRating)
+  return body
+}
+
+export function buildAdminUserFilterBody(filters = {}) {
+  const body = {}
+  if (filters.search) body.texto = filters.search
+  if (filters.role) body.tipoUsuario = filters.role
+  if (filters.status === 'blocked') body.estado = 'Bloqueado'
+  if (filters.status === 'active') body.estado = 'Activo'
+  if (filters.sort) body.ordenarPor = filters.sort
+  return body
+}
+
+export function buildClaimSearchBody(filters = {}) {
+  const body = {}
+  if (filters.clientId) body.idCliente = Number(filters.clientId)
+  if (filters.date) body.fechaReclamo = filters.date
+  if (filters.orderStatus) body.estadoPedido = filters.orderStatus
+  if (!body.idCliente && !body.fechaReclamo && !body.estadoPedido) {
+    body.estadoPedido = 'Confirmado'
+  }
+  return body
 }
 
 export function buildOrderListParams(filters = {}) {

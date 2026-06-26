@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { closeLocal, getMyLocal, openLocal } from '../../api/localPanel'
+import { getLocalRatingSummary } from '../../api/ratings'
 import '../Panel.css'
 
 export function LocalHome() {
   const [restaurant, setRestaurant] = useState(null)
+  const [rating, setRating] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
@@ -14,8 +16,9 @@ export function LocalHome() {
     setError(null)
 
     try {
-      const data = await getMyLocal()
+      const [data, ratingData] = await Promise.all([getMyLocal(), getLocalRatingSummary()])
       setRestaurant(data)
+      setRating(ratingData)
     } catch (err) {
       setError(err.message ?? 'No pudimos cargar la información del local.')
     } finally {
@@ -106,6 +109,15 @@ export function LocalHome() {
             >
               Cerrar local
             </button>
+          </div>
+
+          <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
+            <h3 style={{ marginBottom: '0.5rem', color: 'var(--gris-oscuro)' }}>Mi calificación</h3>
+            {rating?.total === 0 ? (
+              <p className="panel-empty" style={{ padding: 0 }}>Su local todavía no ha recibido calificaciones de los clientes.</p>
+            ) : (
+              <p><strong>{rating.average}</strong> / 5 · {rating.total} valoraciones</p>
+            )}
           </div>
         </>
       )}

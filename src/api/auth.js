@@ -38,20 +38,8 @@ export { MockApiError as AuthError }
 
 
 
-async function resolveLocalEnabled(userId) {
-
-  try {
-
-    const locales = await apiFetch('/clientes')
-
-    return Array.isArray(locales) && locales.some((local) => local.id === userId)
-
-  } catch {
-
-    return false
-
-  }
-
+async function resolveLocalEnabled() {
+  return true
 }
 
 
@@ -72,7 +60,7 @@ export async function login(email, password) {
 
     const role = data.tipo?.toLowerCase()
 
-    const localEnabled = role === 'local' ? await resolveLocalEnabled(data.id) : undefined
+    const localEnabled = role === 'local' ? await resolveLocalEnabled() : undefined
 
     const mapped = mapLoginResponse(data, { localEnabled })
 

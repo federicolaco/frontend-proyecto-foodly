@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 
 import { getHomePathForRole, login, validateSession } from '../api/auth'
-import { isApiConfigured } from '../api/client'
+import { isMockMode } from '../api/client'
 import { DEMO_ACCOUNTS } from '../lib/roles'
 
 import { AuthLayout } from '../components/AuthLayout'
@@ -186,10 +186,8 @@ export function Login() {
 
 
 
-        <Link to="#" className="auth-link">
-
+        <Link to="/recuperar-contrasena" className="auth-link">
           ¿Olvidaste tu contraseña?
-
         </Link>
 
 
@@ -204,7 +202,7 @@ export function Login() {
 
 
 
-      {!isApiConfigured() && (
+      {isMockMode() && (
         <details className="auth-demo-accounts">
           <summary>Cuentas de prueba (mock)</summary>
           <ul>

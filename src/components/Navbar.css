@@ -31,6 +31,9 @@
   gap: 5px;
   padding: 4px;
   transition: gap 0.3s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .navbar--scrolled .navbar__menu {
@@ -62,6 +65,47 @@
 
 .navbar--scrolled .navbar__logo {
   font-size: 1.45rem;
+}
+
+.navbar__logo {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.navbar__actions {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.navbar__greeting {
+  display: none;
+  color: var(--blanco);
+  font-weight: 700;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.navbar__profile-wrap {
+  position: relative;
+}
+
+.navbar__profile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--blanco);
+  color: var(--celeste);
+  transition: transform 0.2s ease;
+}
+
+.navbar__profile-btn:hover {
+  transform: scale(1.05);
 }
 
 .navbar__login {
@@ -101,5 +145,9 @@
   .navbar__login {
     font-size: 0.75rem;
     padding: 0.5rem 1.25rem;
+  }
+
+  .navbar__greeting {
+    display: inline;
   }
 }

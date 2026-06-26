@@ -233,3 +233,92 @@ export function buildDishPayload(localId, payload) {
     dtLocal: { id: Number(localId) },
   }
 }
+
+export function buildPromotionPayload(payload) {
+  const toDateTime = (date) => (date?.includes('T') ? date : `${date}T00:00:00`)
+  return {
+    idPlato: Number(payload.dishId),
+    descuento: Number(payload.discountPercent),
+    fechaInicio: toDateTime(payload.startDate),
+    fechaFin: toDateTime(payload.endDate),
+    descripcion: payload.title?.trim() ?? payload.description?.trim() ?? 'Promoción',
+  }
+}
+
+export function mapLocalPromotion(promo, index = 0) {
+  return {
+    id: promo.id,
+    dishId: promo.dtPlato?.id ?? promo.idPlato,
+    title: promo.descripcion ?? 'Promoción',
+    discountPercent: promo.descuento ?? 0,
+    startDate: promo.fechaInicio?.split('T')[0] ?? promo.fechaInicio,
+    endDate: promo.fechaFin?.split('T')[0] ?? promo.fechaFin,
+    active: true,
+  }
+}
+
+export function mapUserListItem(user) {
+  const statusMap = { Activo: 'active', Bloqueado: 'blocked', Pendiente: 'pending' }
+  return {
+    id: user.id,
+    email: user.email,
+    role: mapBackendRole(user.tipoUsuario ?? user.tipo ?? 'cliente'),
+    name: user.nombreVisible ?? user.email,
+    status: statusMap[user.estado] ?? (user.blocked ? 'blocked' : 'active'),
+    rating: user.calificacionGlobal ?? 0,
+  }
+}
+
+export function mapClaim(claim) {
+  return {
+    id: claim.id,
+    orderId: claim.dtPedido?.id ?? claim.orderId,
+    clientName: claim.dtPedido?.cliente?.nombre ?? claim.clientName ?? 'Cliente',
+    reason: claim.motivo ?? claim.reason,
+    compensationType: claim.tipoCompensacion ?? claim.compensationType,
+    status: claim.estado === 'Solucionado' || claim.status === 'resolved' ? 'resolved' : 'pending',
+    amount: claim.montoReintegro ?? claim.amount ?? 0,
+    createdAt: claim.fecha ?? claim.createdAt ?? new Date().toISOString(),
+    resolutionType: claim.resolutionType,
+    resolutionNote: claim.resolutionNote,
+  }
+}
+
+export function mapRatingSummary(data) {
+  if (!data) return { average: 0, total: 0, breakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } }
+  if (data.average !== undefined) return data
+
+  const breakdown = data.detallePorPuntuacion ?? data.breakdown ?? {}
+  return {
+    average: data.promedio ?? data.average ?? 0,
+    total: data.totalCalificaciones ?? data.total ?? 0,
+    breakdown: {
+      1: breakdown[1] ?? 0,
+      2: breakdown[2] ?? 0,
+      3: breakdown[3] ?? 0,
+      4: breakdown[4] ?? 0,
+      5: breakdown[5] ?? 0,
+    },
+  }
+}
+
+export function mapLocalClient(client) {
+  return {
+    id: client.id,
+    name: [client.nombre, client.apellido].filter(Boolean).join(' ').trim() || client.name,
+    rating: client.calificacionGlobal ?? client.rating ?? 0,
+    alreadyRated: client.alreadyRated ?? false,
+  }
+}
+
+export function mapLocalStats(data) {
+  return {
+    monthlyRevenue: data.gananciasMensuales ?? 0,
+    topDishes: (data.platosMasPedido ?? []).map((plato, index) => ({
+      id: plato.id,
+      name: plato.nombre,
+      price: plato.precio ?? 0,
+      image: plato.imagenes?.[0] ?? placeholder(index),
+    })),
+  }
+}

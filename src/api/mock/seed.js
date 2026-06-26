@@ -9,6 +9,8 @@ export function seedMockDb() {
     dishes: SEED_DISHES,
     promotions: SEED_PROMOTIONS,
     orders: [],
+    claims: [],
+    ratings: [],
     nextIds: {
       user: 100,
       order: 1,
@@ -16,10 +18,24 @@ export function seedMockDb() {
       promotion: 100,
       localRequest: 1,
       restaurant: 100,
+      claim: 1,
+      rating: 1,
     },
   })
 }
 
 export function ensureMockDb() {
-  if (!getDb()) seedMockDb()
+  const db = getDb()
+  if (!db) {
+    seedMockDb()
+    return
+  }
+
+  let changed = false
+  if (!db.claims) { db.claims = []; changed = true }
+  if (!db.ratings) { db.ratings = []; changed = true }
+  if (!db.nextIds) db.nextIds = {}
+  if (db.nextIds.claim == null) { db.nextIds.claim = 1; changed = true }
+  if (db.nextIds.rating == null) { db.nextIds.rating = 1; changed = true }
+  if (changed) saveDb(db)
 }

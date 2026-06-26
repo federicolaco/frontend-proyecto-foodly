@@ -46,6 +46,10 @@
   gap: 0.65rem;
 }
 
+.orders-navbar__profile-wrap {
+  position: relative;
+}
+
 .orders-navbar__greeting {
   display: none;
   color: var(--blanco);
@@ -80,16 +84,20 @@
   }
 }
 
-.orders-navbar__text-btn,
-.orders-navbar__logout {
+.orders-navbar__text-btn {
+  display: none;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--celeste);
+  color: var(--blanco);
   white-space: nowrap;
 }
 
-.orders-navbar__logout {
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  border: 1px solid var(--celeste);
+.orders-navbar__text-btn:hover {
+  opacity: 0.85;
+}
+
+@media (min-width: 900px) {
+  .orders-navbar__text-btn--desktop {
+    display: inline;
+  }
 }

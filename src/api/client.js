@@ -7,8 +7,17 @@ const API_BASE =
     ? ''
     : (import.meta.env.VITE_API_URL ?? DEFAULT_API_URL)
 
+export function isMockMode() {
+  return import.meta.env.VITE_USE_MOCK === 'true'
+}
+
 export function isApiConfigured() {
   return Boolean(API_BASE)
+}
+
+export function getApiModeLabel() {
+  if (isMockMode()) return 'Mock (localStorage)'
+  return API_BASE || 'Sin API'
 }
 
 
