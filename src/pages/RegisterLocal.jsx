@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { submitLocalRegistration } from '../api/localPanel'
+import { addressFromFields } from '../api/backend/helpers'
 import { isApiConfigured } from '../api/client'
 import { getStoredUser } from '../lib/auth'
 import { OrdersNavbar } from '../components/OrdersNavbar'
@@ -58,7 +59,10 @@ export function RegisterLocal() {
 
   const [email, setEmail] = useState(user.email ?? '')
 
-  const [address, setAddress] = useState('')
+  const [street, setStreet] = useState('')
+  const [streetNumber, setStreetNumber] = useState('')
+  const [city, setCity] = useState('')
+  const [postalCode, setPostalCode] = useState('')
 
   const [description, setDescription] = useState('')
   const [password, setPassword] = useState('')
@@ -105,7 +109,7 @@ export function RegisterLocal() {
 
 
 
-    if (!name.trim() || !email.trim() || !address.trim() || !description.trim()) {
+    if (!name.trim() || !email.trim() || !street.trim() || !streetNumber.trim() || !city.trim() || !postalCode.trim() || !description.trim()) {
       setError('Los campos nombre, correo, dirección y descripción son requeridos.')
       setLoading(false)
       return
@@ -132,7 +136,7 @@ export function RegisterLocal() {
       await submitLocalRegistration({
         name,
         email,
-        address,
+        address: addressFromFields({ street, streetNumber, city, postalCode }),
         description,
         password: isApiConfigured() ? password : undefined,
         images,
@@ -319,26 +323,51 @@ export function RegisterLocal() {
               )}
 
               <label className="register-local-field">
-
                 <input
-
                   type="text"
-
-                  placeholder="Calle Falsa 123, Barrio"
-
+                  placeholder="Calle"
                   className="register-local-field__input"
-
-                  value={address}
-
-                  onChange={(e) => setAddress(e.target.value)}
-
+                  value={street}
+                  onChange={(e) => setStreet(e.target.value)}
                   required
-
                 />
-
               </label>
 
+              <label className="register-local-field">
+                <input
+                  type="text"
+                  placeholder="Número"
+                  inputMode="numeric"
+                  className="register-local-field__input"
+                  value={streetNumber}
+                  onChange={(e) => setStreetNumber(e.target.value)}
+                  required
+                />
+              </label>
 
+              <label className="register-local-field">
+                <input
+                  type="text"
+                  placeholder="Ciudad"
+                  className="register-local-field__input"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                />
+              </label>
+
+              <label className="register-local-field">
+                <input
+                  type="text"
+                  placeholder="Código postal"
+                  inputMode="numeric"
+                  maxLength={5}
+                  className="register-local-field__input"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                  required
+                />
+              </label>
 
               <label className="register-local-field">
 

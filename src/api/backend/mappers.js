@@ -4,7 +4,7 @@ import pastaCardImg from '../../../img/pasta-card.png'
 import sushiCardImg from '../../../img/sushi-card.png'
 import milanesaCardImg from '../../../img/milanesa-card.png'
 import iceCreamCardImg from '../../../img/ice-cream-card.png'
-import { formatAddress, mapBackendRole, mapBackendStatusToFrontend } from './helpers'
+import { formatAddress, mapBackendRole, mapBackendStatusToFrontend, parseDeliveryMinutes } from './helpers'
 
 const PLACEHOLDER_IMAGES = [
   burgerCardImg,
@@ -43,7 +43,6 @@ export function mapClienteRegistrationPayload(payload) {
     apellido: payload.lastName.trim(),
     documento: payload.document ?? `DOC${Date.now()}`,
     direccion: payload.addressParsed,
-    activo: false,
   }
 }
 
@@ -73,12 +72,13 @@ export function mapLocalListItem(local, index = 0) {
 }
 
 export function mapPlatoListItem(plato, index = 0) {
-  const restaurantId = plato.dtLocal?.id
+  const restaurantId = plato.dtLocal?.id ?? plato.local?.id
+  const restaurant = plato.dtLocal ?? plato.local
   return {
     id: plato.id,
     restaurantId,
     name: plato.nombre,
-    restaurant: plato.dtLocal?.nombre ?? 'Local',
+    restaurant: restaurant?.nombre ?? 'Local',
     image: plato.imagenes?.[0] ?? placeholder(index),
     price: plato.precio ?? 0,
     categoryId: 'general',
@@ -86,8 +86,9 @@ export function mapPlatoListItem(plato, index = 0) {
 }
 
 export function mapPromocionListItem(promo, index = 0) {
-  const plato = promo.dtPlato
-  const restaurantId = plato?.dtLocal?.id
+  const plato = promo.dtPlato ?? promo.plato
+  const restaurant = plato?.dtLocal ?? plato?.local
+  const restaurantId = restaurant?.id
   const basePrice = plato?.precio ?? 0
   const discountPercent = promo.descuento ?? 0
   const discountedPrice = Math.round(basePrice * (1 - discountPercent / 100))
@@ -98,7 +99,7 @@ export function mapPromocionListItem(promo, index = 0) {
     dishId: plato?.id,
     restaurantId,
     name: promo.descripcion ?? plato?.nombre ?? 'Promoción',
-    restaurant: plato?.dtLocal?.nombre ?? 'Local',
+    restaurant: restaurant?.nombre ?? 'Local',
     image: plato?.imagenes?.[0] ?? placeholder(index),
     price: discountedPrice,
     originalPrice: basePrice,
@@ -157,7 +158,7 @@ export function mapLocalPanelRestaurant(local, extras = {}) {
 export function mapLocalDish(plato, index = 0) {
   return {
     id: plato.id,
-    restaurantId: plato.dtLocal?.id,
+    restaurantId: plato.dtLocal?.id ?? plato.local?.id,
     categoryId: 'general',
     name: plato.nombre,
     description: plato.descripcion ?? '',
@@ -183,9 +184,7 @@ export function mapOrderListItem(pedido) {
     total: pedido.total ?? 0,
     status: mapBackendStatusToFrontend(pedido.estado),
     createdAt: pedido.fecha ?? new Date().toISOString(),
-    deliveryMinutes: pedido.tiempoEstEntrega?.seconds
-      ? Math.round(pedido.tiempoEstEntrega.seconds / 60)
-      : undefined,
+    deliveryMinutes: parseDeliveryMinutes(pedido.tiempoEstEntrega),
     itemCount: pedido.cantidadItems ?? 0,
   }
 }
@@ -248,7 +247,7 @@ export function buildPromotionPayload(payload) {
 export function mapLocalPromotion(promo, index = 0) {
   return {
     id: promo.id,
-    dishId: promo.dtPlato?.id ?? promo.idPlato,
+    dishId: promo.plato?.id ?? promo.dtPlato?.id ?? promo.idPlato,
     title: promo.descripcion ?? 'Promoción',
     discountPercent: promo.descuento ?? 0,
     startDate: promo.fechaInicio?.split('T')[0] ?? promo.fechaInicio,
@@ -270,13 +269,20 @@ export function mapUserListItem(user) {
 }
 
 export function mapClaim(claim) {
+  const cliente = claim.dtPedido?.dtCliente ?? claim.dtPedido?.cliente
+  const clientName = [cliente?.nombre, cliente?.apellido].filter(Boolean).join(' ').trim()
+  const isResolved =
+    claim.estado === 'Solucionado' ||
+    claim.status === 'resolved' ||
+    (claim.montoReintegro != null && claim.montoReintegro > 0)
+
   return {
     id: claim.id,
     orderId: claim.dtPedido?.id ?? claim.orderId,
-    clientName: claim.dtPedido?.cliente?.nombre ?? claim.clientName ?? 'Cliente',
+    clientName: clientName || claim.clientName || 'Cliente',
     reason: claim.motivo ?? claim.reason,
     compensationType: claim.tipoCompensacion ?? claim.compensationType,
-    status: claim.estado === 'Solucionado' || claim.status === 'resolved' ? 'resolved' : 'pending',
+    status: isResolved ? 'resolved' : 'pending',
     amount: claim.montoReintegro ?? claim.amount ?? 0,
     createdAt: claim.fecha ?? claim.createdAt ?? new Date().toISOString(),
     resolutionType: claim.resolutionType,
@@ -288,16 +294,19 @@ export function mapRatingSummary(data) {
   if (!data) return { average: 0, total: 0, breakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } }
   if (data.average !== undefined) return data
 
-  const breakdown = data.detallePorPuntuacion ?? data.breakdown ?? {}
+  const breakdownSource = data.detallePorPuntuacion ?? data.breakdown ?? {}
+  const readBreakdown = (star) =>
+    breakdownSource[star] ?? breakdownSource[String(star)] ?? 0
+
   return {
-    average: data.promedio ?? data.average ?? 0,
-    total: data.totalCalificaciones ?? data.total ?? 0,
+    average: data.calificacionGlobal ?? data.promedio ?? data.average ?? 0,
+    total: data.totalValoraciones ?? data.totalCalificaciones ?? data.total ?? 0,
     breakdown: {
-      1: breakdown[1] ?? 0,
-      2: breakdown[2] ?? 0,
-      3: breakdown[3] ?? 0,
-      4: breakdown[4] ?? 0,
-      5: breakdown[5] ?? 0,
+      1: readBreakdown(1),
+      2: readBreakdown(2),
+      3: readBreakdown(3),
+      4: readBreakdown(4),
+      5: readBreakdown(5),
     },
   }
 }

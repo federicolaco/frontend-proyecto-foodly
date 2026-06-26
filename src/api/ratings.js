@@ -1,5 +1,5 @@
 import { getSessionToken, getStoredUser } from '../lib/auth'
-import { apiFetch, isApiConfigured } from './client'
+import { apiFetch, apiFetchSafe, isApiConfigured } from './client'
 import { buildLocalClientFilterBody } from './backend/helpers'
 import { mapLocalClient, mapRatingSummary } from './backend/mappers'
 import {
@@ -9,6 +9,24 @@ import {
   mockRateClient,
   mockRateLocal,
 } from './mock/ratingsMock'
+
+const RATED_LOCALS_KEY = 'foodly_rated_locals'
+
+function readRatedLocals() {
+  try {
+    return JSON.parse(localStorage.getItem(RATED_LOCALS_KEY) ?? '[]')
+  } catch {
+    return []
+  }
+}
+
+function rememberRatedLocal(localId) {
+  const id = Number(localId)
+  const rated = readRatedLocals()
+  if (!rated.includes(id)) {
+    localStorage.setItem(RATED_LOCALS_KEY, JSON.stringify([...rated, id]))
+  }
+}
 
 export async function rateLocal(payload) {
   if (isApiConfigured()) {
@@ -20,6 +38,7 @@ export async function rateLocal(payload) {
         dtLocal: { id: Number(payload.localId) },
       }),
     })
+    rememberRatedLocal(payload.localId)
     return { localId: Number(payload.localId), score: Number(payload.score) }
   }
 
@@ -44,7 +63,7 @@ export async function rateClient(payload) {
 
 export async function getLocalRatingSummary() {
   if (isApiConfigured()) {
-    const data = await apiFetch('/calificaciones/local/mi-calificacion')
+    const data = await apiFetchSafe('/calificaciones/local/mi-calificacion')
     return mapRatingSummary(data)
   }
 
@@ -67,7 +86,7 @@ export async function getLocalClients(filters = {}) {
 
 export async function hasRatedLocal(localId) {
   if (isApiConfigured()) {
-    return false
+    return readRatedLocals().includes(Number(localId))
   }
 
   return mockHasRatedLocal(getSessionToken(), localId)

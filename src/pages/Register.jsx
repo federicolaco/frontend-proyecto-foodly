@@ -43,7 +43,10 @@ export function Register() {
   const [accountType, setAccountType] = useState('cliente')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [address, setAddress] = useState('')
+  const [street, setStreet] = useState('')
+  const [streetNumber, setStreetNumber] = useState('')
+  const [city, setCity] = useState('')
+  const [postalCode, setPostalCode] = useState('')
   const [document, setDocument] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -51,6 +54,13 @@ export function Register() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [showGoogleForm, setShowGoogleForm] = useState(false)
+
+  const address = {
+    calle: street,
+    numero: streetNumber,
+    ciudad: city,
+    codigoPostal: postalCode,
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -156,13 +166,48 @@ export function Register() {
               required
             />
           </label>
-          <label className="auth-field" htmlFor="google-address">
-            <span className="auth-field__label">Domicilio</span>
+          <div className="auth-form__row">
+            <label className="auth-field" htmlFor="google-street">
+              <span className="auth-field__label">Calle</span>
+              <input
+                id="google-street"
+                type="text"
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
+                required
+              />
+            </label>
+            <label className="auth-field" htmlFor="google-street-number">
+              <span className="auth-field__label">Número</span>
+              <input
+                id="google-street-number"
+                type="text"
+                inputMode="numeric"
+                value={streetNumber}
+                onChange={(e) => setStreetNumber(e.target.value)}
+                required
+              />
+            </label>
+          </div>
+          <label className="auth-field" htmlFor="google-city">
+            <span className="auth-field__label">Ciudad</span>
             <input
-              id="google-address"
+              id="google-city"
               type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              required
+            />
+          </label>
+          <label className="auth-field" htmlFor="google-postal-code">
+            <span className="auth-field__label">Código postal</span>
+            <input
+              id="google-postal-code"
+              type="text"
+              inputMode="numeric"
+              maxLength={5}
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
               required
             />
           </label>
@@ -215,16 +260,66 @@ export function Register() {
           </label>
         </div>
 
-        <label className="auth-field" htmlFor="register-address">
-          <span className="auth-field__label">Domicilio (calle, número)</span>
+        <div className="auth-form__row">
+          <label className="auth-field" htmlFor="register-street">
+            <span className="auth-field__label">Calle</span>
+            <span className="auth-field__control">
+              <input
+                id="register-street"
+                type="text"
+                placeholder="Calle"
+                autoComplete="address-line1"
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
+                required
+              />
+            </span>
+          </label>
+
+          <label className="auth-field" htmlFor="register-street-number">
+            <span className="auth-field__label">Número</span>
+            <span className="auth-field__control">
+              <input
+                id="register-street-number"
+                type="text"
+                placeholder="Número"
+                inputMode="numeric"
+                autoComplete="address-line2"
+                value={streetNumber}
+                onChange={(e) => setStreetNumber(e.target.value)}
+                required
+              />
+            </span>
+          </label>
+        </div>
+
+        <label className="auth-field" htmlFor="register-city">
+          <span className="auth-field__label">Ciudad</span>
           <span className="auth-field__control">
             <input
-              id="register-address"
+              id="register-city"
               type="text"
-              placeholder="Domicilio (calle, número)"
-              autoComplete="street-address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Ciudad"
+              autoComplete="address-level2"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              required
+            />
+          </span>
+        </label>
+
+        <label className="auth-field" htmlFor="register-postal-code">
+          <span className="auth-field__label">Código postal</span>
+          <span className="auth-field__control">
+            <input
+              id="register-postal-code"
+              type="text"
+              placeholder="Código postal"
+              inputMode="numeric"
+              autoComplete="postal-code"
+              maxLength={5}
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
               required
             />
           </span>

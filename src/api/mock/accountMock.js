@@ -1,4 +1,5 @@
 import { clearSessionToken, getSessionToken, setStoredUser } from '../../lib/auth'
+import { formatAddress, normalizeAddress } from '../backend/helpers'
 import { getDb, updateDb } from './db'
 import { mockDelay, MockApiError, sanitizeUser } from './helpers'
 import { ensureMockDb } from './seed'
@@ -37,7 +38,11 @@ export function mockUpdateProfile(token, payload) {
     if (payload.firstName) user.firstName = payload.firstName.trim()
     if (payload.lastName) user.lastName = payload.lastName.trim()
     if (payload.name) user.name = payload.name.trim()
-    if (payload.address) user.address = payload.address.trim()
+    if (payload.address) {
+      const normalized = normalizeAddress(payload.address)
+      user.address = formatAddress(normalized)
+      user.addressDetails = normalized
+    }
     if (payload.description) user.description = payload.description.trim()
 
     const displayName =

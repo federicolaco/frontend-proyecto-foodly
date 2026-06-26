@@ -35,6 +35,69 @@ export function parseAddressString(address = '') {
   }
 }
 
+export function normalizeAddress(address) {
+  if (!address) return parseAddressString('')
+  if (typeof address === 'string') return parseAddressString(address)
+
+  return {
+    calle: address.calle?.trim() || 'Sin especificar',
+    numero: address.numero?.trim() || 'S/N',
+    ciudad: address.ciudad?.trim() || 'N/D',
+    codigoPostal: address.codigoPostal?.trim() || '0000',
+  }
+}
+
+export function addressFromFields({ street, streetNumber, city, postalCode }) {
+  return normalizeAddress({
+    calle: street,
+    numero: streetNumber,
+    ciudad: city,
+    codigoPostal: postalCode,
+  })
+}
+
+export function splitAddressFields(source) {
+  const details = normalizeAddress(source?.addressDetails ?? source?.address ?? source)
+  return {
+    street: details.calle === 'Sin especificar' ? '' : details.calle,
+    streetNumber: details.numero === 'S/N' ? '' : details.numero,
+    city: details.ciudad === 'N/D' ? '' : details.ciudad,
+    postalCode: details.codigoPostal === '0000' ? '' : details.codigoPostal,
+  }
+}
+
+export function getUserDeliveryAddress(user) {
+  if (user?.addressDetails) return normalizeAddress(user.addressDetails)
+  if (user?.address) return normalizeAddress(user.address)
+  return normalizeAddress('')
+}
+
+export function parseDeliveryMinutes(tiempoEstEntrega) {
+  if (tiempoEstEntrega == null) return undefined
+
+  if (typeof tiempoEstEntrega === 'number') {
+    return tiempoEstEntrega >= 3600 ? Math.round(tiempoEstEntrega / 60) : tiempoEstEntrega
+  }
+
+  if (typeof tiempoEstEntrega === 'string') {
+    const isoMatch = tiempoEstEntrega.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?/i)
+    if (isoMatch) {
+      const hours = Number(isoMatch[1] || 0)
+      const minutes = Number(isoMatch[2] || 0)
+      const seconds = Number(isoMatch[3] || 0)
+      return hours * 60 + minutes + Math.round(seconds / 60)
+    }
+  }
+
+  if (typeof tiempoEstEntrega === 'object') {
+    if (typeof tiempoEstEntrega.seconds === 'number') {
+      return Math.round(tiempoEstEntrega.seconds / 60)
+    }
+  }
+
+  return undefined
+}
+
 export function formatAddress(direccion) {
   if (!direccion) return ''
   return [direccion.calle, direccion.numero, direccion.ciudad].filter(Boolean).join(', ')
@@ -117,6 +180,7 @@ export function buildAdminUserFilterBody(filters = {}) {
   if (filters.role) body.tipoUsuario = filters.role
   if (filters.status === 'blocked') body.estado = 'Bloqueado'
   if (filters.status === 'active') body.estado = 'Activo'
+  if (filters.status === 'pending') body.estado = 'Pendiente'
   if (filters.sort) body.ordenarPor = filters.sort
   return body
 }

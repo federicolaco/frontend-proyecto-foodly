@@ -2,7 +2,7 @@ import { getSessionToken, getStoredUser, setStoredUser } from '../lib/auth'
 import { apiFetch, apiFetchMultipart, apiFetchSafe, isApiConfigured } from './client'
 import {
   createPlaceholderImage,
-  parseAddressString,
+  normalizeAddress,
   buildOrderListParams,
 } from './backend/helpers'
 import {
@@ -61,7 +61,7 @@ export async function submitLocalRegistration(payload) {
     const formData = new FormData()
     const datos = mapLocalRegistrationPayload({
       ...payload,
-      addressParsed: parseAddressString(payload.address),
+      addressParsed: normalizeAddress(payload.address),
     })
 
     formData.append(
@@ -124,7 +124,7 @@ export async function closeLocal() {
 export async function getLocalDishes() {
   if (isApiConfigured()) {
     const localId = getLocalId()
-    const response = await apiFetch('/clientes/busqueda', {
+    const response = await apiFetchSafe('/clientes/busqueda', {
       method: 'POST',
       body: JSON.stringify({ dtLocal: { id: localId } }),
     })
@@ -202,11 +202,11 @@ export async function rejectOrder(orderId, reason) {
 export async function getLocalPromotions() {
   if (isApiConfigured()) {
     const localId = getLocalId()
-    const response = await apiFetch('/clientes/busqueda', {
+    const response = await apiFetchSafe('/clientes/busqueda', {
       method: 'POST',
       body: JSON.stringify({ dtLocal: { id: localId }, promocionActiva: true }),
     })
-    return response?.promociones ?? []
+    return (response?.promociones ?? []).map(mapLocalPromotion)
   }
 
   return mockGetLocalPromotions(getSessionToken())

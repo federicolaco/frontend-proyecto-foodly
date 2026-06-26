@@ -8,9 +8,11 @@ import {
 
   createPlaceholderImage,
 
+  formatAddress,
+
   isJwtExpired,
 
-  parseAddressString,
+  normalizeAddress,
 
 } from './backend/helpers'
 
@@ -98,7 +100,7 @@ export async function register(payload) {
 
       ...payload,
 
-      addressParsed: parseAddressString(payload.address),
+      addressParsed: normalizeAddress(payload.address),
 
     })
 
@@ -124,19 +126,39 @@ export async function register(payload) {
       // Cuenta ya activa o mail no configurado en Railway.
     }
 
-    return login(payload.email, payload.password)
+    const result = await login(payload.email, payload.password)
+    const addressNormalized = normalizeAddress(payload.address)
+    const user = {
+      ...result.user,
+      address: formatAddress(addressNormalized),
+      addressDetails: addressNormalized,
+    }
+    setStoredUser(user)
+    return { ...result, user }
 
   }
 
 
 
-  const data = await mockRegister(payload)
+  const data = await mockRegister({
+
+    ...payload,
+
+    address: formatAddress(normalizeAddress(payload.address)),
+
+  })
+
+  const addressNormalized = normalizeAddress(payload.address)
+  const user = {
+    ...data.user,
+    addressDetails: addressNormalized,
+  }
 
   setSessionToken(data.token)
 
-  setStoredUser(data.user)
+  setStoredUser(user)
 
-  return data
+  return { ...data, user }
 
 }
 
@@ -160,11 +182,17 @@ export async function registerWithGoogle(payload) {
 
         documento: payload.document ?? `GOOG${Date.now()}`,
 
+        direccion: normalizeAddress(payload.address),
+
       }),
 
     })
 
 
+
+    if (!data?.id) {
+      throw new Error('El registro con Google aún no está disponible en el backend.')
+    }
 
     const mapped = {
 
@@ -186,6 +214,10 @@ export async function registerWithGoogle(payload) {
 
 
 
+    const addressNormalized = normalizeAddress(payload.address)
+    mapped.user.address = formatAddress(addressNormalized)
+    mapped.user.addressDetails = addressNormalized
+
     if (mapped.token) setSessionToken(mapped.token)
 
     setStoredUser(mapped.user)
@@ -196,13 +228,25 @@ export async function registerWithGoogle(payload) {
 
 
 
-  const data = await mockRegisterWithGoogle(payload)
+  const data = await mockRegisterWithGoogle({
+
+    ...payload,
+
+    address: formatAddress(normalizeAddress(payload.address)),
+
+  })
+
+  const addressNormalized = normalizeAddress(payload.address)
+  const user = {
+    ...data.user,
+    addressDetails: addressNormalized,
+  }
 
   setSessionToken(data.token)
 
-  setStoredUser(data.user)
+  setStoredUser(user)
 
-  return data
+  return { ...data, user }
 
 }
 

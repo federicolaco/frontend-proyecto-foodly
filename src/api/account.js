@@ -1,6 +1,6 @@
-import { getSessionToken, getStoredUser, setStoredUser } from '../lib/auth'
-import { apiFetch, apiFetchMultipart, isApiConfigured } from './client'
-import { createPlaceholderImage, parseAddressString } from './backend/helpers'
+import { clearSessionToken, getSessionToken, getStoredUser, setStoredUser } from '../lib/auth'
+import { apiFetch, apiFetchMultipart, apiFetchSafe, isApiConfigured } from './client'
+import { createPlaceholderImage, formatAddress, normalizeAddress } from './backend/helpers'
 import { mapRatingSummary } from './backend/mappers'
 import {
   mockConfirmPasswordChange,
@@ -16,7 +16,7 @@ import { mockGetClientRatingSummary } from './mock/ratingsMock'
 export async function updateProfile(payload) {
   if (isApiConfigured()) {
     const user = getStoredUser()
-    const address = parseAddressString(payload.address ?? '')
+    const address = normalizeAddress(payload.address)
     const formData = new FormData()
 
     if (user.role === 'cliente') {
@@ -47,7 +47,11 @@ export async function updateProfile(payload) {
     const updated = {
       ...user,
       name: displayName,
-      address: payload.address ?? user.address,
+      firstName: payload.firstName ?? user.firstName,
+      lastName: payload.lastName ?? user.lastName,
+      description: payload.description ?? user.description,
+      address: formatAddress(address),
+      addressDetails: address,
     }
     setStoredUser(updated)
     return updated
@@ -128,8 +132,8 @@ export async function resetPassword(token, newPassword) {
 
 export async function deleteAccount() {
   if (isApiConfigured()) {
-    const user = getStoredUser()
-    await apiFetch(`/usuarios/clientes/${user.id}/cuenta-dev`, { method: 'DELETE' })
+    await apiFetch('/usuarios/mi-cuenta', { method: 'DELETE' })
+    clearSessionToken()
     return { deleted: true }
   }
 
@@ -139,7 +143,7 @@ export async function deleteAccount() {
 export async function getMyClientRating() {
   if (isApiConfigured()) {
     const user = getStoredUser()
-    const data = await apiFetch(`/calificaciones/${user.id}/calificacion`)
+    const data = await apiFetchSafe(`/calificaciones/${user.id}/calificacion`)
     return mapRatingSummary(data)
   }
 

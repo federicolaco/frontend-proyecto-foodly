@@ -8,6 +8,7 @@ import {
   updateProfile,
   verifyPasswordChangeCode,
 } from '../../api/account'
+import { addressFromFields, splitAddressFields } from '../../api/backend/helpers'
 import { isMockMode } from '../../api/client'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
 import { StarRating } from '../../components/StarRating'
@@ -31,11 +32,15 @@ export function AccountSettings() {
   const [message, setMessage] = useState(null)
   const [loading, setLoading] = useState(false)
 
+  const initialAddress = splitAddressFields(user)
   const [firstName, setFirstName] = useState(user.firstName ?? user.name?.split(' ')[0] ?? '')
   const [lastName, setLastName] = useState(user.lastName ?? user.name?.split(' ').slice(1).join(' ') ?? '')
   const [localName, setLocalName] = useState(user.name ?? '')
   const [description, setDescription] = useState(user.description ?? '')
-  const [address, setAddress] = useState(user.address ?? '')
+  const [street, setStreet] = useState(initialAddress.street)
+  const [streetNumber, setStreetNumber] = useState(initialAddress.streetNumber)
+  const [city, setCity] = useState(initialAddress.city)
+  const [postalCode, setPostalCode] = useState(initialAddress.postalCode)
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [code, setCode] = useState('')
@@ -63,7 +68,7 @@ export function AccountSettings() {
         lastName,
         name: localName,
         description,
-        address,
+        address: addressFromFields({ street, streetNumber, city, postalCode }),
       })
       setMessage('Datos actualizados correctamente.')
     } catch (err) {
@@ -171,8 +176,25 @@ export function AccountSettings() {
                     <input className="panel-field__input" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                   </label>
                   <label className="panel-field">
-                    <span className="panel-field__label">Domicilio</span>
-                    <input className="panel-field__input" value={address} onChange={(e) => setAddress(e.target.value)} />
+                    <span className="panel-field__label">Calle</span>
+                    <input className="panel-field__input" value={street} onChange={(e) => setStreet(e.target.value)} required />
+                  </label>
+                  <label className="panel-field">
+                    <span className="panel-field__label">Número</span>
+                    <input className="panel-field__input" value={streetNumber} onChange={(e) => setStreetNumber(e.target.value)} required />
+                  </label>
+                  <label className="panel-field">
+                    <span className="panel-field__label">Ciudad</span>
+                    <input className="panel-field__input" value={city} onChange={(e) => setCity(e.target.value)} required />
+                  </label>
+                  <label className="panel-field">
+                    <span className="panel-field__label">Código postal</span>
+                    <input
+                      className="panel-field__input"
+                      value={postalCode}
+                      onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                      required
+                    />
                   </label>
                 </>
               )}
@@ -187,8 +209,25 @@ export function AccountSettings() {
                     <textarea className="panel-field__textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
                   </label>
                   <label className="panel-field">
-                    <span className="panel-field__label">Dirección</span>
-                    <input className="panel-field__input" value={address} onChange={(e) => setAddress(e.target.value)} />
+                    <span className="panel-field__label">Calle</span>
+                    <input className="panel-field__input" value={street} onChange={(e) => setStreet(e.target.value)} required />
+                  </label>
+                  <label className="panel-field">
+                    <span className="panel-field__label">Número</span>
+                    <input className="panel-field__input" value={streetNumber} onChange={(e) => setStreetNumber(e.target.value)} required />
+                  </label>
+                  <label className="panel-field">
+                    <span className="panel-field__label">Ciudad</span>
+                    <input className="panel-field__input" value={city} onChange={(e) => setCity(e.target.value)} required />
+                  </label>
+                  <label className="panel-field">
+                    <span className="panel-field__label">Código postal</span>
+                    <input
+                      className="panel-field__input"
+                      value={postalCode}
+                      onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                      required
+                    />
                   </label>
                 </>
               )}

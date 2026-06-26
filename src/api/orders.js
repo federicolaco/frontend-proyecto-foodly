@@ -6,7 +6,7 @@ import milanesaCardImg from '../../img/milanesa-card.png'
 import iceCreamCardImg from '../../img/ice-cream-card.png'
 import { getSessionToken, getStoredUser } from '../lib/auth'
 import { apiFetch, apiFetchSafe, isApiConfigured } from './client'
-import { buildLocalListBody, buildOrderListParams, buildSearchFilter } from './backend/helpers'
+import { buildLocalListBody, buildOrderListParams, buildSearchFilter, getUserDeliveryAddress } from './backend/helpers'
 import {
   buildOrderPayload,
   mapLocalListItem,
@@ -72,9 +72,11 @@ export async function searchDishes(query = '', options = {}) {
 export async function createOrder(payload) {
   if (isApiConfigured()) {
     const user = getStoredUser()
+    const deliveryAddress =
+      payload.deliveryAddress ?? getUserDeliveryAddress(user)
     const response = await apiFetch('/pedidos', {
       method: 'POST',
-      body: JSON.stringify(buildOrderPayload(user.id, payload)),
+      body: JSON.stringify(buildOrderPayload(user.id, { ...payload, deliveryAddress })),
     })
 
     return {
@@ -92,7 +94,7 @@ export async function getMyOrders(filters = {}) {
   if (isApiConfigured()) {
     const params = buildOrderListParams(filters)
     const qs = params.toString()
-    const data = await apiFetch(`/pedidos/mi-historial${qs ? `?${qs}` : ''}`)
+    const data = await apiFetchSafe(`/pedidos/mi-historial${qs ? `?${qs}` : ''}`)
     return (data ?? []).map(mapOrderListItem)
   }
 
