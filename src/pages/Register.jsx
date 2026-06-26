@@ -44,6 +44,7 @@ export function Register() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [address, setAddress] = useState('')
+  const [document, setDocument] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -67,6 +68,7 @@ export function Register() {
         firstName,
         lastName,
         address,
+        document,
         email,
         password,
         role: accountType,
@@ -94,6 +96,7 @@ export function Register() {
         firstName: firstName || 'Usuario',
         lastName: lastName || 'Google',
         address,
+        document,
         email: email || `google.user.${Date.now()}@foodly.mock`,
       })
       navigate(getHomePathForRole(user.role), { replace: true })
@@ -222,6 +225,24 @@ export function Register() {
               autoComplete="street-address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+              required
+            />
+          </span>
+        </label>
+
+        <label className="auth-field" htmlFor="register-document">
+          <span className="auth-field__label">Documento</span>
+          <span className="auth-field__control">
+            <input
+              id="register-document"
+              type="text"
+              placeholder="Documento"
+              inputMode="numeric"
+              maxLength={8}
+              value={document}
+              onChange={(e) =>
+                setDocument(e.target.value.replace(/\D/g, '').slice(0, 8))
+              }
               required
             />
           </span>
