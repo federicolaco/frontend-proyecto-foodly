@@ -80,14 +80,7 @@ function App() {
           }
         />
 
-        <Route
-          path="/registrar-local"
-          element={
-            <ProtectedRoute>
-              <RegisterLocal />
-            </ProtectedRoute>
-          }
-        />
+     <Route path="/registrar-local" element={<RegisterLocal />} />
 
         <Route
           path="/admin/solicitudes"
