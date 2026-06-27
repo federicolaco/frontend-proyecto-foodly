@@ -35,6 +35,8 @@ function App() {
         <Route path="/registrarse" element={<Register />} />
         <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
         <Route path="/restablecer-contrasena" element={<ResetPassword />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/activar" element={<ActivarCuenta />} />
 
         <Route
           path="/cuenta"
