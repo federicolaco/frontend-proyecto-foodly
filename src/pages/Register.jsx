@@ -129,8 +129,8 @@ export function Register() {
         </button>
         <button
           type="button"
-          className={`auth-account-type__btn${accountType === 'local' ? ' auth-account-type__btn--active' : ''}`}
-          onClick={() => setAccountType('local')}
+          className="auth-account-type__btn"
+          onClick={() => navigate('/registrar-local')}
         >
           Local comercial
         </button>
