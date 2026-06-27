@@ -308,6 +308,7 @@ export function RegisterLocal() {
               {isApiConfigured() && (
                 <>
                   <PasswordField
+                    id="register-local-password"
                     label="Contraseña de la cuenta del local"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -315,6 +316,7 @@ export function RegisterLocal() {
                     required
                   />
                   <PasswordField
+                    id="register-local-confirm-password"
                     label="Confirmar contraseña"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
