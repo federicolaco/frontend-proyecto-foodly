@@ -23,7 +23,7 @@ export function ActivarCuenta() {
     setLoading(true)
     setMensaje(null)
     try {
-      await apiFetch('/usuarios/activar?email=${encodeURIComponent(email)}', { method: 'POST' })
+      await apiFetch(`/usuarios/activar?email=${encodeURIComponent(email)}`, { method: 'POST' })
       setEstado('activado')
     } catch (err) {
       setEstado('error')
