@@ -74,21 +74,13 @@ export function Register() {
     setLoading(true)
 
     try {
-      const { user } = await register({
-        firstName,
-        lastName,
-        address,
-        document,
-        email,
-        password,
-        role: accountType,
+      await register({
+        firstName, lastName, address, document, email, password, role: accountType,
       })
-
-      if (user.role === 'local') {
-        navigate('/registrar-local', { replace: true })
-      } else {
-        navigate(getHomePathForRole(user.role), { replace: true })
-      }
+      navigate('/iniciar-sesion', {
+        replace: true,
+        state: { message: '¡Registro exitoso! Revisá tu correo para activar tu cuenta.' },
+      })
     } catch (err) {
       setError(err.message ?? 'No pudimos crear la cuenta.')
     } finally {

@@ -21,7 +21,7 @@ export function Login() {
   const navigate = useNavigate()
 
   const redirectTo = location.state?.from ?? null
-
+  const successMessage = location.state?.message ?? null
   const [alreadyLoggedIn, setAlreadyLoggedIn] = useState(null)
 
   const [email, setEmail] = useState('')
@@ -124,7 +124,12 @@ export function Login() {
 
       </h2>
 
-
+      {successMessage && (
+        <p className="auth-page__success" role="status">{successMessage}</p>
+      )}
+      {error && (
+        <p className="auth-page__error" role="alert">{error}</p>
+      )}
 
       {error && (
 
