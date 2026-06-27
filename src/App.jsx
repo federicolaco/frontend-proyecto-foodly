@@ -23,6 +23,7 @@ import { RegisterLocal } from './pages/RegisterLocal'
 import { ResetPassword } from './pages/ResetPassword'
 import { Restaurant } from './pages/Restaurant'
 import { ROLES } from './lib/roles'
+import { ActivarCuenta } from './pages/ActivarCuenta'
 
 function App() {
   return (
