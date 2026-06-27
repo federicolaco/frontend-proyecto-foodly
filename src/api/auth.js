@@ -120,11 +120,6 @@ export async function register(payload) {
 
     await apiFetchMultipart('/clientes/registro', formData)
 
-    try {
-      await apiFetch(`/usuarios/activar?email=${encodeURIComponent(payload.email.trim())}`)
-    } catch {
-      // Cuenta ya activa o mail no configurado en Railway.
-    }
 
     const result = await login(payload.email, payload.password)
     const addressNormalized = normalizeAddress(payload.address)
