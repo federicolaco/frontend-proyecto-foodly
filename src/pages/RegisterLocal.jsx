@@ -6,7 +6,7 @@ import { submitLocalRegistration } from '../api/localPanel'
 import { addressFromFields } from '../api/backend/helpers'
 import { isApiConfigured } from '../api/client'
 import { getStoredUser } from '../lib/auth'
-import { OrdersNavbar } from '../components/OrdersNavbar'
+
 import { PasswordField } from '../components/PasswordField'
 
 import './RegisterLocal.css'
@@ -171,8 +171,10 @@ export function RegisterLocal() {
 
     <div className="register-local-page">
 
-      <OrdersNavbar />
 
+      <header className="register-local-page__header">
+        <span className="register-local-page__logo">Foodly</span>
+      </header>
 
 
       <main className="register-local-page__main contenedor">
