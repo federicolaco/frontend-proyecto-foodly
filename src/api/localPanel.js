@@ -121,7 +121,18 @@ export async function closeLocal() {
   return mockSetLocalOpenState(getSessionToken(), false)
 }
 
+export async function getLocalDishes() {
+  if (isApiConfigured()) {
+    const localId = getLocalId()
+    const response = await apiFetchSafe('/clientes/busqueda', {
+      method: 'POST',
+      body: JSON.stringify({ dtLocal: { id: localId } }),
+    })
+    return (response?.platos ?? []).map(mapLocalDish)
+  }
 
+  return mockGetLocalDishes(getSessionToken())
+}
 
 export async function saveDish(payload) {
   if (isApiConfigured()) {
