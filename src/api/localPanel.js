@@ -124,7 +124,7 @@ export async function closeLocal() {
 export async function getLocalDishes() {
   if (isApiConfigured()) {
     const localId = getLocalId()
-    const response = await apiFetchSafe(`/busqueda_plato_local/${localId}`)
+    const response = await apiFetchSafe(`/locales/busqueda_plato_local/${localId}`)
     return (response ?? []).map(mapLocalDish)
   }
 
@@ -199,7 +199,7 @@ export async function rejectOrder(orderId, reason) {
 export async function getLocalPromotions() {
   if (isApiConfigured()) {
     const localId = getLocalId()
-    const response = await apiFetchSafe(`/busqueda_promocion_local/${localId}`)
+    const response = await apiFetchSafe(`/locales/busqueda_promocion_local/${localId}`)
     return (response ?? []).map(mapLocalPromotion)
   }
 
