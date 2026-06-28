@@ -73,12 +73,12 @@
 }
 
 .panel-form--profile {
-  max-width: 28rem;
+  max-width: none;
+  gap: 1.5rem;
 }
 
 .panel-form--profile .panel-btn--primary {
   width: auto;
-  justify-self: start;
 }
 
 .panel-form__row {
