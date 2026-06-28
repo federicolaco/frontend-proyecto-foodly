@@ -20,10 +20,10 @@ export function MenuProductList({
   const normalizedQuery = searchQuery.trim().toLowerCase()
   const filteredProducts = normalizedQuery
     ? products.filter(
-        (product) =>
-          product.name.toLowerCase().includes(normalizedQuery) ||
-          product.description.toLowerCase().includes(normalizedQuery),
-      )
+      (product) =>
+        product.name.toLowerCase().includes(normalizedQuery) ||
+        product.description.toLowerCase().includes(normalizedQuery),
+    )
     : products
 
   return (
@@ -62,7 +62,16 @@ export function MenuProductList({
               <h3 className="menu-product-list__name">{product.name}</h3>
               <p className="menu-product-list__description">{product.description}</p>
             </div>
-
+            <span className="product-price">
+              {product.tienePromocion && (
+                <span className="product-price--original" style={{ textDecoration: 'line-through', color: 'gray' }}>
+                  {formatPrice(product.precio)}
+                </span>
+              )}
+              <span className={product.tienePromocion ? 'product-price--discount' : ''}>
+                {formatPrice(product.precioFinal)}
+              </span>
+            </span>
             <div className="menu-product-list__actions">
               <span className="menu-product-list__price">{formatPrice(product.price)}</span>
               <button

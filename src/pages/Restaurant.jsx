@@ -74,9 +74,13 @@ export function Restaurant() {
   }, [addToCart, location.state, navigate, restaurant, restaurantId, searchParams])
 
   const handleAddProduct = (product) => {
-    if (!restaurant) return
-    addToCart({ id: restaurant.id, name: restaurant.name }, product, 1)
-  }
+  if (!restaurant) return
+  addToCart(
+    { id: restaurant.id, name: restaurant.name },
+    { ...product, price: product.precioFinal ?? product.precio },
+    1
+  )
+}
 
   if (loading) {
     return (

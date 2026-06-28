@@ -131,17 +131,6 @@ export function Login() {
         <p className="auth-page__error" role="alert">{error}</p>
       )}
 
-      {error && (
-
-        <p className="auth-page__error" role="alert">
-
-          {error}
-
-        </p>
-
-      )}
-
-
 
       <form className="auth-form" onSubmit={handleSubmit}>
 
