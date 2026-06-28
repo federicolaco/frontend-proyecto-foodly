@@ -84,6 +84,7 @@ export function mapLoginResponse(data, extras = {}) {
       localId: role === 'local' ? data.id : undefined,
       restaurantId: role === 'local' ? data.id : undefined,
       localEnabled: extras.localEnabled ?? role !== 'local',
+      isOpen: role === 'local' ? Boolean(data.estaAbierto) : undefined,
     },
   }
 }

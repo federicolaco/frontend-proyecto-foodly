@@ -75,8 +75,9 @@ export async function submitLocalRegistration(payload) {
     const logo = payload.logo ?? createPlaceholderImage('local.png')
     formData.append('logo', logo)
 
-    const images = payload.images?.length ? payload.images : [createPlaceholderImage('local.png')]
+    const images = payload.images?.length ? payload.images : []
     images.forEach((file) => formData.append('imagenes', file))
+
 
     await apiFetchMultipart('/locales/solicitudes-habilitacion', formData)
     return { status: 'pending' }
