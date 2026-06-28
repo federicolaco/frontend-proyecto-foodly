@@ -227,96 +227,102 @@ export function AccountSettings() {
         <section className="panel-card">
           {tab === 'profile' && (
             <form className="panel-form panel-form--profile" onSubmit={handleProfileSave}>
-              <div className="account-photo">
-                <button
-                  type="button"
-                  className="account-photo__avatar-btn"
-                  onClick={() => photoInputRef.current?.click()}
-                  aria-label="Cambiar foto de perfil"
-                >
-                  {photoPreview ? (
-                    <img src={photoPreview} alt="" />
-                  ) : (
-                    <span className="account-photo__placeholder">
-                      <CameraIcon />
-                      <span>Foto</span>
-                    </span>
-                  )}
-                </button>
-                <div className="account-photo__actions">
+              <div className="account-profile-layout">
+                <div className="account-photo">
                   <button
                     type="button"
-                    className="panel-btn panel-btn--outline"
+                    className="account-photo__avatar-btn"
                     onClick={() => photoInputRef.current?.click()}
+                    aria-label="Cambiar foto de perfil"
                   >
-                    {photoPreview ? 'Cambiar foto' : 'Agregar foto'}
+                    {photoPreview ? (
+                      <img src={photoPreview} alt="" />
+                    ) : (
+                      <span className="account-photo__placeholder">
+                        <CameraIcon />
+                        <span>Foto</span>
+                      </span>
+                    )}
                   </button>
-                  <p className="account-photo__hint">JPG o PNG, máx. 5 MB</p>
+                  <div className="account-photo__actions">
+                    <button
+                      type="button"
+                      className="panel-btn panel-btn--outline"
+                      onClick={() => photoInputRef.current?.click()}
+                    >
+                      {photoPreview ? 'Cambiar foto' : 'Agregar foto'}
+                    </button>
+                    <p className="account-photo__hint">JPG o PNG, m&aacute;x. 5 MB</p>
+                  </div>
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    className="account-photo__file-input"
+                    onChange={handlePhotoChange}
+                  />
                 </div>
-                <input
-                  ref={photoInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  className="account-photo__file-input"
-                  onChange={handlePhotoChange}
-                />
-              </div>
 
-              <label className="panel-field">
-                <span className="panel-field__label">Correo electrónico</span>
-                <input
-                  type="email"
-                  className="panel-field__input"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </label>
-              {user.role === ROLES.CLIENT && (
-                <>
+                <div className="account-profile-layout__fields">
                   <label className="panel-field">
-                    <span className="panel-field__label">Nombre</span>
-                    <input className="panel-field__input" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                    <span className="panel-field__label">Correo electr&oacute;nico</span>
+                    <input
+                      type="email"
+                      className="panel-field__input"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
                   </label>
-                  <label className="panel-field">
-                    <span className="panel-field__label">Apellido</span>
-                    <input className="panel-field__input" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
-                  </label>
-                  <AddressFields
-                    street={street}
-                    streetNumber={streetNumber}
-                    city={city}
-                    postalCode={postalCode}
-                    onStreet={(e) => setStreet(e.target.value)}
-                    onStreetNumber={(e) => setStreetNumber(e.target.value)}
-                    onCity={(e) => setCity(e.target.value)}
-                    onPostalCode={(e) => setPostalCode(e.target.value)}
-                  />
-                </>
-              )}
-              {user.role === ROLES.LOCAL && (
-                <>
-                  <label className="panel-field">
-                    <span className="panel-field__label">Nombre del local</span>
-                    <input className="panel-field__input" value={localName} onChange={(e) => setLocalName(e.target.value)} required />
-                  </label>
-                  <label className="panel-field">
-                    <span className="panel-field__label">Descripción</span>
-                    <textarea className="panel-field__textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
-                  </label>
-                  <AddressFields
-                    street={street}
-                    streetNumber={streetNumber}
-                    city={city}
-                    postalCode={postalCode}
-                    onStreet={(e) => setStreet(e.target.value)}
-                    onStreetNumber={(e) => setStreetNumber(e.target.value)}
-                    onCity={(e) => setCity(e.target.value)}
-                    onPostalCode={(e) => setPostalCode(e.target.value)}
-                  />
-                </>
-              )}
-              <button type="submit" className="panel-btn panel-btn--primary" disabled={loading}>
+                  {user.role === ROLES.CLIENT && (
+                    <>
+                      <div className="panel-form__row panel-form__row--2">
+                        <label className="panel-field">
+                          <span className="panel-field__label">Nombre</span>
+                          <input className="panel-field__input" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                        </label>
+                        <label className="panel-field">
+                          <span className="panel-field__label">Apellido</span>
+                          <input className="panel-field__input" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+                        </label>
+                      </div>
+                      <AddressFields
+                        street={street}
+                        streetNumber={streetNumber}
+                        city={city}
+                        postalCode={postalCode}
+                        onStreet={(e) => setStreet(e.target.value)}
+                        onStreetNumber={(e) => setStreetNumber(e.target.value)}
+                        onCity={(e) => setCity(e.target.value)}
+                        onPostalCode={(e) => setPostalCode(e.target.value)}
+                      />
+                    </>
+                  )}
+                  {user.role === ROLES.LOCAL && (
+                    <>
+                      <label className="panel-field">
+                        <span className="panel-field__label">Nombre del local</span>
+                        <input className="panel-field__input" value={localName} onChange={(e) => setLocalName(e.target.value)} required />
+                      </label>
+                      <label className="panel-field">
+                        <span className="panel-field__label">Descripci&oacute;n</span>
+                        <textarea className="panel-field__textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+                      </label>
+                      <AddressFields
+                        street={street}
+                        streetNumber={streetNumber}
+                        city={city}
+                        postalCode={postalCode}
+                        onStreet={(e) => setStreet(e.target.value)}
+                        onStreetNumber={(e) => setStreetNumber(e.target.value)}
+                        onCity={(e) => setCity(e.target.value)}
+                        onPostalCode={(e) => setPostalCode(e.target.value)}
+                      />
+                    </>
+                  )}
+                </div>
+              </div>
+              <button type="submit" className="panel-btn panel-btn--primary account-profile-layout__submit" disabled={loading}>
                 Guardar cambios
               </button>
             </form>
