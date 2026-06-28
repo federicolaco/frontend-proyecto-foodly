@@ -69,6 +69,9 @@ export async function submitLocalRegistration(payload) {
       new Blob([JSON.stringify(datos)], { type: 'application/json' }),
     )
 
+    const logo = payload.logo ?? createPlaceholderImage('local.png')
+    formData.append('logo', logo)
+
     const images = payload.images?.length ? payload.images : [createPlaceholderImage('local.png')]
     images.forEach((file) => formData.append('imagenes', file))
 
@@ -211,13 +214,13 @@ export async function savePromotion(payload) {
     const body = buildPromotionPayload(payload)
     const response = payload.id
       ? await apiFetch(`/locales/promociones/${payload.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(body),
-        })
+        method: 'PUT',
+        body: JSON.stringify(body),
+      })
       : await apiFetch('/locales/promociones', {
-          method: 'POST',
-          body: JSON.stringify(body),
-        })
+        method: 'POST',
+        body: JSON.stringify(body),
+      })
     return mapLocalPromotion(response)
   }
 

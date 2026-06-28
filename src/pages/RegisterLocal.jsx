@@ -136,13 +136,13 @@ export function RegisterLocal() {
       await submitLocalRegistration({
         name,
         email,
-        address: addressFromFields({ street, streetNumber, city, postalCode }),
+        address: ({ street, streetNumber, city, postalCode }),
         description,
         password: isApiConfigured() ? password : undefined,
-        images,
-        imageCount: images.length,
+        logo: logoFile,
+        images: selectedImages,
+        imageCount: selectedImages.length,
       })
-
 
 
       setSuccess(
