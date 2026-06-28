@@ -151,18 +151,16 @@
   align-items: start;
 }
 
+.account-profile-layout > .account-photo {
+  justify-self: center;
+}
+
 .account-profile-layout__fields {
   display: grid;
   gap: 1rem;
+  width: 100%;
 }
 
 .account-profile-layout__submit {
   justify-self: center;
-}
-
-@media (min-width: 900px) {
-  .account-profile-layout {
-    grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
-    gap: 2rem;
-  }
 }
