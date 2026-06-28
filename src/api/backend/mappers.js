@@ -19,6 +19,39 @@ function placeholder(index = 0) {
   return PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length]
 }
 
+function normalizeDishCategory(category) {
+  if (typeof category === 'string') {
+    const trimmed = category.trim()
+    return trimmed || 'general'
+  }
+
+  if (typeof category === 'number') {
+    return String(category)
+  }
+
+  if (category && typeof category === 'object') {
+    return (
+      category.id ??
+      category.codigo ??
+      category.nombre ??
+      category.name ??
+      'general'
+    )
+  }
+
+  return 'general'
+}
+
+function getDishCategory(plato) {
+  return normalizeDishCategory(
+    plato?.categoria ??
+      plato?.categoryId ??
+      plato?.category ??
+      plato?.dtCategoria ??
+      plato?.categoriaPlato,
+  )
+}
+
 export function mapLoginResponse(data, extras = {}) {
   const role = mapBackendRole(data.tipo)
   return {
@@ -81,7 +114,7 @@ export function mapPlatoListItem(plato, index = 0) {
     restaurant: restaurant?.nombre ?? 'Local',
     image: plato.imagenes?.[0] ?? placeholder(index),
     price: plato.precio ?? 0,
-    categoryId: 'general',
+    categoryId: getDishCategory(plato),
   }
 }
 
@@ -135,7 +168,7 @@ export function mapRestaurantDetail(local, platos = []) {
       .filter((plato) => plato.disponible !== false)
       .map((plato, index) => ({
         id: plato.id,
-        categoryId: 'general',
+        categoryId: getDishCategory(plato),
         name: plato.nombre,
         description: plato.descripcion ?? '',
         price: plato.precio ?? 0,
@@ -159,7 +192,7 @@ export function mapLocalDish(plato, index = 0) {
   return {
     id: plato.id,
     restaurantId: plato.dtLocal?.id ?? plato.local?.id,
-    categoryId: 'general',
+    categoryId: getDishCategory(plato),
     name: plato.nombre,
     description: plato.descripcion ?? '',
     price: plato.precio ?? 0,
@@ -228,6 +261,7 @@ export function buildDishPayload(localId, payload) {
     nombre: payload.name?.trim(),
     descripcion: payload.description?.trim() ?? payload.name?.trim() ?? 'Plato',
     precio: Number(payload.price),
+    categoria: normalizeDishCategory(payload.categoryId ?? payload.categoria),
     disponible: payload.active ?? true,
     dtLocal: { id: Number(localId) },
   }
