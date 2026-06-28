@@ -12,12 +12,11 @@ export function RestaurantBanner({ restaurant }) {
   return (
     <section className="restaurant-banner">
       <img
-        src={restaurant.image}
+        src={restaurant.logo ?? restaurant.images?.[0]}
         alt=""
         className="restaurant-banner__image"
         aria-hidden="true"
       />
-
       <div className="restaurant-banner__info">
         <h1 className="restaurant-banner__name">{restaurant.name}</h1>
         <p className="restaurant-banner__rating">
@@ -27,7 +26,6 @@ export function RestaurantBanner({ restaurant }) {
           </span>
         </p>
       </div>
-
       <p className="restaurant-banner__hours">{restaurant.hours}</p>
     </section>
   )
