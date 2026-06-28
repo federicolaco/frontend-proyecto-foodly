@@ -145,8 +145,13 @@ export async function saveDish(payload) {
     const formData = new FormData()
     formData.append('datos', new Blob([JSON.stringify(datos)], { type: 'application/json' }))
 
-    const image = payload.imageFile ?? createPlaceholderImage('plato.png')
-    formData.append('imagenes', image)
+    if (payload.imageFile) {
+      formData.append('imagenes', payload.imageFile)
+    } else if (!payload.id) {
+      // Solo en alta (POST) es obligatorio: si no hay archivo, mandamos placeholder
+      formData.append('imagenes', createPlaceholderImage('plato.png'))
+    }
+    // En edición (PUT) sin archivo nuevo: no mandamos 'imagenes', el backend mantiene las URLs existentes
 
     const response = payload.id
       ? await apiFetchMultipart(`/locales/platos/${payload.id}`, formData, { method: 'PUT' })

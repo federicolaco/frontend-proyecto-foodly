@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { deleteDish, getLocalDishes, saveDish } from '../../api/localPanel'
 import '../Panel.css'
 
@@ -8,6 +8,8 @@ const EMPTY_FORM = {
   description: '',
   price: '',
   categoryId: 'general',
+  imageFile: null,
+  imagePreview: null,
 }
 
 export function LocalDishes() {
@@ -17,6 +19,7 @@ export function LocalDishes() {
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
   const [saving, setSaving] = useState(false)
+  const imageInputRef = useRef(null)
 
   const loadDishes = async () => {
     setLoading(true)
@@ -36,8 +39,25 @@ export function LocalDishes() {
     loadDishes()
   }, [])
 
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setForm((prev) => ({
+      ...prev,
+      imageFile: file,
+      imagePreview: URL.createObjectURL(file),
+    }))
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
+
+    if (!form.id && !form.imageFile) {
+      setError('Debe seleccionar una imagen para el plato.')
+      return
+    }
+
     setSaving(true)
     setError(null)
     setMessage(null)
@@ -45,6 +65,7 @@ export function LocalDishes() {
     try {
       await saveDish(form)
       setForm(EMPTY_FORM)
+      if (imageInputRef.current) imageInputRef.current.value = ''
       setMessage(form.id ? 'Plato actualizado.' : 'Plato agregado al catálogo.')
       await loadDishes()
     } catch (err) {
@@ -61,7 +82,15 @@ export function LocalDishes() {
       description: dish.description ?? '',
       price: String(dish.price),
       categoryId: dish.categoryId ?? 'general',
+      imageFile: null,
+      imagePreview: dish.image ?? null,
     })
+    if (imageInputRef.current) imageInputRef.current.value = ''
+  }
+
+  const handleCancel = () => {
+    setForm(EMPTY_FORM)
+    if (imageInputRef.current) imageInputRef.current.value = ''
   }
 
   const handleDelete = async (dishId) => {
@@ -135,6 +164,29 @@ export function LocalDishes() {
             />
           </label>
 
+          <label className="panel-field">
+            <span className="panel-field__label">
+              Imagen del plato{form.id ? ' (opcional, deje vacío para mantener la actual)' : ''}
+            </span>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/jpeg,image/png"
+              className="panel-field__input"
+              onChange={handleImageChange}
+            />
+          </label>
+
+          {form.imagePreview && (
+            <div style={{ gridColumn: '1 / -1' }}>
+              <img
+                src={form.imagePreview}
+                alt=""
+                style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }}
+              />
+            </div>
+          )}
+
           <div className="panel-actions" style={{ alignItems: 'end' }}>
             <button type="submit" className="panel-btn panel-btn--primary" disabled={saving}>
               {form.id ? 'Guardar cambios' : 'Agregar plato'}
@@ -143,7 +195,7 @@ export function LocalDishes() {
               <button
                 type="button"
                 className="panel-btn panel-btn--outline"
-                onClick={() => setForm(EMPTY_FORM)}
+                onClick={handleCancel}
               >
                 Cancelar
               </button>
@@ -166,6 +218,7 @@ export function LocalDishes() {
             <table className="panel-table">
               <thead>
                 <tr>
+                  <th>Imagen</th>
                   <th>Nombre</th>
                   <th>Precio</th>
                   <th>Categoría</th>
@@ -175,6 +228,15 @@ export function LocalDishes() {
               <tbody>
                 {dishes.map((dish) => (
                   <tr key={dish.id}>
+                    <td>
+                      {dish.image && (
+                        <img
+                          src={dish.image}
+                          alt=""
+                          style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6 }}
+                        />
+                      )}
+                    </td>
                     <td>{dish.name}</td>
                     <td>${dish.price.toLocaleString('es-AR')}</td>
                     <td>{dish.categoryId}</td>
