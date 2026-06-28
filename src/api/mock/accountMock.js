@@ -54,6 +54,7 @@ export function mockUpdateProfile(token, payload) {
       user.addressDetails = normalized
     }
     if (payload.description) user.description = payload.description.trim()
+    if (payload.photoUrl) user.photo = payload.photoUrl
 
     const displayName =
       [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.name

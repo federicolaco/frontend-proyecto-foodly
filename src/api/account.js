@@ -1,6 +1,6 @@
 import { clearSessionToken, getSessionToken, getStoredUser, setStoredUser } from '../lib/auth'
 import { apiFetch, apiFetchMultipart, apiFetchSafe, isApiConfigured } from './client'
-import { createPlaceholderImage, formatAddress, normalizeAddress } from './backend/helpers'
+import { formatAddress, normalizeAddress } from './backend/helpers'
 import { mapRatingSummary } from './backend/mappers'
 import {
   mockConfirmPasswordChange,
@@ -13,10 +13,28 @@ import {
 } from './mock/accountMock'
 import { mockGetClientRatingSummary } from './mock/ratingsMock'
 
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
+async function resolvePhotoUrl(photo) {
+  if (!photo) return undefined
+  if (typeof photo === 'string') return photo
+  if (isApiConfigured()) return URL.createObjectURL(photo)
+  return fileToDataUrl(photo)
+}
+
 export async function updateProfile(payload) {
+  const user = getStoredUser()
+  const address = normalizeAddress(payload.address)
+  const photoUrl = payload.photo ? await resolvePhotoUrl(payload.photo) : undefined
+
   if (isApiConfigured()) {
-    const user = getStoredUser()
-    const address = normalizeAddress(payload.address)
     const formData = new FormData()
 
     if (payload.email) formData.append('email', payload.email.trim())
@@ -36,30 +54,29 @@ export async function updateProfile(payload) {
     }
     if (payload.photo) {
       formData.append('foto', payload.photo)
-    } else if (payload.photo !== undefined) {
-      formData.append('foto', createPlaceholderImage('perfil.png'))
     }
 
     await apiFetchMultipart('/usuarios/perfil', formData, { method: 'PUT' })
-
-    const displayName =
-      payload.name ??
-      ([payload.firstName, payload.lastName].filter(Boolean).join(' ') || user.name)
-    const updated = {
-      ...user,
-      email: payload.email ?? user.email,
-      name: displayName,
-      firstName: payload.firstName ?? user.firstName,
-      lastName: payload.lastName ?? user.lastName,
-      description: payload.description ?? user.description,
-      address: formatAddress(address),
-      addressDetails: address,
-    }
-    setStoredUser(updated)
-    return updated
+  } else {
+    await mockUpdateProfile(getSessionToken(), { ...payload, photoUrl })
   }
 
-  return mockUpdateProfile(getSessionToken(), payload)
+  const displayName =
+    payload.name ??
+    ([payload.firstName, payload.lastName].filter(Boolean).join(' ') || user.name)
+  const updated = {
+    ...user,
+    email: payload.email ?? user.email,
+    name: displayName,
+    firstName: payload.firstName ?? user.firstName,
+    lastName: payload.lastName ?? user.lastName,
+    description: payload.description ?? user.description,
+    address: formatAddress(address),
+    addressDetails: address,
+    ...(photoUrl ? { photo: photoUrl } : {}),
+  }
+  setStoredUser(updated)
+  return updated
 }
 
 export async function startPasswordChange(currentPassword) {

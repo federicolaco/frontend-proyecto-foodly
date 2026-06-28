@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   confirmPasswordChange,
@@ -24,14 +24,58 @@ const TABS = [
   { id: 'danger', label: 'Eliminar cuenta', roles: [ROLES.CLIENT] },
 ]
 
+function CameraIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M4 8h3l1.5-2h7L17 8h3a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2v-8a2 2 0 012-2z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="13" r="3.5" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  )
+}
+
+function AddressFields({ street, streetNumber, city, postalCode, onStreet, onStreetNumber, onCity, onPostalCode }) {
+  return (
+    <>
+      <div className="panel-form__row panel-form__row--2">
+        <label className="panel-field">
+          <span className="panel-field__label">Calle</span>
+          <input className="panel-field__input" value={street} onChange={onStreet} required />
+        </label>
+        <label className="panel-field">
+          <span className="panel-field__label">Número</span>
+          <input className="panel-field__input" value={streetNumber} onChange={onStreetNumber} required />
+        </label>
+      </div>
+      <div className="panel-form__row panel-form__row--2">
+        <label className="panel-field">
+          <span className="panel-field__label">Ciudad</span>
+          <input className="panel-field__input" value={city} onChange={onCity} required />
+        </label>
+        <label className="panel-field">
+          <span className="panel-field__label">Código postal</span>
+          <input className="panel-field__input" value={postalCode} onChange={onPostalCode} required />
+        </label>
+      </div>
+    </>
+  )
+}
+
 export function AccountSettings() {
   const navigate = useNavigate()
   const user = getStoredUser()
+  const photoInputRef = useRef(null)
   const [tab, setTab] = useState('profile')
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState(user.email ?? '')
+  const [photoFile, setPhotoFile] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState(user.photo ?? null)
 
   const initialAddress = splitAddressFields(user)
   const [firstName, setFirstName] = useState(user.firstName ?? user.name?.split(' ')[0] ?? '')
@@ -58,6 +102,20 @@ export function AccountSettings() {
     getMyClientRating().then(setRating).catch(() => setRating({ average: 0, total: 0, breakdown: {} }))
   }, [tab, user.role])
 
+  useEffect(() => () => {
+    if (photoPreview?.startsWith('blob:')) URL.revokeObjectURL(photoPreview)
+  }, [photoPreview])
+
+  const handlePhotoChange = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setPhotoPreview((prev) => {
+      if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev)
+      return URL.createObjectURL(file)
+    })
+    setPhotoFile(file)
+  }
+
   const handleProfileSave = async (event) => {
     event.preventDefault()
     setLoading(true)
@@ -71,7 +129,9 @@ export function AccountSettings() {
         name: localName,
         description,
         address: addressFromFields({ street, streetNumber, city, postalCode }),
+        ...(photoFile ? { photo: photoFile } : {}),
       })
+      setPhotoFile(null)
       setMessage('Datos actualizados correctamente.')
     } catch (err) {
       setError(err.message)
@@ -166,9 +226,44 @@ export function AccountSettings() {
 
         <section className="panel-card">
           {tab === 'profile' && (
-            <form className="panel-form" onSubmit={handleProfileSave}>
+            <form className="panel-form panel-form--profile" onSubmit={handleProfileSave}>
+              <div className="account-photo">
+                <button
+                  type="button"
+                  className="account-photo__avatar-btn"
+                  onClick={() => photoInputRef.current?.click()}
+                  aria-label="Cambiar foto de perfil"
+                >
+                  {photoPreview ? (
+                    <img src={photoPreview} alt="" />
+                  ) : (
+                    <span className="account-photo__placeholder">
+                      <CameraIcon />
+                      <span>Foto</span>
+                    </span>
+                  )}
+                </button>
+                <div className="account-photo__actions">
+                  <button
+                    type="button"
+                    className="panel-btn panel-btn--outline"
+                    onClick={() => photoInputRef.current?.click()}
+                  >
+                    {photoPreview ? 'Cambiar foto' : 'Agregar foto'}
+                  </button>
+                  <p className="account-photo__hint">JPG o PNG, máx. 5 MB</p>
+                </div>
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  className="account-photo__file-input"
+                  onChange={handlePhotoChange}
+                />
+              </div>
+
               <label className="panel-field">
-                <span className="panel-field__label">Correo electrÃ³nico</span>
+                <span className="panel-field__label">Correo electrónico</span>
                 <input
                   type="email"
                   className="panel-field__input"
@@ -187,27 +282,16 @@ export function AccountSettings() {
                     <span className="panel-field__label">Apellido</span>
                     <input className="panel-field__input" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                   </label>
-                  <label className="panel-field">
-                    <span className="panel-field__label">Calle</span>
-                    <input className="panel-field__input" value={street} onChange={(e) => setStreet(e.target.value)} required />
-                  </label>
-                  <label className="panel-field">
-                    <span className="panel-field__label">Número</span>
-                    <input className="panel-field__input" value={streetNumber} onChange={(e) => setStreetNumber(e.target.value)} required />
-                  </label>
-                  <label className="panel-field">
-                    <span className="panel-field__label">Ciudad</span>
-                    <input className="panel-field__input" value={city} onChange={(e) => setCity(e.target.value)} required />
-                  </label>
-                  <label className="panel-field">
-                    <span className="panel-field__label">Código postal</span>
-                    <input
-                      className="panel-field__input"
-                      value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value)}
-                      required
-                    />
-                  </label>
+                  <AddressFields
+                    street={street}
+                    streetNumber={streetNumber}
+                    city={city}
+                    postalCode={postalCode}
+                    onStreet={(e) => setStreet(e.target.value)}
+                    onStreetNumber={(e) => setStreetNumber(e.target.value)}
+                    onCity={(e) => setCity(e.target.value)}
+                    onPostalCode={(e) => setPostalCode(e.target.value)}
+                  />
                 </>
               )}
               {user.role === ROLES.LOCAL && (
@@ -220,27 +304,16 @@ export function AccountSettings() {
                     <span className="panel-field__label">Descripción</span>
                     <textarea className="panel-field__textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
                   </label>
-                  <label className="panel-field">
-                    <span className="panel-field__label">Calle</span>
-                    <input className="panel-field__input" value={street} onChange={(e) => setStreet(e.target.value)} required />
-                  </label>
-                  <label className="panel-field">
-                    <span className="panel-field__label">Número</span>
-                    <input className="panel-field__input" value={streetNumber} onChange={(e) => setStreetNumber(e.target.value)} required />
-                  </label>
-                  <label className="panel-field">
-                    <span className="panel-field__label">Ciudad</span>
-                    <input className="panel-field__input" value={city} onChange={(e) => setCity(e.target.value)} required />
-                  </label>
-                  <label className="panel-field">
-                    <span className="panel-field__label">Código postal</span>
-                    <input
-                      className="panel-field__input"
-                      value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value)}
-                      required
-                    />
-                  </label>
+                  <AddressFields
+                    street={street}
+                    streetNumber={streetNumber}
+                    city={city}
+                    postalCode={postalCode}
+                    onStreet={(e) => setStreet(e.target.value)}
+                    onStreetNumber={(e) => setStreetNumber(e.target.value)}
+                    onCity={(e) => setCity(e.target.value)}
+                    onPostalCode={(e) => setPostalCode(e.target.value)}
+                  />
                 </>
               )}
               <button type="submit" className="panel-btn panel-btn--primary" disabled={loading}>

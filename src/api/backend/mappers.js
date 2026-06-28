@@ -81,6 +81,7 @@ export function mapLoginResponse(data, extras = {}) {
       lastName: data.apellido ?? data.lastName,
       address: addressNormalized ? formatAddress(addressNormalized) : data.address,
       addressDetails: addressNormalized,
+      photo: data.foto ?? data.photo ?? null,
       localId: role === 'local' ? data.id : undefined,
       restaurantId: role === 'local' ? data.id : undefined,
       localEnabled: extras.localEnabled ?? role !== 'local',

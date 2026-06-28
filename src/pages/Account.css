@@ -70,3 +70,74 @@
   height: 100%;
   background: var(--celeste);
 }
+
+.account-photo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.account-photo__avatar-btn {
+  flex-shrink: 0;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  border: 2px dashed #ccc;
+  background: var(--gris-claro);
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.account-photo__avatar-btn:hover {
+  border-color: var(--celeste);
+  background: #e8f6fc;
+}
+
+.account-photo__avatar-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.account-photo__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  width: 100%;
+  height: 100%;
+  color: var(--gris-intermedio);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.account-photo__placeholder svg {
+  color: var(--gris-intermedio);
+}
+
+.account-photo__avatar-btn:hover .account-photo__placeholder,
+.account-photo__avatar-btn:hover .account-photo__placeholder svg {
+  color: var(--celeste);
+}
+
+.account-photo__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.account-photo__hint {
+  font-size: 0.8rem;
+  color: var(--gris-intermedio);
+  margin: 0;
+}
+
+.account-photo__file-input {
+  display: none;
+}

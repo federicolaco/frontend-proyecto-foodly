@@ -72,6 +72,26 @@
   gap: 1rem;
 }
 
+.panel-form--profile {
+  max-width: 28rem;
+}
+
+.panel-form--profile .panel-btn--primary {
+  width: auto;
+  justify-self: start;
+}
+
+.panel-form__row {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 480px) {
+  .panel-form__row--2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .panel-field {
   display: grid;
   gap: 0.35rem;
