@@ -17,29 +17,8 @@ async function fetchLocalDishes(restaurantId) {
     body: JSON.stringify({ dtLocal: { id: Number(restaurantId) } }),
   })
 
-  const platos = response?.platos ?? []
-  const promociones = response?.promociones ?? []
-
-  const ahora = new Date()
-  const promoPorPlato = new Map(
-    promociones
-      .filter(p =>
-        new Date(p.fechaInicio) <= ahora &&
-        new Date(p.fechaFin) >= ahora
-      )
-      .map(p => [p.dtPlato.id, p])
-  )
-
-  return platos.map(plato => {
-    const promo = promoPorPlato.get(plato.id)
-    return {
-      ...plato,
-      precioFinal: promo
-        ? plato.precio * (1 - promo.descuento / 100)
-        : plato.precio,
-      tienePromocion: !!promo,
-    }
-  })
+  
+  return response?.platos ?? []
 }
 
 export async function fetchRestaurant(restaurantId) {
