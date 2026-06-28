@@ -2,13 +2,14 @@ import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAppNavLinks, getProfileMenuItems } from '../lib/navLinks'
 import { getStoredUser } from '../lib/auth'
+import { useCart } from '../context/CartContext'
 import { NavBurgerMenu } from './NavBurgerMenu'
 import { ProfileMenu } from './ProfileMenu'
 import './OrdersNavbar.css'
 
 function UserIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
       <path
         d="M5 20c0-3.314 3.134-6 7-6s7 2.686 7 6"
@@ -22,16 +23,16 @@ function UserIcon() {
 
 function CartIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="9" cy="21" r="1" stroke="currentColor" strokeWidth="2" />
+      <circle cx="20" cy="21" r="1" stroke="currentColor" strokeWidth="2" />
       <path
-        d="M6 6h15l-1.5 9H8L6 6z"
+        d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
         stroke="currentColor"
         strokeWidth="2"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path d="M6 6L5 3H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="10" cy="19" r="1.5" fill="currentColor" />
-      <circle cx="17" cy="19" r="1.5" fill="currentColor" />
     </svg>
   )
 }
@@ -40,6 +41,7 @@ export function OrdersNavbar() {
   const navigate = useNavigate()
   const user = getStoredUser()
   const profileBtnRef = useRef(null)
+  const { cart, itemCount } = useCart()
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
@@ -55,6 +57,15 @@ export function OrdersNavbar() {
         : '/pedidos'
 
   const toggleProfile = () => setProfileOpen((prev) => !prev)
+
+  const handleCartClick = () => {
+    if (cart.restaurantId) {
+      navigate(`/local/${cart.restaurantId}`)
+      return
+    }
+
+    navigate('/pedidos')
+  }
 
   return (
     <>
@@ -83,61 +94,6 @@ export function OrdersNavbar() {
           <div className="orders-navbar__actions">
             <span className="orders-navbar__greeting">¡Hola, {user.name}!</span>
 
-            {user.role === 'cliente' && (
-              <>
-                <button
-                  type="button"
-                  className="orders-navbar__text-btn orders-navbar__text-btn--desktop"
-                  onClick={() => navigate('/pedidos')}
-                >
-                  Platos
-                </button>
-                <button
-                  type="button"
-                  className="orders-navbar__text-btn orders-navbar__text-btn--desktop"
-                  onClick={() => navigate('/locales')}
-                >
-                  Locales
-                </button>
-                <button
-                  type="button"
-                  className="orders-navbar__text-btn orders-navbar__text-btn--desktop"
-                  onClick={() => navigate('/mis-pedidos')}
-                >
-                  Mis pedidos
-                </button>
-              </>
-            )}
-
-            {user.role === 'admin' && (
-              <>
-                <button
-                  type="button"
-                  className="orders-navbar__text-btn orders-navbar__text-btn--desktop"
-                  onClick={() => navigate('/admin/solicitudes')}
-                >
-                  Solicitudes
-                </button>
-                <button
-                  type="button"
-                  className="orders-navbar__text-btn orders-navbar__text-btn--desktop"
-                  onClick={() => navigate('/admin/usuarios')}
-                >
-                  Usuarios
-                </button>
-              </>
-            )}
-
-            {user.role === 'local' && user.localEnabled && (
-              <button
-                type="button"
-                className="orders-navbar__text-btn orders-navbar__text-btn--desktop"
-                onClick={() => navigate('/local-panel')}
-              >
-                Mi local
-              </button>
-            )}
-
             <div className="orders-navbar__profile-wrap">
               <button
                 ref={profileBtnRef}
@@ -162,11 +118,16 @@ export function OrdersNavbar() {
             {user.role === 'cliente' && (
               <button
                 type="button"
-                className="orders-navbar__icon-btn"
-                aria-label="Carrito"
-                onClick={() => navigate('/pedidos')}
+                className="orders-navbar__icon-btn orders-navbar__cart-btn"
+                aria-label={itemCount > 0 ? `Carrito (${itemCount} items)` : 'Carrito'}
+                onClick={handleCartClick}
               >
                 <CartIcon />
+                {itemCount > 0 && (
+                  <span className="orders-navbar__cart-badge" aria-hidden="true">
+                    {itemCount > 9 ? '9+' : itemCount}
+                  </span>
+                )}
               </button>
             )}
           </div>

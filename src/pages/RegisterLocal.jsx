@@ -115,6 +115,12 @@ export function RegisterLocal() {
       return
     }
 
+    if (!logoFile) {
+      setError('Debe subir un logo para el local.')
+      setLoading(false)
+      return
+    }
+
     if (isApiConfigured()) {
       if (!password || password.length < 8) {
         setError('Debe indicar una contraseña de al menos 8 caracteres para la cuenta del local.')
@@ -130,9 +136,6 @@ export function RegisterLocal() {
     }
 
     try {
-      const images = [...selectedImages]
-      if (logoFile) images.unshift(logoFile)
-
       await submitLocalRegistration({
         name,
         email,

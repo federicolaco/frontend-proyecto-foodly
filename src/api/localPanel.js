@@ -57,6 +57,9 @@ export async function submitLocalRegistration(payload) {
     if (!payload.password) {
       throw new Error('Debe indicar una contraseña para la cuenta del local.')
     }
+    if (!payload.logo) {
+      throw new Error('Debe indicar un logo para el local.')
+    }
 
     const formData = new FormData()
     const datos = mapLocalRegistrationPayload({
