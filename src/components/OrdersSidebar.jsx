@@ -3,7 +3,18 @@ import { buildRestaurantPath } from '../api/restaurant'
 import { getPlaceholderImage } from '../api/orders'
 import './OrdersSidebar.css'
 
-function RestaurantLogo({ name }) {
+function RestaurantLogo({ name, logo }) {
+  if (logo) {
+    return (
+      <img
+        src={logo}
+        alt=""
+        className="orders-sidebar__logo orders-sidebar__logo--image"
+        aria-hidden="true"
+      />
+    )
+  }
+
   return (
     <span className="orders-sidebar__logo" aria-hidden="true">
       {name.charAt(0)}
@@ -13,7 +24,6 @@ function RestaurantLogo({ name }) {
 
 export function OrdersSidebar({ restaurants, mostOrdered, loading }) {
   const navigate = useNavigate()
-
   return (
     <aside className="orders-sidebar">
       <section className="orders-sidebar__panel">
@@ -32,14 +42,13 @@ export function OrdersSidebar({ restaurants, mostOrdered, loading }) {
                     className="orders-sidebar__restaurant-btn"
                     onClick={() => navigate(buildRestaurantPath(restaurant.id))}
                   >
-                    <RestaurantLogo name={restaurant.name} />
+                    <RestaurantLogo name={restaurant.name} logo={restaurant.logo} />
                     <span className="orders-sidebar__restaurant-name">{restaurant.name}</span>
                   </button>
                 </li>
               ))}
         </ul>
       </section>
-
       <section className="orders-sidebar__panel">
         <h2 className="orders-sidebar__title">Lo más pedido...</h2>
         <ul className="orders-sidebar__list">

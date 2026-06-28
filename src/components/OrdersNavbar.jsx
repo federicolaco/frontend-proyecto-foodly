@@ -20,7 +20,6 @@ function UserIcon() {
     </svg>
   )
 }
-
 function CartIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -104,7 +103,16 @@ export function OrdersNavbar() {
                 aria-haspopup="menu"
                 onClick={toggleProfile}
               >
-                <UserIcon />
+                {user.photo ? (
+                  <img
+                    src={user.photo}
+                    alt=""
+                    className="orders-navbar__profile-photo"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <UserIcon />
+                )}
               </button>
 
               <ProfileMenu
@@ -114,7 +122,6 @@ export function OrdersNavbar() {
                 anchorRef={profileBtnRef}
               />
             </div>
-
             {user.role === 'cliente' && (
               <button
                 type="button"

@@ -29,6 +29,13 @@
   gap: 0.65rem;
 }
 
+.orders-sidebar__logo--image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .orders-sidebar__restaurant-btn,
 .orders-sidebar__dish-btn {
   width: 100%;
