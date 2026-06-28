@@ -126,7 +126,7 @@ export async function requestPasswordRecovery(email) {
   if (isApiConfigured()) {
     await apiFetch('/usuarios/recuperar_contra_correo', {
       method: 'POST',
-      body: JSON.stringify(email.trim()),
+      body: JSON.stringify({ correo: email.trim() }),
       headers: { 'Content-Type': 'application/json' },
     })
     return {
