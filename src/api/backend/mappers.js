@@ -193,6 +193,8 @@ export function mapRestaurantDetail(local, platos = []) {
         name: plato.nombre,
         description: plato.descripcion ?? '',
         price: plato.precio ?? 0,
+        precioFinal: plato.precioFinal ?? plato.precio ?? 0,  // ← agregar
+        tienePromocion: plato.tienePromocion ?? false,         // ← agregar
         image: plato.imagenes?.[0] ?? placeholder(index),
       })),
   }
