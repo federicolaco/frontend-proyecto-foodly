@@ -138,20 +138,21 @@
 }
 
 .menu-product-list__add-btn {
-  padding: 0;
-  border: none;
-  background: transparent;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--celeste);
+  border-radius: 999px;
+  background: var(--blanco);
   color: var(--celeste);
   font-weight: 800;
   font-size: 0.82rem;
   letter-spacing: 0.03em;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .menu-product-list__add-btn:hover {
-  color: var(--celeste-oscuro);
-  text-decoration: underline;
+  background: var(--celeste);
+  color: var(--blanco);
 }
 
 .menu-product-list__empty {

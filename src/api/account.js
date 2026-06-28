@@ -19,6 +19,7 @@ export async function updateProfile(payload) {
     const address = normalizeAddress(payload.address)
     const formData = new FormData()
 
+    if (payload.email) formData.append('email', payload.email.trim())
     if (user.role === 'cliente') {
       if (payload.firstName) formData.append('nombre', payload.firstName.trim())
       if (payload.lastName) formData.append('apellido', payload.lastName.trim())
@@ -46,6 +47,7 @@ export async function updateProfile(payload) {
       ([payload.firstName, payload.lastName].filter(Boolean).join(' ') || user.name)
     const updated = {
       ...user,
+      email: payload.email ?? user.email,
       name: displayName,
       firstName: payload.firstName ?? user.firstName,
       lastName: payload.lastName ?? user.lastName,

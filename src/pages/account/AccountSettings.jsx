@@ -31,6 +31,7 @@ export function AccountSettings() {
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState(user.email ?? '')
 
   const initialAddress = splitAddressFields(user)
   const [firstName, setFirstName] = useState(user.firstName ?? user.name?.split(' ')[0] ?? '')
@@ -64,6 +65,7 @@ export function AccountSettings() {
     setMessage(null)
     try {
       await updateProfile({
+        email,
         firstName,
         lastName,
         name: localName,
@@ -165,6 +167,16 @@ export function AccountSettings() {
         <section className="panel-card">
           {tab === 'profile' && (
             <form className="panel-form" onSubmit={handleProfileSave}>
+              <label className="panel-field">
+                <span className="panel-field__label">Correo electrÃ³nico</span>
+                <input
+                  type="email"
+                  className="panel-field__input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </label>
               {user.role === ROLES.CLIENT && (
                 <>
                   <label className="panel-field">
