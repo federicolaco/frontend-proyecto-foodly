@@ -83,7 +83,7 @@ export function Restaurant() {
       <div className="restaurant-page">
         <OrdersNavbar />
         <main className="restaurant-page__main contenedor">
-          <p className="restaurant-page__status">Cargando menú...</p>
+          <p className="restaurant-page__status">Cargando menï¿½...</p>
         </main>
       </div>
     )
@@ -115,7 +115,7 @@ export function Restaurant() {
           />
           {!restaurant.isOpen && (
             <p className="restaurant-page__closed-banner" role="alert">
-              Este local está cerrado y no acepta pedidos por el momento.
+              Este local estï¿½ cerrado y no acepta pedidos por el momento.
             </p>
           )}
         </div>
