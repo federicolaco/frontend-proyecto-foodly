@@ -78,15 +78,14 @@ export async function createOrder(payload) {
       method: 'POST',
       body: JSON.stringify(buildOrderPayload(user.id, { ...payload, deliveryAddress })),
     })
-
     return {
       id: response.id,
       status: 'pending',
       total: response.total ?? payload.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
       restaurantId: payload.restaurantId,
+      mpInitPoint: response.mpInitPoint ?? null, 
     }
   }
-
   return mockCreateOrder(getSessionToken(), payload)
 }
 

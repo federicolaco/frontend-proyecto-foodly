@@ -37,13 +37,11 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
   const hasItems = cart.items.length > 0
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
 
   const handleCheckout = async () => {
     if (!hasItems) return
 
     setError(null)
-    setSuccess(null)
     setLoading(true)
 
     try {
@@ -58,12 +56,14 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
         })),
       })
 
+      if (!order.mpInitPoint) {
+        throw new Error('No pudimos generar el link de pago. Intente nuevamente.')
+      }
+
       clearCart()
-      setSuccess(`Pedido #${order.id} registrado como Pendiente.`)
-      setTimeout(() => navigate('/mis-pedidos'), 1500)
+      window.location.href = order.mpInitPoint
     } catch (err) {
       setError(err.message ?? 'No pudimos registrar el pedido.')
-    } finally {
       setLoading(false)
     }
   }
@@ -78,7 +78,7 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
 
         {!restaurantOpen && (
           <p className="cart-sidebar__closed" role="alert">
-            Este local est· cerrado y no acepta pedidos por el momento.
+            Este local est√° cerrado y no acepta pedidos por el momento.
           </p>
         )}
 
@@ -87,14 +87,13 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
             {error}
           </p>
         )}
-        {success && <p className="cart-sidebar__success">{success}</p>}
 
         {!hasItems && (
           <div className="cart-sidebar__empty">
             <span className="cart-sidebar__empty-icon" aria-hidden="true">
               <BagIcon />
             </span>
-            <p>Tu pedido est· vacÌo</p>
+            <p>Tu pedido est√° vac√≠o</p>
           </div>
         )}
 
@@ -156,7 +155,7 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
           disabled={!hasItems || !restaurantOpen || loading}
           onClick={handleCheckout}
         >
-          {loading ? 'PROCESANDO...' : 'FINALIZAR PEDIDO'}
+          {loading ? 'REDIRIGIENDO A MERCADO PAGO...' : 'FINALIZAR PEDIDO'}
         </button>
       </section>
     </aside>

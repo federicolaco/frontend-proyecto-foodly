@@ -24,6 +24,9 @@ import { ResetPassword } from './pages/ResetPassword'
 import { Restaurant } from './pages/Restaurant'
 import { ROLES } from './lib/roles'
 import { ActivarCuenta } from './pages/ActivarCuenta'
+import { PaymentSuccess } from './pages/payment/PaymentSuccess'
+import { PaymentFailure } from './pages/payment/PaymentFailure'
+import { PaymentPending } from './pages/payment/PaymentPending'
 
 function App() {
   return (
@@ -80,7 +83,32 @@ function App() {
           }
         />
 
-     <Route path="/registrar-local" element={<RegisterLocal />} />
+        <Route
+          path="/pago/exito"
+          element={
+            <ProtectedRoute roles={[ROLES.CLIENT]}>
+              <PaymentSuccess />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pago/error"
+          element={
+            <ProtectedRoute roles={[ROLES.CLIENT]}>
+              <PaymentFailure />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pago/pendiente"
+          element={
+            <ProtectedRoute roles={[ROLES.CLIENT]}>
+              <PaymentPending />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="/registrar-local" element={<RegisterLocal />} />
 
         <Route
           path="/admin/solicitudes"

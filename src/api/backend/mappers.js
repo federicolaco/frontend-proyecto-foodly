@@ -264,8 +264,8 @@ export function buildOrderPayload(clientId, payload) {
     dtPedido: {
       dtLocal: { id: Number(payload.restaurantId) },
       dtCliente: { id: Number(clientId) },
-      medioDePago: 'simulado',
-      pagoSimulado: true,
+      medioDePago: 'mercadopago',
+      pagoSimulado: false,
       domicilioEntrega: payload.deliveryAddress ?? {
         calle: 'Sin especificar',
         numero: 'S/N',
