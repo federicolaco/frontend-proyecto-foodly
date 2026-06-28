@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { fetchRestaurant, getRestaurantProduct } from '../api/restaurant'
 import { CartSidebar } from '../components/restaurant/CartSidebar'
-import { MenuCategoryTabs } from '../components/restaurant/MenuCategoryTabs'
 import { MenuProductList } from '../components/restaurant/MenuProductList'
 import { RestaurantBanner } from '../components/restaurant/RestaurantBanner'
 import { RestaurantDeliveryBar } from '../components/restaurant/RestaurantDeliveryBar'
@@ -12,14 +11,14 @@ import './Restaurant.css'
 
 export function Restaurant() {
   const { restaurantId } = useParams()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { addToCart } = useCart()
 
   const [restaurant, setRestaurant] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [activeCategory, setActiveCategory] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
@@ -33,7 +32,6 @@ export function Restaurant() {
         const data = await fetchRestaurant(restaurantId)
         if (!cancelled) {
           setRestaurant(data)
-          setActiveCategory(data.categories[0]?.id ?? '')
         }
       } catch {
         if (!cancelled) {
@@ -55,15 +53,20 @@ export function Restaurant() {
     if (!restaurant) return
 
     const dishId = searchParams.get('plato')
-    if (!dishId) return
+    const preselectedProduct = location.state?.preselectedProduct ?? null
+    if (!dishId && !preselectedProduct) return
 
-    const product = getRestaurantProduct(restaurant, dishId)
+    const product =
+      (dishId ? getRestaurantProduct(restaurant, dishId) : null) ??
+      (preselectedProduct?.id ? getRestaurantProduct(restaurant, preselectedProduct.id) : null) ??
+      preselectedProduct
+
     if (product) {
       addToCart({ id: restaurant.id, name: restaurant.name }, product, 1)
     }
 
-    setSearchParams({}, { replace: true })
-  }, [addToCart, restaurant, searchParams, setSearchParams])
+    navigate(`/local/${restaurantId}`, { replace: true })
+  }, [addToCart, location.state, navigate, restaurant, restaurantId, searchParams])
 
   const handleAddProduct = (product) => {
     if (!restaurant) return
@@ -95,13 +98,6 @@ export function Restaurant() {
     )
   }
 
-  const activeCategoryLabel =
-    restaurant.categories.find((category) => category.id === activeCategory)?.label ?? ''
-
-  const categoryProducts = restaurant.products.filter(
-    (product) => product.categoryId === activeCategory,
-  )
-
   return (
     <div className="restaurant-page">
       <OrdersNavbar />
@@ -119,16 +115,11 @@ export function Restaurant() {
         <div className="restaurant-page__layout">
           <div className="restaurant-page__menu-column">
             <RestaurantBanner restaurant={restaurant} />
-            <MenuCategoryTabs
-              categories={restaurant.categories}
-              activeCategory={activeCategory}
-              onChange={setActiveCategory}
-            />
 
             <div className="restaurant-page__menu-panel">
               <MenuProductList
-                categoryLabel={activeCategoryLabel}
-                products={categoryProducts}
+                categoryLabel="Menu"
+                products={restaurant.products}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
                 onAddProduct={handleAddProduct}
