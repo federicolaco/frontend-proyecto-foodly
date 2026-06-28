@@ -137,14 +137,25 @@ export function OrdersCatalog() {
                 key={dish.id}
                 dish={dish}
                 index={index}
-                onSelect={(selectedDish) =>
-                  navigate(
-                    buildRestaurantPath(
-                      selectedDish.restaurantId,
-                      selectedDish.dishId ?? selectedDish.id,
-                    ),
-                  )
-                }
+                onSelect={(selectedDish) =>
+                  navigate(
+                    buildRestaurantPath(
+                      selectedDish.restaurantId,
+                      selectedDish.dishId ?? selectedDish.id,
+                    ),
+                    {
+                      state: {
+                        preselectedProduct: {
+                          id: Number(selectedDish.dishId ?? selectedDish.id),
+                          name: selectedDish.name,
+                          price: selectedDish.price,
+                          image: selectedDish.image,
+                          description: selectedDish.description ?? '',
+                        },
+                      },
+                    },
+                  )
+                }
               />
             ))}
           </div>
@@ -153,4 +164,4 @@ export function OrdersCatalog() {
     </section>
   )
 }
-
+

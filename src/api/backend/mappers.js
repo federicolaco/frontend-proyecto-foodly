@@ -4,7 +4,13 @@ import pastaCardImg from '../../../img/pasta-card.png'
 import sushiCardImg from '../../../img/sushi-card.png'
 import milanesaCardImg from '../../../img/milanesa-card.png'
 import iceCreamCardImg from '../../../img/ice-cream-card.png'
-import { formatAddress, mapBackendRole, mapBackendStatusToFrontend, parseDeliveryMinutes } from './helpers'
+import {
+  formatAddress,
+  mapBackendRole,
+  mapBackendStatusToFrontend,
+  normalizeAddress,
+  parseDeliveryMinutes,
+} from './helpers'
 
 const PLACEHOLDER_IMAGES = [
   burgerCardImg,
@@ -54,13 +60,27 @@ function getDishCategory(plato) {
 
 export function mapLoginResponse(data, extras = {}) {
   const role = mapBackendRole(data.tipo)
+  const fullName = [data.nombre, data.apellido].filter(Boolean).join(' ').trim()
+  const resolvedName = extras.name ?? (fullName || data.name || data.email)
+  const addressSource =
+    data.direccion ??
+    data.addressDetails ??
+    data.address ??
+    data.dtDireccion ??
+    null
+  const addressNormalized = addressSource ? normalizeAddress(addressSource) : undefined
+
   return {
     token: data.token,
     user: {
       id: data.id,
       email: data.email,
       role,
-      name: extras.name ?? data.email,
+      name: resolvedName,
+      firstName: data.nombre ?? data.firstName,
+      lastName: data.apellido ?? data.lastName,
+      address: addressNormalized ? formatAddress(addressNormalized) : data.address,
+      addressDetails: addressNormalized,
       localId: role === 'local' ? data.id : undefined,
       restaurantId: role === 'local' ? data.id : undefined,
       localEnabled: extras.localEnabled ?? role !== 'local',

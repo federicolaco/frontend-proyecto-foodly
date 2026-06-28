@@ -1,6 +1,6 @@
 .restaurant-delivery-bar {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
 }
 
@@ -15,6 +15,7 @@
   font-size: 0.72rem;
   color: var(--gris-oscuro);
   text-align: left;
+  cursor: pointer;
 }
 
 .restaurant-delivery-bar__item svg {
@@ -26,14 +27,10 @@
   font-weight: 800;
 }
 
-.restaurant-delivery-bar__item--static {
-  cursor: default;
-}
-
-.restaurant-delivery-bar__mode {
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  color: var(--celeste);
+.restaurant-delivery-bar__copy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
 }
 
 .restaurant-delivery-bar__chevron {
@@ -42,8 +39,83 @@
   font-size: 0.85rem;
 }
 
-@media (max-width: 900px) {
-  .restaurant-delivery-bar {
+.restaurant-delivery-bar__editor {
+  background: var(--blanco);
+  border: 1px solid #d9eef7;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.restaurant-delivery-bar__editor-title {
+  margin-bottom: 0.9rem;
+  color: var(--celeste-oscuro);
+  font-weight: 800;
+}
+
+.restaurant-delivery-bar__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.restaurant-delivery-bar__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gris-oscuro);
+}
+
+.restaurant-delivery-bar__field input {
+  width: 100%;
+  border: 1px solid #cfe4ee;
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  font: inherit;
+  color: var(--gris-oscuro);
+  background: #fcfeff;
+}
+
+.restaurant-delivery-bar__field input:focus {
+  outline: 2px solid #b8e4f5;
+  border-color: var(--celeste);
+}
+
+.restaurant-delivery-bar__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.restaurant-delivery-bar__action {
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  background: var(--celeste);
+  color: var(--blanco);
+  font-weight: 800;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.restaurant-delivery-bar__action--ghost {
+  background: #eef7fb;
+  color: var(--celeste-oscuro);
+}
+
+@media (max-width: 768px) {
+  .restaurant-delivery-bar__grid {
     grid-template-columns: 1fr;
+  }
+
+  .restaurant-delivery-bar__actions {
+    flex-direction: column-reverse;
+  }
+
+  .restaurant-delivery-bar__action {
+    width: 100%;
   }
 }

@@ -364,11 +364,9 @@ export function RegisterLocal() {
                 <input
                   type="text"
                   placeholder="Código postal"
-                  inputMode="numeric"
-                  maxLength={5}
                   className="register-local-field__input"
                   value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                  onChange={(e) => setPostalCode(e.target.value)}
                   required
                 />
               </label>
