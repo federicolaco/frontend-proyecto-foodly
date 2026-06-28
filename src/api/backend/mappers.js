@@ -187,19 +187,21 @@ export function mapRestaurantDetail(local, platos = []) {
     enabled: true,
     products: platos
       .filter((plato) => plato.disponible !== false)
-      .map((plato, index) => ({
-        id: plato.id,
-        categoryId: getDishCategory(plato),
-        name: plato.nombre,
-        description: plato.descripcion ?? '',
-        price: plato.precio ?? 0,
-        precioFinal: plato.precioFinal ?? plato.precio ?? 0,  // ← agregar
-        tienePromocion: plato.tienePromocion ?? false,         // ← agregar
-        image: plato.imagenes?.[0] ?? placeholder(index),
-      })),
+      .map((plato, index) => {
+        console.log('plato recibido:', plato) // ← agregar esto temporalmente
+        return {
+          id: plato.id,
+          categoryId: getDishCategory(plato),
+          name: plato.nombre,
+          description: plato.descripcion ?? '',
+          price: plato.precio ?? 0,
+          precioFinal: plato.precioFinal ?? plato.precio ?? 0,
+          tienePromocion: plato.tienePromocion ?? false,
+          image: plato.imagenes?.[0] ?? placeholder(index),
+        }
+      }),
   }
 }
-
 export function mapLocalPanelRestaurant(local, extras = {}) {
   return {
     id: local.id,

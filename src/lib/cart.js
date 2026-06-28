@@ -36,6 +36,10 @@ export function getCartSubtotal(items) {
   return items.reduce((total, item) => total + item.price * item.quantity, 0)
 }
 
-export function formatPrice(amount) {
+/* export function formatPrice(amount) {
   return `$ ${amount.toLocaleString('es-AR')}`
+} */
+
+export function formatPrice(amount) {
+  return `$ ${(amount ?? 0).toLocaleString('es-AR')}`
 }
