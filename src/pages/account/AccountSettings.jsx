@@ -192,7 +192,7 @@ export function AccountSettings() {
                     <input
                       className="panel-field__input"
                       value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                      onChange={(e) => setPostalCode(e.target.value)}
                       required
                     />
                   </label>
@@ -225,7 +225,7 @@ export function AccountSettings() {
                     <input
                       className="panel-field__input"
                       value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                      onChange={(e) => setPostalCode(e.target.value)}
                       required
                     />
                   </label>
@@ -310,3 +310,4 @@ export function AccountSettings() {
     </div>
   )
 }
+

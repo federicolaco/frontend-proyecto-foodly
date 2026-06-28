@@ -196,10 +196,8 @@ export function Register() {
             <input
               id="google-postal-code"
               type="text"
-              inputMode="numeric"
-              maxLength={5}
               value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+              onChange={(e) => setPostalCode(e.target.value)}
               required
             />
           </label>
@@ -307,11 +305,9 @@ export function Register() {
               id="register-postal-code"
               type="text"
               placeholder="Código postal"
-              inputMode="numeric"
               autoComplete="postal-code"
-              maxLength={5}
               value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+              onChange={(e) => setPostalCode(e.target.value)}
               required
             />
           </span>

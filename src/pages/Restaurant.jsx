@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { getUserDeliveryAddress } from '../api/backend/helpers'
 import { fetchRestaurant, getRestaurantProduct } from '../api/restaurant'
 import { CartSidebar } from '../components/restaurant/CartSidebar'
 import { MenuProductList } from '../components/restaurant/MenuProductList'
@@ -7,6 +8,7 @@ import { RestaurantBanner } from '../components/restaurant/RestaurantBanner'
 import { RestaurantDeliveryBar } from '../components/restaurant/RestaurantDeliveryBar'
 import { OrdersNavbar } from '../components/OrdersNavbar'
 import { useCart } from '../context/CartContext'
+import { getStoredUser } from '../lib/auth'
 import './Restaurant.css'
 
 export function Restaurant() {
@@ -20,6 +22,9 @@ export function Restaurant() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [deliveryAddress, setDeliveryAddress] = useState(() =>
+    getUserDeliveryAddress(getStoredUser()),
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -78,7 +83,7 @@ export function Restaurant() {
       <div className="restaurant-page">
         <OrdersNavbar />
         <main className="restaurant-page__main contenedor">
-          <p className="restaurant-page__status">Cargando menú...</p>
+          <p className="restaurant-page__status">Cargando men�...</p>
         </main>
       </div>
     )
@@ -104,10 +109,13 @@ export function Restaurant() {
 
       <main className="restaurant-page__main contenedor">
         <div className="restaurant-page__delivery-bar">
-          <RestaurantDeliveryBar deliveryTime={restaurant.deliveryTime} />
+          <RestaurantDeliveryBar
+            address={deliveryAddress}
+            onAddressChange={setDeliveryAddress}
+          />
           {!restaurant.isOpen && (
             <p className="restaurant-page__closed-banner" role="alert">
-              Este local está cerrado y no acepta pedidos por el momento.
+              Este local est� cerrado y no acepta pedidos por el momento.
             </p>
           )}
         </div>
@@ -127,7 +135,10 @@ export function Restaurant() {
             </div>
           </div>
 
-          <CartSidebar restaurantOpen={restaurant.isOpen !== false} />
+          <CartSidebar
+            restaurantOpen={restaurant.isOpen !== false}
+            deliveryAddress={deliveryAddress}
+          />
         </div>
       </main>
     </div>
