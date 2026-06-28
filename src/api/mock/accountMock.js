@@ -35,6 +35,16 @@ export function mockUpdateProfile(token, payload) {
     if (index < 0) throw new MockApiError(404, 'Usuario no encontrado')
 
     const user = db.users[index]
+    if (payload.email) {
+      const normalizedEmail = payload.email.trim().toLowerCase()
+      const emailInUse = db.users.some((entry) => (
+        entry.id !== sessionUser.id && entry.email.toLowerCase() === normalizedEmail
+      ))
+      if (emailInUse) {
+        throw new MockApiError(409, 'El correo electrÃ³nico ingresado ya estÃ¡ asociado a otra cuenta.')
+      }
+      user.email = normalizedEmail
+    }
     if (payload.firstName) user.firstName = payload.firstName.trim()
     if (payload.lastName) user.lastName = payload.lastName.trim()
     if (payload.name) user.name = payload.name.trim()
