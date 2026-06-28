@@ -54,45 +54,34 @@ export function MenuProductList({
           <p className="menu-product-list__empty">No encontramos productos con ese nombre.</p>
         )}
 
-        {filteredProducts.map((product) => (
-          <article key={product.id} className="menu-product-list__item">
-            <img src={product.image} alt="" className="menu-product-list__image" />
-
-            <div className="menu-product-list__content">
-              <h3 className="menu-product-list__name">{product.name}</h3>
-              <p className="menu-product-list__description">{product.description}</p>
-            </div>
-            <span className="product-price">
-              {product.tienePromocion && (
-                <span className="product-price--original" style={{ textDecoration: 'line-through', color: 'gray' }}>
-                  {formatPrice(product.precio)}
-                </span>
-              )}
-              <span className={product.tienePromocion ? 'product-price--discount' : ''}>
-                {formatPrice(product.precioFinal)}
-              </span>
-            </span>
-            <div className="menu-product-list__actions">
-              <div className="menu-product-list__price-wrap">
-                {product.tienePromocion && (
-                  <span className="menu-product-list__price menu-product-list__price--original">
-                    {formatPrice(product.price)}
-                  </span>
-                )}
-                <span className="menu-product-list__price">
-                  {formatPrice(product.precioFinal ?? product.price)}
-                </span>
-              </div>
-              <button
-                type="button"
-                className="menu-product-list__add-btn"
-                onClick={() => onAddProduct(product)}
-              >
-                AGREGAR +
-              </button>
-            </div>
-          </article>
-        ))}
+   {filteredProducts.map((product) => (
+  <article key={product.id} className="menu-product-list__item">
+    <img src={product.image} alt="" className="menu-product-list__image" />
+    <div className="menu-product-list__content">
+      <h3 className="menu-product-list__name">{product.name}</h3>
+      <p className="menu-product-list__description">{product.description}</p>
+    </div>
+    <div className="menu-product-list__actions">
+      <div className="menu-product-list__price-wrap">
+        {product.tienePromocion && (
+          <span className="menu-product-list__price menu-product-list__price--original">
+            {formatPrice(product.price)}
+          </span>
+        )}
+        <span className="menu-product-list__price">
+          {formatPrice(product.precioFinal ?? product.price)}
+        </span>
+      </div>
+      <button
+        type="button"
+        className="menu-product-list__add-btn"
+        onClick={() => onAddProduct(product)}
+      >
+        AGREGAR +
+      </button>
+    </div>
+  </article>
+))}
       </div>
     </section>
   )
