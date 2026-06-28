@@ -28,6 +28,19 @@
   white-space: nowrap;
 }
 
+.menu-product-list__price-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.menu-product-list__price--original {
+  text-decoration: line-through;
+  color: gray;
+  font-size: 0.85em;
+}
+
 .menu-product-list__accent {
   flex: 1;
   min-width: 2rem;

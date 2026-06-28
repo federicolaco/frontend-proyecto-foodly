@@ -73,7 +73,16 @@ export function MenuProductList({
               </span>
             </span>
             <div className="menu-product-list__actions">
-              <span className="menu-product-list__price">{formatPrice(product.price)}</span>
+              <div className="menu-product-list__price-wrap">
+                {product.tienePromocion && (
+                  <span className="menu-product-list__price menu-product-list__price--original">
+                    {formatPrice(product.price)}
+                  </span>
+                )}
+                <span className="menu-product-list__price">
+                  {formatPrice(product.precioFinal ?? product.price)}
+                </span>
+              </div>
               <button
                 type="button"
                 className="menu-product-list__add-btn"
