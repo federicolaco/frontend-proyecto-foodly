@@ -14,8 +14,7 @@ const REJECTION_REASONS = [
 export function LocalOrdersPage() {
   const [orders, setOrders] = useState([])
   const [statusFilter, setStatusFilter] = useState('')
-  const [sortBy, setSortBy] = useState('date')       // 'date' | 'amount'
-  const [sortDir, setSortDir] = useState('desc')     // 'asc' | 'desc'
+  const [sort, setSort] = useState('date-desc')   // 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
@@ -41,16 +40,14 @@ export function LocalOrdersPage() {
     loadOrders()
   }, [statusFilter])
 
-  // Ordenamiento local: no requiere un nuevo fetch
   const sortedOrders = useMemo(() => {
+    const [field, dir] = sort.split('-')
     return [...orders].sort((a, b) => {
-      const aVal = sortBy === 'date' ? new Date(a.createdAt).getTime() : a.total
-      const bVal = sortBy === 'date' ? new Date(b.createdAt).getTime() : b.total
-      return sortDir === 'asc' ? aVal - bVal : bVal - aVal
+      const aVal = field === 'date' ? new Date(a.createdAt).getTime() : a.total
+      const bVal = field === 'date' ? new Date(b.createdAt).getTime() : b.total
+      return dir === 'asc' ? aVal - bVal : bVal - aVal
     })
-  }, [orders, sortBy, sortDir])
-
-  const toggleSortDir = () => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+  }, [orders, sort])
 
   const handleConfirm = async (orderId) => {
     if (!deliveryMinutes || Number(deliveryMinutes) <= 0) {
@@ -99,10 +96,11 @@ export function LocalOrdersPage() {
       {message && <p className="panel-page__success">{message}</p>}
 
       <section className="panel-card">
-        {/* ── Controles de filtro y ordenamiento ── */}
-        <div className="panel-actions" style={{ marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-          
-          {/* Filtro por estado */}
+        <div
+          className="panel-actions"
+          style={{ marginBottom: '1rem', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}
+        >
+          {/* Izquierda: filtro por estado */}
           <label className="panel-field" style={{ minWidth: '180px' }}>
             <span className="panel-field__label">Estado</span>
             <select
@@ -118,58 +116,20 @@ export function LocalOrdersPage() {
             </select>
           </label>
 
-          {/* Ordenar por */}
-          <label className="panel-field" style={{ minWidth: '160px' }}>
-            <span className="panel-field__label">Ordenar por</span>
+          {/* Derecha: ordenamiento */}
+          <label className="panel-field" style={{ minWidth: '200px' }}>
+            <span className="panel-field__label">Ordenar</span>
             <select
               className="panel-field__select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
             >
-              <option value="date">Fecha</option>
-              <option value="amount">Monto</option>
+              <option value="date-desc">Fecha: mayor a menor</option>
+              <option value="date-asc">Fecha: menor a mayor</option>
+              <option value="amount-desc">Precio: mayor a menor</option>
+              <option value="amount-asc">Precio: menor a mayor</option>
             </select>
           </label>
-
-          {/* Dirección */}
-          <div className="panel-field">
-            <span className="panel-field__label">Dirección</span>
-            <div style={{ display: 'flex', height: '36px', border: '1px solid #ddd', borderRadius: '0.5rem', overflow: 'hidden' }}>
-              <button
-                type="button"
-                onClick={() => setSortDir('asc')}
-                style={{
-                  flex: 1,
-                  border: 'none',
-                  borderRight: '1px solid #ddd',
-                  background: sortDir === 'asc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
-                  color: sortDir === 'asc' ? 'var(--text-accent, #1a56db)' : 'inherit',
-                  fontWeight: sortDir === 'asc' ? 500 : 400,
-                  cursor: 'pointer',
-                  padding: '0 12px',
-                  fontSize: '13px',
-                }}
-              >
-                ↑ Asc
-              </button>
-              <button
-                type="button"
-                onClick={() => setSortDir('desc')}
-                style={{
-                  flex: 1,
-                  border: 'none',
-                  background: sortDir === 'desc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
-                  color: sortDir === 'desc' ? 'var(--text-accent, #1a56db)' : 'inherit',
-                  fontWeight: sortDir === 'desc' ? 500 : 400,
-                  cursor: 'pointer',
-                  padding: '0 12px',
-                  fontSize: '13px',
-                }}
-              >
-                ↓ Desc
-              </button>
-            </div>
-          </div>
         </div>
 
         {loading && <p className="panel-empty">Cargando pedidos...</p>}
@@ -180,7 +140,7 @@ export function LocalOrdersPage() {
 
         {!loading && sortedOrders.length > 0 && (
           <div style={{ display: 'grid', gap: '1rem' }}>
-            {sortedOrders.map((order) => (   // <-- sortedOrders en lugar de orders
+            {sortedOrders.map((order) => (
               <article
                 key={order.id}
                 style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}
