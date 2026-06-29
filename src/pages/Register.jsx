@@ -54,25 +54,25 @@ export function Register() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
- const handleGoogleLogin = useGoogleLogin({
-  onSuccess: async (tokenResponse) => {
-    setError(null)
-    setLoading(true)
-    try {
-      const { user } = await registerWithGoogle({
-        idToken: tokenResponse.access_token,
-        address,
-        document,
-      })
-      navigate(getHomePathForRole(user.role), { replace: true })
-    } catch (err) {
-      setError(err.message ?? 'No fue posible completar la autenticación con Google.')
-    } finally {
-      setLoading(false)
-    }
-  },
-  onError: () => setError('No se pudo autenticar con Google.')
-})
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setError(null)
+      setLoading(true)
+      try {
+        const { user } = await registerWithGoogle({
+          idToken: tokenResponse.access_token,
+          address,
+          document,
+        })
+        navigate(getHomePathForRole(user.role), { replace: true })
+      } catch (err) {
+        setError(err.message ?? 'No fue posible completar la autenticación con Google.')
+      } finally {
+        setLoading(false)
+      }
+    },
+    onError: () => setError('No se pudo autenticar con Google.')
+  })
 
   const address = {
     calle: street,
@@ -155,15 +155,15 @@ export function Register() {
         </button>
       </div>
 
-    <button
-  type="button"
-  className="auth-btn auth-btn--outline auth-btn--google"
-  onClick={() => handleGoogleLogin()}
-  disabled={loading}
->
-  <GoogleIcon />
-  CONTINUAR CON GOOGLE
-</button>
+      <button
+        type="button"
+        className="auth-btn auth-btn--outline auth-btn--google"
+        onClick={() => handleGoogleLogin()}
+        disabled={loading}
+      >
+        <GoogleIcon />
+        CONTINUAR CON GOOGLE
+      </button>
 
       {showGoogleForm && (
         <form className="auth-form auth-form--google-extra" onSubmit={handleGoogleRegister}>
