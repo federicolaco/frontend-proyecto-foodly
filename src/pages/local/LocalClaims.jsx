@@ -24,7 +24,10 @@ export function LocalClaims() {
     setError(null)
     try {
       const user = getStoredUser()
-      const data = await getLocalClaims({ status: statusFilter ?? undefined, localId: user?.localId ?? user?.restaurantId ?? user?.id })
+      const data = await getLocalClaims({
+        status: statusFilter || undefined,   
+        localId: user?.localId ?? user?.restaurantId ?? user?.id
+      })
       setClaims(data)
     } catch (err) {
       setError(err.message)
