@@ -32,9 +32,36 @@ import {
   mockSubmitLocalRequest,
 } from './mock/localMock'
 
+const DEFAULT_LOCAL_STATS_PRESET = 'MES_ACTUAL'
+
 function getLocalId() {
   const user = getStoredUser()
   return user.restaurantId ?? user.localId ?? user.id
+}
+
+function buildLocalStatsQueryParams(filters = {}) {
+  const params = new URLSearchParams()
+  const preset = typeof filters.preset === 'string' ? filters.preset.trim() : ''
+  const fechaDesde = typeof filters.fechaDesde === 'string' ? filters.fechaDesde.trim() : ''
+  const fechaHasta = typeof filters.fechaHasta === 'string' ? filters.fechaHasta.trim() : ''
+  const hasFreeRange = Boolean(fechaDesde || fechaHasta)
+
+  if (preset && hasFreeRange) {
+    throw new Error('Debe enviar un preset o un rango libre, pero no ambos.')
+  }
+
+  if (hasFreeRange) {
+    if (!fechaDesde || !fechaHasta) {
+      throw new Error('Para usar rango libre debe indicar fechaDesde y fechaHasta.')
+    }
+
+    params.set('fechaDesde', fechaDesde)
+    params.set('fechaHasta', fechaHasta)
+    return params
+  }
+
+  params.set('preset', preset || DEFAULT_LOCAL_STATS_PRESET)
+  return params
 }
 
 async function fetchOwnLocalSummary() {
@@ -246,12 +273,19 @@ export async function deletePromotion(promotionId) {
 }
 
 
-export async function getLocalStats() {
+export async function getLocalStats(filters = {}) {
   if (isApiConfigured()) {
     const localId = getLocalId()
-    const data = await apiFetchSafe(`/locales/estadisticas/${localId}`)
-    return mapLocalStats(data ?? { platosMasPedido: [], gananciasMensuales: 0 })
+    const params = buildLocalStatsQueryParams(filters)
+    const qs = params.toString()
+    const data = await apiFetch(`/locales/estadisticas/${localId}?${qs}`)
+    return mapLocalStats(data ?? {
+      fechaDesde: null,
+      fechaHasta: null,
+      platosMasPedido: [],
+      ventasConfirmadas: 0,
+    })
   }
 
-  return mockGetLocalStats(getSessionToken())
+  return mockGetLocalStats(getSessionToken(), filters)
 }
