@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getLocalClaims, resolveClaim } from '../../api/claims'
 import { formatPrice } from '../../lib/cart'
+import { getLocalId } from '../../api/localPanel'
 import '../Panel.css'
 
 const RESOLUTION_TYPES = [
@@ -22,7 +23,7 @@ export function LocalClaims() {
     setLoading(true)
     setError(null)
     try {
-      const data = await getLocalClaims(statusFilter ? { status: statusFilter } : {})
+      const data = await getLocalClaims({ status: statusFilter ?? undefined, localId: getLocalId() })
       setClaims(data)
     } catch (err) {
       setError(err.message)
