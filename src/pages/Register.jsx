@@ -107,26 +107,6 @@ export function Register() {
     }
   }
 
-  const handleGoogleRegister = async (event) => {
-    event.preventDefault()
-    setError(null)
-    setLoading(true)
-
-    try {
-      const { user } = await registerWithGoogle({
-        firstName: firstName || 'Usuario',
-        lastName: lastName || 'Google',
-        address,
-        document,
-        email: email || `google.user.${Date.now()}@foodly.mock`,
-      })
-      navigate(getHomePathForRole(user.role), { replace: true })
-    } catch (err) {
-      setError(err.message ?? 'No fue posible completar la autenticación con Google.')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <AuthLayout>
@@ -165,67 +145,7 @@ export function Register() {
         CONTINUAR CON GOOGLE
       </button>
 
-      {showGoogleForm && (
-        <form className="auth-form auth-form--google-extra" onSubmit={handleGoogleRegister}>
-          <p className="auth-page__hint">Completá los datos faltantes para finalizar con Google (simulado).</p>
-          <label className="auth-field" htmlFor="google-email">
-            <span className="auth-field__label">Correo de Google</span>
-            <input
-              id="google-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
-          <div className="auth-form__row">
-            <label className="auth-field" htmlFor="google-street">
-              <span className="auth-field__label">Calle</span>
-              <input
-                id="google-street"
-                type="text"
-                value={street}
-                onChange={(e) => setStreet(e.target.value)}
-                required
-              />
-            </label>
-            <label className="auth-field" htmlFor="google-street-number">
-              <span className="auth-field__label">Número</span>
-              <input
-                id="google-street-number"
-                type="text"
-                inputMode="numeric"
-                value={streetNumber}
-                onChange={(e) => setStreetNumber(e.target.value)}
-                required
-              />
-            </label>
-          </div>
-          <label className="auth-field" htmlFor="google-city">
-            <span className="auth-field__label">Ciudad</span>
-            <input
-              id="google-city"
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              required
-            />
-          </label>
-          <label className="auth-field" htmlFor="google-postal-code">
-            <span className="auth-field__label">Código postal</span>
-            <input
-              id="google-postal-code"
-              type="text"
-              value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value)}
-              required
-            />
-          </label>
-          <button type="submit" className="auth-btn auth-btn--primary" disabled={loading}>
-            Finalizar registro Google
-          </button>
-        </form>
-      )}
+
 
       <div className="auth-divider" aria-hidden="true">
         <span className="auth-divider__line" />
