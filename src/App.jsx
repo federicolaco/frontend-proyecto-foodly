@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ApiModeBanner } from './components/ApiModeBanner'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -27,8 +28,28 @@ import { ActivarCuenta } from './pages/ActivarCuenta'
 import { PaymentSuccess } from './pages/payment/PaymentSuccess'
 import { PaymentFailure } from './pages/payment/PaymentFailure'
 import { PaymentPending } from './pages/payment/PaymentPending'
+import { isJwtExpired } from './api/backend/helpers'
+import { getSessionToken, clearSessionToken } from './lib/auth'
+import { clearStoredUser } from './lib/auth'
 
 function App() {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const token = getSessionToken()
+      if (token && isJwtExpired(token)) {
+        clearSessionToken()
+        clearStoredUser()
+        navigate('/iniciar-sesion', {
+          replace: true,
+          state: { message: 'Tu sesión expiró. Por favor iniciá sesión nuevamente.' }
+        })
+      }
+    }, 30 * 1000) 
+
+    return () => clearInterval(interval)
+  }, [navigate])
   return (
     <BrowserRouter>
       <ApiModeBanner />
