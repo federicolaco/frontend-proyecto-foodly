@@ -128,7 +128,7 @@ export function LocalOrdersPage() {
               </select>
             </label>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div style={{ paddingTop: '22px' }}>
               <span className="panel-field__label">​</span>
               <div style={{ display: 'flex', height: '36px', border: '1px solid #ddd', borderRadius: '0.5rem', overflow: 'hidden' }}>
                 <button
