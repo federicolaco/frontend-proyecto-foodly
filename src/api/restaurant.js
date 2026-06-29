@@ -1,14 +1,9 @@
 import { apiFetch, isApiConfigured } from './client'
-import { buildLocalListBody } from './backend/helpers'
-import { mapLocalListItem, mapRestaurantDetail } from './backend/mappers'
+import { mapRestaurantDetail } from './backend/mappers'
 import { mockGetRestaurantById } from './mock/ordersMock'
 
 async function fetchLocalSummary(restaurantId) {
-  const data = await apiFetch('/clientes/listar_locales', {
-    method: 'POST',
-    body: JSON.stringify({}),
-  })
-  return (data ?? []).find((local) => local.id === Number(restaurantId)) ?? null
+  return apiFetch(`/locales/${Number(restaurantId)}/perfil`)
 }
 
 async function fetchLocalDishes(restaurantId) {
@@ -17,7 +12,6 @@ async function fetchLocalDishes(restaurantId) {
     body: JSON.stringify({ dtLocal: { id: Number(restaurantId) } }),
   })
 
-  
   return response?.platos ?? []
 }
 

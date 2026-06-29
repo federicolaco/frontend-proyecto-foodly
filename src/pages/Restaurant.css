@@ -133,3 +133,138 @@
   font-size: 0.9rem;
   font-weight: 700;
 }
+
+.restaurant-page__rating-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  background: var(--blanco);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.restaurant-page__rating-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.restaurant-page__rating-eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--celeste);
+}
+
+.restaurant-page__rating-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--gris-oscuro);
+}
+
+.restaurant-page__rating-copy,
+.restaurant-page__rating-meta,
+.restaurant-page__rating-success,
+.restaurant-page__rating-error {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.restaurant-page__rating-copy,
+.restaurant-page__rating-meta {
+  color: var(--gris-intermedio);
+}
+
+.restaurant-page__rating-meta {
+  margin-top: 0.4rem;
+}
+
+.restaurant-page__rating-success {
+  color: #1e8449;
+  font-weight: 700;
+}
+
+.restaurant-page__rating-error {
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.restaurant-page__rating-trigger,
+.restaurant-page__rating-submit,
+.restaurant-page__rating-cancel {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.8rem 1.2rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.restaurant-page__rating-trigger,
+.restaurant-page__rating-submit {
+  background: var(--celeste);
+  color: var(--blanco);
+}
+
+.restaurant-page__rating-cancel {
+  background: transparent;
+  color: var(--gris-oscuro);
+  border: 1px solid rgba(33, 33, 33, 0.15);
+}
+
+.restaurant-page__rating-trigger:hover,
+.restaurant-page__rating-submit:hover,
+.restaurant-page__rating-cancel:hover {
+  transform: translateY(-1px);
+}
+
+.restaurant-page__rating-trigger:disabled,
+.restaurant-page__rating-submit:disabled,
+.restaurant-page__rating-cancel:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.restaurant-page__rating-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.restaurant-page__rating-textarea {
+  width: 100%;
+  min-height: 6rem;
+  resize: vertical;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(33, 33, 33, 0.14);
+  padding: 0.9rem 1rem;
+  font: inherit;
+  color: var(--gris-oscuro);
+  background: #fff;
+}
+
+.restaurant-page__rating-textarea:focus {
+  outline: 2px solid rgba(33, 150, 243, 0.18);
+  border-color: var(--celeste);
+}
+
+.restaurant-page__rating-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+@media (max-width: 767px) {
+  .restaurant-page__rating-header {
+    flex-direction: column;
+  }
+
+  .restaurant-page__rating-trigger,
+  .restaurant-page__rating-submit,
+  .restaurant-page__rating-cancel {
+    width: 100%;
+  }
+}
