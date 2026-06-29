@@ -9,6 +9,8 @@ function StarIcon() {
 }
 
 export function RestaurantBanner({ restaurant }) {
+  const reviewCount = restaurant.reviews ?? 0
+
   return (
     <section className="restaurant-banner">
       <img
@@ -22,7 +24,7 @@ export function RestaurantBanner({ restaurant }) {
         <p className="restaurant-banner__rating">
           <StarIcon />
           <span>
-            {restaurant.rating} (+ {restaurant.reviews} opiniones)
+            {restaurant.rating} (+ {reviewCount} opiniones)
           </span>
         </p>
       </div>

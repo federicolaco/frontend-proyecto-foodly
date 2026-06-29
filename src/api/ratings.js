@@ -5,26 +5,20 @@ import { mapLocalClient, mapRatingSummary } from './backend/mappers'
 import {
   mockGetLocalClients,
   mockGetLocalRatingSummary,
+  mockGetMyLocalRating,
   mockHasRatedLocal,
   mockRateClient,
   mockRateLocal,
 } from './mock/ratingsMock'
 
-const RATED_LOCALS_KEY = 'foodly_rated_locals'
+function mapMyLocalRating(data) {
+  if (!data) return null
 
-function readRatedLocals() {
-  try {
-    return JSON.parse(localStorage.getItem(RATED_LOCALS_KEY) ?? '[]')
-  } catch {
-    return []
-  }
-}
-
-function rememberRatedLocal(localId) {
-  const id = Number(localId)
-  const rated = readRatedLocals()
-  if (!rated.includes(id)) {
-    localStorage.setItem(RATED_LOCALS_KEY, JSON.stringify([...rated, id]))
+  return {
+    id: data.id,
+    score: Number(data.puntaje ?? data.score ?? 0),
+    comment: data.comentario ?? data.comment ?? '',
+    createdAt: data.fecha ?? data.createdAt ?? null,
   }
 }
 
@@ -38,7 +32,7 @@ export async function rateLocal(payload) {
         dtLocal: { id: Number(payload.localId) },
       }),
     })
-    rememberRatedLocal(payload.localId)
+
     return { localId: Number(payload.localId), score: Number(payload.score) }
   }
 
@@ -55,6 +49,7 @@ export async function rateClient(payload) {
         dtCliente: { id: Number(payload.clientId) },
       }),
     })
+
     return { clientId: Number(payload.clientId), score: Number(payload.score) }
   }
 
@@ -78,15 +73,25 @@ export async function getLocalClients(filters = {}) {
       method: 'POST',
       body: JSON.stringify(buildLocalClientFilterBody(filters)),
     })
+
     return (data ?? []).map(mapLocalClient)
   }
 
   return mockGetLocalClients(getSessionToken(), filters)
 }
 
+export async function getMyLocalRating(localId) {
+  if (isApiConfigured()) {
+    const data = await apiFetch(`/calificaciones/locales/${Number(localId)}/mi-calificacion`)
+    return mapMyLocalRating(data)
+  }
+
+  return mockGetMyLocalRating(getSessionToken(), localId)
+}
+
 export async function hasRatedLocal(localId) {
   if (isApiConfigured()) {
-    return readRatedLocals().includes(Number(localId))
+    return Boolean(await getMyLocalRating(localId))
   }
 
   return mockHasRatedLocal(getSessionToken(), localId)

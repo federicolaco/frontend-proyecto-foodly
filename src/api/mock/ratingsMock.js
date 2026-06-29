@@ -51,7 +51,10 @@ export function mockRateLocal(token, payload) {
       (r) => r.type === 'cliente_to_local' && r.clientId === user.id && r.localId === Number(payload.localId),
     )
     if (existing) {
-      throw new MockApiError(400, 'Ya ha calificado a este local.')
+      existing.score = Number(payload.score)
+      existing.comment = payload.comment?.trim() ?? ''
+      existing.createdAt = new Date().toISOString()
+      return existing
     }
 
     const rating = {
@@ -185,6 +188,26 @@ export function mockGetLocalClients(token, filters = {}) {
   }
 
   return mockDelay(clients)
+}
+
+export function mockGetMyLocalRating(token, localId) {
+  ensureMockDb()
+  const user = requireUser(token)
+  const db = getDb()
+  const rating = db.ratings.find(
+    (r) => r.type === 'cliente_to_local' && r.clientId === user.id && r.localId === Number(localId),
+  )
+
+  if (!rating) {
+    return mockDelay(null)
+  }
+
+  return mockDelay({
+    id: rating.id,
+    puntaje: rating.score,
+    comentario: rating.comment ?? '',
+    fecha: rating.createdAt,
+  })
 }
 
 export function mockHasRatedLocal(token, localId) {

@@ -112,16 +112,18 @@ export function mapLocalRegistrationPayload(payload) {
 }
 
 export function mapLocalListItem(local, index = 0) {
+  const images = local.imagenes ?? (local.foto ? [local.foto] : [])
+
   return {
     id: local.id,
     name: local.nombre,
-    logo: local.imagenes?.[0] ?? null,
+    logo: local.foto ?? images[0] ?? null,
     isOpen: Boolean(local.estaAbierto),
     rating: local.calificacionGlobal ?? 0,
     foodType: local.descripcion ?? '',
     description: local.descripcion ?? '',
     address: formatAddress(local.direccion),
-    images: local.imagenes ?? [],
+    images,
   }
 }
 
