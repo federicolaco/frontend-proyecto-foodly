@@ -114,7 +114,7 @@ export function LocalOrdersPage() {
             </select>
           </label>
 
-          {/* Derecha: los dos juntos en un wrapper */}
+          {/* Derecha */}
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
             <label className="panel-field" style={{ minWidth: '160px' }}>
               <span className="panel-field__label">Ordenar por</span>
@@ -128,9 +128,9 @@ export function LocalOrdersPage() {
               </select>
             </label>
 
-            <div className="panel-field">
-            
-              <div style={{ display: 'flex', height: '36px', border: '1px solid #ddd', borderRadius: '0.5rem', overflow: 'hidden', alignSelf: 'flex-end', marginTop: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span className="panel-field__label">​</span>
+              <div style={{ display: 'flex', height: '36px', border: '1px solid #ddd', borderRadius: '0.5rem', overflow: 'hidden' }}>
                 <button
                   type="button"
                   onClick={() => setSortDir('asc')}
