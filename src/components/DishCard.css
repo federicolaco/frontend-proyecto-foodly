@@ -1,5 +1,8 @@
 .dish-card {
   background: var(--blanco);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   border-radius: 0.75rem;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
@@ -25,7 +28,17 @@
 }
 
 .dish-card__body {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
   padding: 0.65rem 0.75rem 0.85rem;
+}
+
+.dish-card__details {
+  flex: 1;
+  min-width: 0;
 }
 
 .dish-card__name {
@@ -51,4 +64,28 @@
   color: var(--gris-oscuro);
   font-size: 0.7rem;
   font-weight: 800;
+}
+
+.dish-card__price-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 0.15rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.dish-card__original-price {
+  color: var(--gris-intermedio);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-decoration: line-through;
+}
+
+.dish-card__price {
+  color: var(--celeste-oscuro);
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
 }

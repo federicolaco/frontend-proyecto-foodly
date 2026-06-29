@@ -1,4 +1,5 @@
 import { getPlaceholderImage } from '../api/orders'
+import { formatPrice } from '../lib/cart'
 import './DishCard.css'
 
 export function DishCard({ dish, index = 0, onSelect }) {
@@ -24,13 +25,20 @@ export function DishCard({ dish, index = 0, onSelect }) {
         />
       </div>
       <div className="dish-card__body">
-        <h3 className="dish-card__name">{dish.name}</h3>
-        <p className="dish-card__restaurant">{dish.restaurant}</p>
-        {dish.isPromotion && (
-          <span className="dish-card__promo">
-            Promo {dish.discountPercent}% — ${dish.price.toLocaleString('es-AR')}
-          </span>
-        )}
+        <div className="dish-card__details">
+          <h3 className="dish-card__name">{dish.name}</h3>
+          <p className="dish-card__restaurant">{dish.restaurant}</p>
+          {dish.isPromotion && (
+            <span className="dish-card__promo">Promo {dish.discountPercent}% OFF</span>
+          )}
+        </div>
+
+        <div className="dish-card__price-wrap">
+          {dish.isPromotion && dish.originalPrice ? (
+            <span className="dish-card__original-price">{formatPrice(dish.originalPrice)}</span>
+          ) : null}
+          <span className="dish-card__price">{formatPrice(dish.price)}</span>
+        </div>
       </div>
     </article>
   )
