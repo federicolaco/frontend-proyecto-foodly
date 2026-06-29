@@ -219,17 +219,9 @@ export function Login() {
           {loading ? 'INGRESANDO...' : 'INGRESAR'}
 
         </button>
+
       </form>
-      
-      <button
-        type="button"
-        className="auth-btn auth-btn--outline auth-btn--google"
-        onClick={() => handleGoogleLogin()}
-        disabled={loading}
-      >
-        <GoogleIcon />
-        CONTINUAR CON GOOGLE
-      </button>
+
 
 
       {isMockMode() && (
@@ -261,7 +253,15 @@ export function Login() {
 
       </div>
 
-
+      <button
+        type="button"
+        className="auth-btn auth-btn--outline auth-btn--google"
+        onClick={() => handleGoogleLogin()}
+        disabled={loading}
+      >
+        <GoogleIcon />
+        CONTINUAR CON GOOGLE
+      </button>
 
       <div className="auth-page__footer">
 
