@@ -179,11 +179,16 @@
 }
 
 .panel-badge--pending {
+  background: #fff0db;
+  color: #b26a00;
+}
+
+.panel-badge--confirmed {
   background: #fff3cd;
   color: #856404;
 }
 
-.panel-badge--confirmed {
+.panel-badge--delivered {
   background: #e8f8ef;
   color: #1e8449;
 }
