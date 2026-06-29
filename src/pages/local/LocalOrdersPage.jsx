@@ -96,7 +96,9 @@ export function LocalOrdersPage() {
       {message && <p className="panel-page__success">{message}</p>}
 
       <section className="panel-card">
-        <div className="panel-actions" style={{ marginBottom: '1rem' }}>
+        <div className="panel-actions" style={{ marginBottom: '1rem', justifyContent: 'space-between' }}>
+
+          {/* Izquierda */}
           <label className="panel-field" style={{ minWidth: '200px' }}>
             <span className="panel-field__label">Filtrar por estado</span>
             <select
@@ -112,56 +114,60 @@ export function LocalOrdersPage() {
             </select>
           </label>
 
-          <label className="panel-field" style={{ minWidth: '160px' }}>
-            <span className="panel-field__label">Ordenar por</span>
-            <select
-              className="panel-field__select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="date">Fecha</option>
-              <option value="amount">Precio</option>
-            </select>
-          </label>
+          {/* Derecha: los dos juntos en un wrapper */}
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
+            <label className="panel-field" style={{ minWidth: '160px' }}>
+              <span className="panel-field__label">Ordenar por</span>
+              <select
+                className="panel-field__select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="date">Fecha</option>
+                <option value="amount">Precio</option>
+              </select>
+            </label>
 
-          <div className="panel-field">
-            <span className="panel-field__label">Dirección</span>
-            <div style={{ display: 'flex', height: '36px', border: '1px solid #ddd', borderRadius: '0.5rem', overflow: 'hidden' }}>
-              <button
-                type="button"
-                onClick={() => setSortDir('asc')}
-                style={{
-                  flex: 1,
-                  border: 'none',
-                  borderRight: '1px solid #ddd',
-                  background: sortDir === 'asc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
-                  color: sortDir === 'asc' ? 'var(--text-accent, #1a56db)' : 'inherit',
-                  fontWeight: sortDir === 'asc' ? 500 : 400,
-                  cursor: 'pointer',
-                  padding: '0 14px',
-                  fontSize: '16px',
-                }}
-              >
-                ↑
-              </button>
-              <button
-                type="button"
-                onClick={() => setSortDir('desc')}
-                style={{
-                  flex: 1,
-                  border: 'none',
-                  background: sortDir === 'desc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
-                  color: sortDir === 'desc' ? 'var(--text-accent, #1a56db)' : 'inherit',
-                  fontWeight: sortDir === 'desc' ? 500 : 400,
-                  cursor: 'pointer',
-                  padding: '0 14px',
-                  fontSize: '16px',
-                }}
-              >
-                ↓
-              </button>
+            <div className="panel-field">
+            
+              <div style={{ display: 'flex', height: '36px', border: '1px solid #ddd', borderRadius: '0.5rem', overflow: 'hidden' }}>
+                <button
+                  type="button"
+                  onClick={() => setSortDir('asc')}
+                  style={{
+                    flex: 1,
+                    border: 'none',
+                    borderRight: '1px solid #ddd',
+                    background: sortDir === 'asc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
+                    color: sortDir === 'asc' ? 'var(--text-accent, #1a56db)' : 'inherit',
+                    fontWeight: sortDir === 'asc' ? 500 : 400,
+                    cursor: 'pointer',
+                    padding: '0 14px',
+                    fontSize: '16px',
+                  }}
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSortDir('desc')}
+                  style={{
+                    flex: 1,
+                    border: 'none',
+                    background: sortDir === 'desc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
+                    color: sortDir === 'desc' ? 'var(--text-accent, #1a56db)' : 'inherit',
+                    fontWeight: sortDir === 'desc' ? 500 : 400,
+                    cursor: 'pointer',
+                    padding: '0 14px',
+                    fontSize: '16px',
+                  }}
+                >
+                  ↓
+                </button>
+              </div>
             </div>
           </div>
+
         </div>
 
         {loading && <p className="panel-empty">Cargando pedidos...</p>}
