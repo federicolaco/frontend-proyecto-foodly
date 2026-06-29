@@ -48,6 +48,7 @@ export async function getLocalClaims(filters = {}) {
   if (isApiConfigured()) {
     const body = buildClaimSearchBody({
       clientId: filters.clientId,
+      localId: filters.localId,
       date: filters.date,
       orderStatus: 'Confirmado',
     })

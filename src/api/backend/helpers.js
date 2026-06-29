@@ -194,7 +194,7 @@ export function buildClaimSearchBody(filters = {}) {
   if (filters.localId) body.idLocal = Number(filters.localId)
   if (filters.date) body.fechaReclamo = filters.date
   if (filters.orderStatus) body.estadoPedido = filters.orderStatus
-  if (!body.idCliente && !body.fechaReclamo && !body.estadoPedido) {
+  if (!body.idCliente && !body.fechaReclamo && !body.estadoPedido && !body.idLocal) {
     body.estadoPedido = 'Confirmado'
   }
   return body
