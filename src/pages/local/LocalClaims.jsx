@@ -44,7 +44,7 @@ export function LocalClaims() {
     setMessage(null)
     try {
       await resolveClaim(claimId, { type: resolutionType, note: resolutionNote })
-      setMessage('Reclamo atendido. Cliente notificado (simulado).')
+      setMessage('Reclamo atendido. Cliente notificado.')
       setResolvingId(null)
       setResolutionNote('')
       await load()
