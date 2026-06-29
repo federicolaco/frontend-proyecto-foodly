@@ -160,91 +160,31 @@ export async function register(payload) {
 
 
 export async function registerWithGoogle(payload) {
-
   if (isApiConfigured()) {
-
     const data = await apiFetch('/clientes/google', {
-
       method: 'POST',
-
       body: JSON.stringify({
-
-        email: payload.email,
-
-        nombre: payload.firstName ?? payload.name ?? 'Usuario',
-
-        apellido: payload.lastName ?? '',
-
-        documento: payload.document ?? `GOOG${Date.now()}`,
-
+        idToken: payload.idToken,
         direccion: normalizeAddress(payload.address),
-
+        documento: payload.document ?? null,
       }),
-
     })
-
-
-
-    if (!data?.id) {
-      throw new Error('El registro con Google aún no está disponible en el backend.')
-    }
-
-    const mapped = {
-
-      token: null,
-
-      user: {
-
-        id: data.id,
-
-        email: data.email,
-
-        role: 'cliente',
-
-        name: `${data.nombre ?? ''} ${data.apellido ?? ''}`.trim() || data.email,
-
-      },
-
-    }
-
-
-
-    const addressNormalized = normalizeAddress(payload.address)
-    mapped.user.address = formatAddress(addressNormalized)
-    mapped.user.addressDetails = addressNormalized
-
-    if (mapped.token) setSessionToken(mapped.token)
-
+    const mapped = mapLoginResponse(data)
+    setSessionToken(mapped.token)
     setStoredUser(mapped.user)
-
     return mapped
-
   }
-
-
 
   const data = await mockRegisterWithGoogle({
-
     ...payload,
-
     address: formatAddress(normalizeAddress(payload.address)),
-
   })
-
   const addressNormalized = normalizeAddress(payload.address)
-  const user = {
-    ...data.user,
-    addressDetails: addressNormalized,
-  }
-
+  const user = { ...data.user, addressDetails: addressNormalized }
   setSessionToken(data.token)
-
   setStoredUser(user)
-
   return { ...data, user }
-
 }
-
 
 
 export async function logout() {
