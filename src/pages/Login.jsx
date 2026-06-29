@@ -246,13 +246,6 @@ export function Login() {
       )}
 
 
-
-      <div className="auth-divider auth-divider--login-accent" aria-hidden="true">
-
-        <span className="auth-divider__line" />
-
-      </div>
-
       <button
         type="button"
         className="auth-btn auth-btn--outline auth-btn--google"
@@ -262,6 +255,13 @@ export function Login() {
         <GoogleIcon />
         CONTINUAR CON GOOGLE
       </button>
+      <div className="auth-divider auth-divider--login-accent" aria-hidden="true">
+
+        <span className="auth-divider__line" />
+
+      </div>
+
+
 
       <div className="auth-page__footer">
 
