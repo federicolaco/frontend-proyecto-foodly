@@ -22,6 +22,7 @@ export function getHomePathForRole(role, user = null) {
 export const ORDER_STATUS_LABELS = {
   pending: 'Pendiente',
   confirmed: 'Confirmado',
+  delivered: 'Entregado',
   rejected: 'Rechazado',
   cancelled: 'Cancelado',
 }

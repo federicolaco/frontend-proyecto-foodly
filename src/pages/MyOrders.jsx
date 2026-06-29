@@ -13,6 +13,13 @@ const COMPENSATION_TYPES = [
   { id: 'compensacion', label: 'Otra compensación' },
 ]
 
+function getOrderBadgeVariant(status) {
+  if (status === 'pending') return 'pending'
+  if (status === 'confirmed') return 'confirmed'
+  if (status === 'delivered') return 'delivered'
+  return 'closed'
+}
+
 export function MyOrders() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
@@ -36,7 +43,7 @@ export function MyOrders() {
       const meta = {}
       await Promise.all(
         data
-          .filter((order) => order.status === 'confirmed')
+          .filter((order) => ['confirmed', 'delivered'].includes(order.status))
           .map(async (order) => {
             if (!order.restaurantId) {
               meta[order.id] = { claim: null, rated: false }
@@ -130,6 +137,7 @@ export function MyOrders() {
               <option value="">Todos</option>
               <option value="pending">Pendiente</option>
               <option value="confirmed">Confirmado</option>
+              <option value="delivered">Entregado</option>
               <option value="rejected">Rechazado</option>
               <option value="cancelled">Cancelado</option>
             </select>
@@ -159,15 +167,9 @@ export function MyOrders() {
                     <div className="panel-actions" style={{ justifyContent: 'space-between' }}>
                       <strong>#{order.id} — {order.restaurantName}</strong>
                       <span
-                        className={`panel-badge panel-badge--${
-                          order.status === 'pending'
-                            ? 'pending'
-                            : order.status === 'confirmed'
-                              ? 'confirmed'
-                              : 'closed'
-                        }`}
+                        className={`panel-badge panel-badge--${getOrderBadgeVariant(order.status)}`}
                       >
-                        {ORDER_STATUS_LABELS[order.status]}
+                        {ORDER_STATUS_LABELS[order.status] ?? order.status}
                       </span>
                     </div>
 
@@ -185,7 +187,7 @@ export function MyOrders() {
                       </button>
                     )}
 
-                    {order.status === 'confirmed' && (
+                    {['confirmed', 'delivered'].includes(order.status) && (
                       <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.5rem' }}>
                         {meta.claim ? (
                           <p style={{ color: 'var(--gris-intermedio)' }}>

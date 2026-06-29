@@ -114,6 +114,7 @@ export function mapFrontendStatusToBackend(status) {
   const map = {
     pending: 'Pendiente',
     confirmed: 'Confirmado',
+    delivered: 'Entregado',
     rejected: 'Rechazado',
     cancelled: 'Cancelado',
   }
@@ -121,13 +122,15 @@ export function mapFrontendStatusToBackend(status) {
 }
 
 export function mapBackendStatusToFrontend(estado) {
+  const normalized = String(estado ?? '').trim().toLowerCase()
   const map = {
-    Pendiente: 'pending',
-    Confirmado: 'confirmed',
-    Rechazado: 'rejected',
-    Cancelado: 'cancelled',
+    pendiente: 'pending',
+    confirmado: 'confirmed',
+    entregado: 'delivered',
+    rechazado: 'rejected',
+    cancelado: 'cancelled',
   }
-  return map[estado] ?? String(estado ?? '').toLowerCase()
+  return map[normalized] ?? normalized
 }
 
 export function isJwtExpired(token) {

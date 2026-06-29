@@ -11,6 +11,13 @@ const REJECTION_REASONS = [
   'Otro',
 ]
 
+function getOrderBadgeVariant(status) {
+  if (status === 'pending') return 'pending'
+  if (status === 'confirmed') return 'confirmed'
+  if (status === 'delivered') return 'delivered'
+  return 'closed'
+}
+
 export function LocalOrdersPage() {
   const [orders, setOrders] = useState([])
   const [statusFilter, setStatusFilter] = useState('')
@@ -109,6 +116,7 @@ export function LocalOrdersPage() {
               <option value="">Todos</option>
               <option value="pending">Pendiente</option>
               <option value="confirmed">Confirmado</option>
+              <option value="delivered">Entregado</option>
               <option value="rejected">Rechazado</option>
               <option value="cancelled">Cancelado</option>
             </select>
@@ -185,7 +193,7 @@ export function LocalOrdersPage() {
               >
                 <div className="panel-actions" style={{ justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <strong>Pedido #{order.id}</strong>
-                  <span className={`panel-badge panel-badge--${order.status === 'pending' ? 'pending' : order.status === 'confirmed' ? 'confirmed' : 'closed'}`}>
+                  <span className={`panel-badge panel-badge--${getOrderBadgeVariant(order.status)}`}>
                     {ORDER_STATUS_LABELS[order.status] ?? order.status}
                   </span>
                 </div>
@@ -261,7 +269,7 @@ export function LocalOrdersPage() {
                   </div>
                 )}
 
-                {order.status === 'confirmed' && order.deliveryMinutes && (
+                {['confirmed', 'delivered'].includes(order.status) && order.deliveryMinutes && (
                   <p>Entrega estimada: {order.deliveryMinutes} minutos</p>
                 )}
                 {order.status === 'rejected' && order.rejectionReason && (
