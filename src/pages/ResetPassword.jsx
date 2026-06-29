@@ -29,7 +29,7 @@ export function ResetPassword() {
     setLoading(true)
     setError(null)
     try {
-      await resetPassword(token, password)
+      await resetPassword(token, password, confirmPassword)
       navigate('/iniciar-sesion', { replace: true, state: { message: 'Contraseña restablecida. Inicie sesión.' } })
     } catch (err) {
       setError(err.message)
