@@ -59,7 +59,7 @@ export function LocalOrdersPage() {
     setMessage(null)
     try {
       await confirmOrder(orderId, deliveryMinutes)
-      setMessage('Pedido confirmado. Factura generada y cliente notificado (simulado).')
+      setMessage('Pedido confirmado. Factura generada y cliente notificado.')
       setConfirmingId(null)
       setDeliveryMinutes('')
       await loadOrders()
@@ -78,7 +78,7 @@ export function LocalOrdersPage() {
     setMessage(null)
     try {
       await rejectOrder(orderId, rejectReason)
-      setMessage('Pedido rechazado. Cliente notificado (simulado).')
+      setMessage('Pedido rechazado. Cliente notificado.')
       setRejectingId(null)
       await loadOrders()
     } catch (err) {
