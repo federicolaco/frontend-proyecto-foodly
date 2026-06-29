@@ -238,7 +238,7 @@ export async function savePromotion(payload) {
 
 export async function deletePromotion(promotionId) {
   if (isApiConfigured()) {
-    await apiFetch(`/promociones_baja/${promotionId}`, { method: 'DELETE' })
+    await apiFetch(`/locales/promociones_baja/${promotionId}`, { method: 'DELETE' })
      return { id: Number(promotionId) }
   }
 
