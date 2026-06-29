@@ -10,15 +10,22 @@ function StarIcon() {
 
 export function RestaurantBanner({ restaurant }) {
   const reviewCount = restaurant.reviews ?? 0
+  const initial = restaurant.name?.charAt(0)?.toUpperCase() ?? '?'
 
   return (
     <section className="restaurant-banner">
-      <img
-        src={restaurant.logo ?? restaurant.images?.[0]}
-        alt=""
-        className="restaurant-banner__image"
-        aria-hidden="true"
-      />
+      {restaurant.logo ? (
+        <img
+          src={restaurant.logo}
+          alt=""
+          className="restaurant-banner__image"
+          aria-hidden="true"
+        />
+      ) : (
+        <span className="restaurant-banner__image restaurant-banner__image--placeholder" aria-hidden="true">
+          {initial}
+        </span>
+      )}
       <div className="restaurant-banner__info">
         <h1 className="restaurant-banner__name">{restaurant.name}</h1>
         <p className="restaurant-banner__rating">
@@ -32,3 +39,4 @@ export function RestaurantBanner({ restaurant }) {
     </section>
   )
 }
+

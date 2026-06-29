@@ -111,13 +111,13 @@ export function mapLocalRegistrationPayload(payload) {
   }
 }
 
-export function mapLocalListItem(local, index = 0) {
-  const images = local.imagenes ?? (local.foto ? [local.foto] : [])
+export function mapLocalListItem(local) {
+  const images = local.imagenes ?? []
 
   return {
     id: local.id,
     name: local.nombre,
-    logo: local.foto ?? images[0] ?? null,
+    logo: local.foto ?? null,
     isOpen: Boolean(local.estaAbierto),
     rating: local.calificacionGlobal ?? 0,
     foodType: local.descripcion ?? '',
@@ -392,3 +392,4 @@ export function mapLocalStats(data) {
     })),
   }
 }
+
