@@ -155,16 +155,13 @@ export function MyOrders() {
           )}
 
           {!loading && orders.length > 0 && (
-            <div style={{ display: 'grid', gap: '1rem' }}>
+            <div className="my-orders__list">
               {orders.map((order) => {
                 const meta = orderMeta[order.id] ?? {}
 
                 return (
-                  <article
-                    key={order.id}
-                    style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}
-                  >
-                    <div className="panel-actions" style={{ justifyContent: 'space-between' }}>
+                  <article key={order.id} className="my-orders__card">
+                    <div className="panel-actions my-orders__header">
                       <strong>#{order.id} — {order.restaurantName}</strong>
                       <span
                         className={`panel-badge panel-badge--${getOrderBadgeVariant(order.status)}`}
@@ -173,80 +170,85 @@ export function MyOrders() {
                       </span>
                     </div>
 
-                    <p>Total: {formatPrice(order.total)}</p>
-                    <p>{new Date(order.createdAt).toLocaleString('es-AR')}</p>
+                    <div className="my-orders__content">
+                      <div className="my-orders__details">
+                        <p>Total: {formatPrice(order.total)}</p>
+                        <p>{new Date(order.createdAt).toLocaleString('es-AR')}</p>
+                      </div>
 
-                    {order.status === 'pending' && (
-                      <button
-                        type="button"
-                        className="panel-btn panel-btn--danger"
-                        style={{ marginTop: '0.5rem' }}
-                        onClick={() => handleCancel(order.id)}
-                      >
-                        Cancelar pedido
-                      </button>
-                    )}
+                      {order.status === 'pending' && (
+                        <button
+                          type="button"
+                          className="panel-btn panel-btn--danger my-orders__action-btn"
+                          onClick={() => handleCancel(order.id)}
+                        >
+                          Cancelar pedido
+                        </button>
+                      )}
 
-                    {['confirmed', 'delivered'].includes(order.status) && (
-                      <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.5rem' }}>
-                        {meta.claim ? (
-                          <p style={{ color: 'var(--gris-intermedio)' }}>
-                            Reclamo presentado ({meta.claim.status === 'resolved' ? 'atendido' : 'pendiente'})
-                          </p>
-                        ) : claimingId === order.id ? (
-                          <>
-                            <textarea
-                              className="panel-field__textarea"
-                              rows={3}
-                              placeholder="Motivo del reclamo"
-                              value={claimReason}
-                              onChange={(e) => setClaimReason(e.target.value)}
-                            />
-                            <select
-                              className="panel-field__select"
-                              value={claimCompensation}
-                              onChange={(e) => setClaimCompensation(e.target.value)}
+                      {['confirmed', 'delivered'].includes(order.status) && (
+                        <div className="my-orders__actions">
+                          {meta.claim ? (
+                            <p className="my-orders__claim-status">
+                              Reclamo presentado ({meta.claim.status === 'resolved' ? 'atendido' : 'pendiente'})
+                            </p>
+                          ) : (
+                            <button
+                              type="button"
+                              className="panel-btn panel-btn--outline my-orders__action-btn"
+                              onClick={() => setClaimingId(order.id)}
                             >
-                              {COMPENSATION_TYPES.map((type) => (
-                                <option key={type.id} value={type.id}>
-                                  {type.label}
-                                </option>
-                              ))}
-                            </select>
-                            <div className="panel-actions">
-                              <button
-                                type="button"
-                                className="panel-btn panel-btn--primary"
-                                onClick={() => handleClaim(order.id)}
-                              >
-                                Enviar reclamo
-                              </button>
-                              <button
-                                type="button"
-                                className="panel-btn panel-btn--outline"
-                                onClick={() => setClaimingId(null)}
-                              >
-                                Cancelar
-                              </button>
-                            </div>
-                          </>
-                        ) : (
+                              Realizar reclamo
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            className="panel-btn panel-btn--outline my-orders__action-btn"
+                            onClick={() => handleOpenRating(order)}
+                          >
+                            {meta.rated ? 'Editar calificación del local' : 'Calificar local'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {['confirmed', 'delivered'].includes(order.status) && claimingId === order.id && !meta.claim && (
+                      <div className="my-orders__claim-form">
+                        <textarea
+                          className="panel-field__textarea"
+                          rows={3}
+                          placeholder="Motivo del reclamo"
+                          value={claimReason}
+                          onChange={(e) => setClaimReason(e.target.value)}
+                        />
+                        <select
+                          className="panel-field__select"
+                          value={claimCompensation}
+                          onChange={(e) => setClaimCompensation(e.target.value)}
+                        >
+                          {COMPENSATION_TYPES.map((type) => (
+                            <option key={type.id} value={type.id}>
+                              {type.label}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="panel-actions">
+                          <button
+                            type="button"
+                            className="panel-btn panel-btn--primary"
+                            onClick={() => handleClaim(order.id)}
+                          >
+                            Enviar reclamo
+                          </button>
                           <button
                             type="button"
                             className="panel-btn panel-btn--outline"
-                            onClick={() => setClaimingId(order.id)}
+                            onClick={() => setClaimingId(null)}
                           >
-                            Realizar reclamo
+                            Cancelar
                           </button>
-                        )}
-
-                        <button
-                          type="button"
-                          className="panel-btn panel-btn--outline"
-                          onClick={() => handleOpenRating(order)}
-                        >
-                          {meta.rated ? 'Editar calificación del local' : 'Calificar local'}
-                        </button>
+                        </div>
                       </div>
                     )}
                   </article>
