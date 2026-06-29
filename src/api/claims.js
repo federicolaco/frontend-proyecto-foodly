@@ -50,7 +50,7 @@ export async function getLocalClaims(filters = {}) {
       clientId: filters.clientId,
       localId: filters.localId,
       date: filters.date,
-      orderStatus: 'Confirmado',
+      orderStatus: filters.statusFilter,
     })
     const data = await apiFetch('/reclamos/buscar_reclamo', {
       method: 'POST',
