@@ -130,7 +130,7 @@ export function LocalOrdersPage() {
 
             <div className="panel-field">
             
-              <div style={{ display: 'flex', height: '36px', border: '1px solid #ddd', borderRadius: '0.5rem', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', height: '36px', border: '1px solid #ddd', borderRadius: '0.5rem', overflow: 'hidden', alignSelf: 'flex-end' }}>
                 <button
                   type="button"
                   onClick={() => setSortDir('asc')}
