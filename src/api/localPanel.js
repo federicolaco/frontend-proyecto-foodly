@@ -238,11 +238,13 @@ export async function savePromotion(payload) {
 
 export async function deletePromotion(promotionId) {
   if (isApiConfigured()) {
-    throw new Error('El backend no expone baja de promociones. Edite la vigencia para desactivarla.')
+    await apiFetch(`/promociones_baja/${promotionId}`, { method: 'DELETE' })
+     return { id: Number(promotionId) }
   }
 
   return mockDeletePromotion(getSessionToken(), promotionId)
 }
+
 
 export async function getLocalStats() {
   if (isApiConfigured()) {
