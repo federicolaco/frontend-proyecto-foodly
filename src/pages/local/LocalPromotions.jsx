@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { deletePromotion, getLocalDishes, getLocalPromotions, savePromotion } from '../../api/localPanel'
-import { isApiConfigured } from '../../api/client'
 import '../Panel.css'
 
 const EMPTY_FORM = {
@@ -70,10 +69,8 @@ export function LocalPromotions() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('¿Desea eliminar esta promoción?')) return
-    if (isApiConfigured()) {
-      setError('El backend no expone baja de promociones. Edite la vigencia para desactivarla.')
-      return
-    }
+    setError(null)
+    setMessage(null)
     try {
       await deletePromotion(id)
       setMessage('Promoción eliminada.')

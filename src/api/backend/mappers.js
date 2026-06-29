@@ -305,6 +305,24 @@ export function buildPromotionPayload(payload) {
   }
 }
 
+function resolvePromotionActive(promo) {
+  if (typeof promo?.active === 'boolean') return promo.active
+  if (typeof promo?.activa === 'boolean') return promo.activa
+  if (typeof promo?.activo === 'boolean') return promo.activo
+  if (typeof promo?.habilitada === 'boolean') return promo.habilitada
+  if (typeof promo?.habilitado === 'boolean') return promo.habilitado
+
+  if (typeof promo?.estado === 'string') {
+    const normalized = promo.estado.trim().toLowerCase()
+    if (['activa', 'activo', 'habilitada', 'habilitado', 'vigente'].includes(normalized)) return true
+    if (['inactiva', 'inactivo', 'deshabilitada', 'deshabilitado', 'eliminada', 'eliminado', 'baja', 'vencida'].includes(normalized)) return false
+  }
+
+  if (promo?.fechaBaja) return false
+
+  return true
+}
+
 export function mapLocalPromotion(promo, index = 0) {
   return {
     id: promo.id,
@@ -313,7 +331,7 @@ export function mapLocalPromotion(promo, index = 0) {
     discountPercent: promo.descuento ?? 0,
     startDate: promo.fechaInicio?.split('T')[0] ?? promo.fechaInicio,
     endDate: promo.fechaFin?.split('T')[0] ?? promo.fechaFin,
-    active: true,
+    active: resolvePromotionActive(promo),
   }
 }
 
