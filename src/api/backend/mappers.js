@@ -164,15 +164,85 @@ export function mapPromocionListItem(promo, index = 0) {
   }
 }
 
+function mapPromotedDishListItem(promo, index = 0) {
+  const plato = promo.dtPlato ?? promo.plato
+  const restaurant = plato?.dtLocal ?? plato?.local
+  const restaurantId = restaurant?.id
+  const basePrice = plato?.precio ?? 0
+  const discountPercent = promo.descuento ?? 0
+  const discountedPrice = Math.round(basePrice * (1 - discountPercent / 100))
+  const dishId = plato?.id ?? promo.idPlato ?? `promo-dish-${promo.id}`
+
+  return {
+    id: dishId,
+    dishId,
+    promotionId: promo.id,
+    restaurantId,
+    name: plato?.nombre ?? promo.descripcion ?? 'Promoción',
+    restaurant: restaurant?.nombre ?? 'Local',
+    image: plato?.imagenes?.[0] ?? placeholder(index),
+    price: discountedPrice,
+    originalPrice: basePrice,
+    discountPercent,
+    isPromotion: true,
+    promotionTitle: promo.descripcion ?? null,
+    categoryId: getDishCategory(plato),
+  }
+}
+
+function mergeDishWithPromotion(baseDish, promotedDish) {
+  if (!baseDish) return promotedDish
+  if (!promotedDish) return baseDish
+
+  const basePrice = Number(baseDish.originalPrice ?? baseDish.price ?? 0)
+  const promotedPrice = Number(promotedDish.price ?? 0)
+  const currentPrice = Number(baseDish.price ?? 0)
+
+  const shouldReplaceCurrent =
+    !baseDish.isPromotion ||
+    promotedPrice < currentPrice ||
+    (promotedPrice === currentPrice &&
+      Number(promotedDish.discountPercent ?? 0) > Number(baseDish.discountPercent ?? 0))
+
+  if (!shouldReplaceCurrent) return baseDish
+
+  return {
+    ...baseDish,
+    ...promotedDish,
+    id: baseDish.id,
+    dishId: promotedDish.dishId ?? baseDish.id,
+    originalPrice: basePrice || promotedDish.originalPrice,
+    categoryId: baseDish.categoryId ?? promotedDish.categoryId,
+  }
+}
+
 export function mapSearchResults(response, options = {}, startIndex = 0) {
   const platos = response?.platos ?? []
   const promociones = response?.promociones ?? []
-  const dishItems = platos.map((plato, index) => mapPlatoListItem(plato, startIndex + index))
-  const promoItems = promociones.map((promo, index) =>
-    mapPromocionListItem(promo, startIndex + dishItems.length + index),
+  const dishMap = new Map(
+    platos.map((plato, index) => {
+      const dishItem = mapPlatoListItem(plato, startIndex + index)
+      return [dishItem.id, dishItem]
+    }),
   )
 
-  let combined = options.promotionsOnly ? promoItems : [...dishItems, ...promoItems]
+  promociones.forEach((promo, index) => {
+    const promotedDish = mapPromotedDishListItem(
+      promo,
+      startIndex + platos.length + index,
+    )
+
+    dishMap.set(
+      promotedDish.id,
+      mergeDishWithPromotion(dishMap.get(promotedDish.id), promotedDish),
+    )
+  })
+
+  let combined = Array.from(dishMap.values())
+
+  if (options.promotionsOnly) {
+    combined = combined.filter((item) => item.isPromotion)
+  }
 
   if (options.maxPrice) {
     const max = Number(options.maxPrice)

@@ -64,6 +64,56 @@ function buildPromotionListItem(promo, db) {
   }
 }
 
+function buildPromotedDishListItem(promo, db) {
+  const dish = db.dishes.find((d) => d.id === promo.dishId)
+  const restaurant = db.restaurants.find((r) => r.id === promo.restaurantId)
+  const basePrice = dish?.price ?? 0
+  const discountedPrice = Math.round(basePrice * (1 - promo.discountPercent / 100))
+  const dishId = dish?.id ?? promo.dishId ?? `promo-dish-${promo.id}`
+
+  return {
+    id: dishId,
+    dishId,
+    promotionId: promo.id,
+    restaurantId: promo.restaurantId,
+    name: dish?.name ?? promo.title,
+    restaurant: restaurant?.name ?? 'Local',
+    image: dish?.image ?? getMockPlaceholderImage(promo.id),
+    price: discountedPrice,
+    originalPrice: basePrice,
+    discountPercent: promo.discountPercent,
+    isPromotion: true,
+    promotionTitle: promo.title,
+    categoryId: dish?.categoryId,
+  }
+}
+
+function mergeDishWithPromotion(baseDish, promotedDish) {
+  if (!baseDish) return promotedDish
+  if (!promotedDish) return baseDish
+
+  const basePrice = Number(baseDish.originalPrice ?? baseDish.price ?? 0)
+  const promotedPrice = Number(promotedDish.price ?? 0)
+  const currentPrice = Number(baseDish.price ?? 0)
+
+  const shouldReplaceCurrent =
+    !baseDish.isPromotion ||
+    promotedPrice < currentPrice ||
+    (promotedPrice === currentPrice &&
+      Number(promotedDish.discountPercent ?? 0) > Number(baseDish.discountPercent ?? 0))
+
+  if (!shouldReplaceCurrent) return baseDish
+
+  return {
+    ...baseDish,
+    ...promotedDish,
+    id: baseDish.id,
+    dishId: promotedDish.dishId ?? baseDish.id,
+    originalPrice: basePrice || promotedDish.originalPrice,
+    categoryId: baseDish.categoryId ?? promotedDish.categoryId,
+  }
+}
+
 export function mockGetEnabledRestaurants(filters = {}) {
   ensureMockDb()
   const db = getDb()
@@ -138,13 +188,34 @@ export function mockSearchDishesAndPromotions(query = '', options = {}) {
     dishes = dishes.filter((dish) => dish.categoryId === options.category)
   }
 
-  if (options.maxPrice) {
-    dishes = dishes.filter((dish) => dish.price <= Number(options.maxPrice))
+  const dishMap = new Map(
+    dishes.map((dish) => {
+      const dishItem = buildDishListItem(dish, db)
+      return [dishItem.id, dishItem]
+    }),
+  )
+
+  promotions.forEach((promo) => {
+    const promotedDish = buildPromotedDishListItem(promo, db)
+    dishMap.set(
+      promotedDish.id,
+      mergeDishWithPromotion(dishMap.get(promotedDish.id), promotedDish),
+    )
+  })
+
+  let combined = Array.from(dishMap.values())
+
+  if (options.promotionsOnly) {
+    combined = combined.filter((item) => item.isPromotion)
   }
 
-  const dishItems = dishes.map((dish) => buildDishListItem(dish, db))
-  const promoItems = promotions.map((promo) => buildPromotionListItem(promo, db))
-  let combined = options.promotionsOnly ? promoItems : [...dishItems, ...promoItems]
+  if (options.category) {
+    combined = combined.filter((item) => item.categoryId === options.category)
+  }
+
+  if (options.maxPrice) {
+    combined = combined.filter((item) => item.price <= Number(options.maxPrice))
+  }
 
   if (options.sort === 'price-asc') {
     combined.sort((a, b) => a.price - b.price)
