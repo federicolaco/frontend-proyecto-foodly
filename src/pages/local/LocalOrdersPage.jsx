@@ -14,7 +14,7 @@ const REJECTION_REASONS = [
 export function LocalOrdersPage() {
   const [orders, setOrders] = useState([])
   const [statusFilter, setStatusFilter] = useState('')
-  const [sort, setSort] = useState('date-desc')   // 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
+  const [sort, setSort] = useState('date-desc')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
@@ -41,13 +41,13 @@ export function LocalOrdersPage() {
   }, [statusFilter])
 
   const sortedOrders = useMemo(() => {
-    const [field, dir] = sort.split('-')
-    return [...orders].sort((a, b) => {
-      const aVal = field === 'date' ? new Date(a.createdAt).getTime() : a.total
-      const bVal = field === 'date' ? new Date(b.createdAt).getTime() : b.total
-      return dir === 'asc' ? aVal - bVal : bVal - aVal
-    })
-  }, [orders, sort])
+  const [field, dir] = sort.split('-')
+  return [...orders].sort((a, b) => {
+    const aVal = field === 'date' ? new Date(a.createdAt).getTime() : a.total
+    const bVal = field === 'date' ? new Date(b.createdAt).getTime() : b.total
+    return dir === 'asc' ? aVal - bVal : bVal - aVal
+  })
+}, [orders, sort])
 
   const handleConfirm = async (orderId) => {
     if (!deliveryMinutes || Number(deliveryMinutes) <= 0) {
@@ -96,41 +96,36 @@ export function LocalOrdersPage() {
       {message && <p className="panel-page__success">{message}</p>}
 
       <section className="panel-card">
-        <div
-          className="panel-actions"
-          style={{ marginBottom: '1rem', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}
-        >
-          {/* Izquierda: filtro por estado */}
-          <label className="panel-field" style={{ minWidth: '180px' }}>
-            <span className="panel-field__label">Estado</span>
-            <select
-              className="panel-field__select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">Todos</option>
-              <option value="pending">Pendiente</option>
-              <option value="confirmed">Confirmado</option>
-              <option value="rejected">Rechazado</option>
-              <option value="cancelled">Cancelado</option>
-            </select>
-          </label>
+   <div className="panel-actions" style={{ marginBottom: '1rem' }}>
+  <label className="panel-field" style={{ minWidth: '200px' }}>
+    <span className="panel-field__label">Filtrar por estado</span>
+    <select
+      className="panel-field__select"
+      value={statusFilter}
+      onChange={(e) => setStatusFilter(e.target.value)}
+    >
+      <option value="">Todos</option>
+      <option value="pending">Pendiente</option>
+      <option value="confirmed">Confirmado</option>
+      <option value="rejected">Rechazado</option>
+      <option value="cancelled">Cancelado</option>
+    </select>
+  </label>
 
-          {/* Derecha: ordenamiento */}
-          <label className="panel-field" style={{ minWidth: '200px' }}>
-            <span className="panel-field__label">Ordenar</span>
-            <select
-              className="panel-field__select"
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-            >
-              <option value="date-desc">Fecha: mayor a menor</option>
-              <option value="date-asc">Fecha: menor a mayor</option>
-              <option value="amount-desc">Precio: mayor a menor</option>
-              <option value="amount-asc">Precio: menor a mayor</option>
-            </select>
-          </label>
-        </div>
+  <label className="panel-field" style={{ minWidth: '200px' }}>
+    <span className="panel-field__label">Ordenar</span>
+    <select
+      className="panel-field__select"
+      value={sort}
+      onChange={(e) => setSort(e.target.value)}
+    >
+      <option value="date-desc">Fecha: mayor a menor</option>
+      <option value="date-asc">Fecha: menor a mayor</option>
+      <option value="amount-desc">Precio: mayor a menor</option>
+      <option value="amount-asc">Precio: menor a mayor</option>
+    </select>
+  </label>
+</div>
 
         {loading && <p className="panel-empty">Cargando pedidos...</p>}
 
