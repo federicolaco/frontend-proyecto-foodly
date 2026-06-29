@@ -14,7 +14,8 @@ const REJECTION_REASONS = [
 export function LocalOrdersPage() {
   const [orders, setOrders] = useState([])
   const [statusFilter, setStatusFilter] = useState('')
-  const [sort, setSort] = useState('date-desc')
+  const [sortBy, setSortBy] = useState('date')
+  const [sortDir, setSortDir] = useState('desc')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
@@ -41,13 +42,12 @@ export function LocalOrdersPage() {
   }, [statusFilter])
 
   const sortedOrders = useMemo(() => {
-  const [field, dir] = sort.split('-')
-  return [...orders].sort((a, b) => {
-    const aVal = field === 'date' ? new Date(a.createdAt).getTime() : a.total
-    const bVal = field === 'date' ? new Date(b.createdAt).getTime() : b.total
-    return dir === 'asc' ? aVal - bVal : bVal - aVal
-  })
-}, [orders, sort])
+    return [...orders].sort((a, b) => {
+      const aVal = sortBy === 'date' ? new Date(a.createdAt).getTime() : a.total
+      const bVal = sortBy === 'date' ? new Date(b.createdAt).getTime() : b.total
+      return sortDir === 'asc' ? aVal - bVal : bVal - aVal
+    })
+  }, [orders, sortBy, sortDir])
 
   const handleConfirm = async (orderId) => {
     if (!deliveryMinutes || Number(deliveryMinutes) <= 0) {
@@ -96,36 +96,73 @@ export function LocalOrdersPage() {
       {message && <p className="panel-page__success">{message}</p>}
 
       <section className="panel-card">
-   <div className="panel-actions" style={{ marginBottom: '1rem' }}>
-  <label className="panel-field" style={{ minWidth: '200px' }}>
-    <span className="panel-field__label">Filtrar por estado</span>
-    <select
-      className="panel-field__select"
-      value={statusFilter}
-      onChange={(e) => setStatusFilter(e.target.value)}
-    >
-      <option value="">Todos</option>
-      <option value="pending">Pendiente</option>
-      <option value="confirmed">Confirmado</option>
-      <option value="rejected">Rechazado</option>
-      <option value="cancelled">Cancelado</option>
-    </select>
-  </label>
+        <div className="panel-actions" style={{ marginBottom: '1rem' }}>
+          <label className="panel-field" style={{ minWidth: '200px' }}>
+            <span className="panel-field__label">Filtrar por estado</span>
+            <select
+              className="panel-field__select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">Todos</option>
+              <option value="pending">Pendiente</option>
+              <option value="confirmed">Confirmado</option>
+              <option value="rejected">Rechazado</option>
+              <option value="cancelled">Cancelado</option>
+            </select>
+          </label>
 
-  <label className="panel-field" style={{ minWidth: '200px' }}>
-    <span className="panel-field__label">Ordenar</span>
-    <select
-      className="panel-field__select"
-      value={sort}
-      onChange={(e) => setSort(e.target.value)}
-    >
-      <option value="date-desc">Fecha: mayor a menor</option>
-      <option value="date-asc">Fecha: menor a mayor</option>
-      <option value="amount-desc">Precio: mayor a menor</option>
-      <option value="amount-asc">Precio: menor a mayor</option>
-    </select>
-  </label>
-</div>
+          <label className="panel-field" style={{ minWidth: '160px' }}>
+            <span className="panel-field__label">Ordenar por</span>
+            <select
+              className="panel-field__select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="date">Fecha</option>
+              <option value="amount">Precio</option>
+            </select>
+          </label>
+
+          <div className="panel-field">
+            <span className="panel-field__label">Dirección</span>
+            <div style={{ display: 'flex', height: '36px', border: '1px solid #ddd', borderRadius: '0.5rem', overflow: 'hidden' }}>
+              <button
+                type="button"
+                onClick={() => setSortDir('asc')}
+                style={{
+                  flex: 1,
+                  border: 'none',
+                  borderRight: '1px solid #ddd',
+                  background: sortDir === 'asc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
+                  color: sortDir === 'asc' ? 'var(--text-accent, #1a56db)' : 'inherit',
+                  fontWeight: sortDir === 'asc' ? 500 : 400,
+                  cursor: 'pointer',
+                  padding: '0 14px',
+                  fontSize: '16px',
+                }}
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                onClick={() => setSortDir('desc')}
+                style={{
+                  flex: 1,
+                  border: 'none',
+                  background: sortDir === 'desc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
+                  color: sortDir === 'desc' ? 'var(--text-accent, #1a56db)' : 'inherit',
+                  fontWeight: sortDir === 'desc' ? 500 : 400,
+                  cursor: 'pointer',
+                  padding: '0 14px',
+                  fontSize: '16px',
+                }}
+              >
+                ↓
+              </button>
+            </div>
+          </div>
+        </div>
 
         {loading && <p className="panel-empty">Cargando pedidos...</p>}
 
