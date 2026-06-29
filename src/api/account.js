@@ -137,11 +137,15 @@ export async function requestPasswordRecovery(email) {
   return mockRequestPasswordRecovery(email)
 }
 
-export async function resetPassword(token, newPassword) {
+export async function resetPassword(token, newPassword, confirmPassword) {
   if (isApiConfigured()) {
     await apiFetch('/usuarios/recuperar', {
       method: 'POST',
-      body: JSON.stringify({ token, nuevaPasswd: newPassword }),
+      body: JSON.stringify({
+        token,
+        nuevaPasswd: newPassword,
+        confirmacionPasswd: confirmPassword,
+      }),
     })
     return { message: 'Contraseña restablecida. Ya puede iniciar sesión.' }
   }
