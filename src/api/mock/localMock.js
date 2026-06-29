@@ -3,11 +3,104 @@ import { mockDelay, MockApiError } from './helpers'
 import { ensureMockDb } from './seed'
 import { mockGetUserFromToken } from './authMock'
 
+const DEFAULT_LOCAL_STATS_PRESET = 'MES_ACTUAL'
+const LOCAL_STATS_LIMIT = 5
+const STATS_AMBIGUOUS_MESSAGE = 'Debe enviar un preset o un rango libre, pero no ambos.'
+const STATS_INCOMPLETE_RANGE_MESSAGE = 'Para usar rango libre debe indicar fechaDesde y fechaHasta.'
+const STATS_INVALID_RANGE_MESSAGE = 'La fechaDesde no puede ser posterior a fechaHasta.'
+
 function requireUser(token) {
   const user = mockGetUserFromToken(token)
   if (!user) throw new MockApiError(401, 'Sesión inválida')
   if (user.blocked) throw new MockApiError(403, 'Cuenta suspendida')
   return user
+}
+
+function createLocalDate(base = new Date()) {
+  const date = new Date(base)
+  date.setHours(12, 0, 0, 0)
+  return date
+}
+
+function shiftDays(base, amount) {
+  const date = createLocalDate(base)
+  date.setDate(date.getDate() + amount)
+  return date
+}
+
+function firstDayOfMonth(base) {
+  const date = createLocalDate(base)
+  date.setDate(1)
+  return date
+}
+
+function lastDayOfMonth(base) {
+  const date = firstDayOfMonth(base)
+  date.setMonth(date.getMonth() + 1)
+  date.setDate(0)
+  return date
+}
+
+function formatIsoDate(date) {
+  const safeDate = createLocalDate(date)
+  const year = safeDate.getFullYear()
+  const month = String(safeDate.getMonth() + 1).padStart(2, '0')
+  const day = String(safeDate.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function resolveMockStatsPreset(preset) {
+  const today = createLocalDate()
+
+  switch (preset) {
+    case 'HOY':
+      return { fechaDesde: formatIsoDate(today), fechaHasta: formatIsoDate(today) }
+    case 'ULTIMOS_7_DIAS':
+      return { fechaDesde: formatIsoDate(shiftDays(today, -6)), fechaHasta: formatIsoDate(today) }
+    case 'ULTIMOS_30_DIAS':
+      return { fechaDesde: formatIsoDate(shiftDays(today, -29)), fechaHasta: formatIsoDate(today) }
+    case 'MES_ANTERIOR': {
+      const currentMonthFirstDay = firstDayOfMonth(today)
+      const previousMonthLastDay = shiftDays(currentMonthFirstDay, -1)
+      return {
+        fechaDesde: formatIsoDate(firstDayOfMonth(previousMonthLastDay)),
+        fechaHasta: formatIsoDate(lastDayOfMonth(previousMonthLastDay)),
+      }
+    }
+    case 'MES_ACTUAL':
+    default:
+      return { fechaDesde: formatIsoDate(firstDayOfMonth(today)), fechaHasta: formatIsoDate(today) }
+  }
+}
+
+function resolveMockStatsPeriod(filters = {}) {
+  const preset = typeof filters.preset === 'string' ? filters.preset.trim() : ''
+  const fechaDesde = typeof filters.fechaDesde === 'string' ? filters.fechaDesde.trim() : ''
+  const fechaHasta = typeof filters.fechaHasta === 'string' ? filters.fechaHasta.trim() : ''
+  const hasFreeRange = Boolean(fechaDesde || fechaHasta)
+
+  if (preset && hasFreeRange) {
+    throw new MockApiError(400, STATS_AMBIGUOUS_MESSAGE)
+  }
+
+  if (hasFreeRange) {
+    if (!fechaDesde || !fechaHasta) {
+      throw new MockApiError(400, STATS_INCOMPLETE_RANGE_MESSAGE)
+    }
+
+    if (fechaDesde > fechaHasta) {
+      throw new MockApiError(400, STATS_INVALID_RANGE_MESSAGE)
+    }
+
+    return { fechaDesde, fechaHasta }
+  }
+
+  return resolveMockStatsPreset(preset || DEFAULT_LOCAL_STATS_PRESET)
+}
+
+function getOrderDateOnly(order) {
+  const rawDate = order?.createdAt ?? order?.confirmedAt ?? null
+  return typeof rawDate === 'string' ? rawDate.split('T')[0] : null
 }
 
 export function mockSubmitLocalRequest(token, payload) {
@@ -397,7 +490,7 @@ export function mockDeletePromotion(token, promotionId) {
   return mockDelay(result)
 }
 
-export function mockGetLocalStats(token) {
+export function mockGetLocalStats(token, filters = {}) {
   ensureMockDb()
   const user = requireUser(token)
   if (user.role !== 'local' || !user.restaurantId) {
@@ -405,8 +498,15 @@ export function mockGetLocalStats(token) {
   }
 
   const db = getDb()
+  const { fechaDesde, fechaHasta } = resolveMockStatsPeriod(filters)
   const orders = db.orders.filter(
-    (o) => o.restaurantId === user.restaurantId && o.status === 'confirmed',
+    (o) =>
+      o.restaurantId === user.restaurantId &&
+      o.status === 'confirmed' &&
+      (() => {
+        const orderDate = getOrderDateOnly(o)
+        return orderDate && orderDate >= fechaDesde && orderDate <= fechaHasta
+      })(),
   )
 
   const dishCounts = {}
@@ -418,19 +518,21 @@ export function mockGetLocalStats(token) {
 
   const topDishes = Object.entries(dishCounts)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
+    .slice(0, LOCAL_STATS_LIMIT)
     .map(([dishId]) => db.dishes.find((d) => d.id === Number(dishId)))
     .filter(Boolean)
 
-  const monthlyRevenue = orders.reduce((sum, o) => sum + (o.total ?? 0), 0)
+  const ventasConfirmadas = orders.reduce((sum, o) => sum + (o.total ?? 0), 0)
 
   return mockDelay({
-    monthlyRevenue,
-    topDishes: topDishes.map((d) => ({
+    fechaDesde,
+    fechaHasta,
+    ventasConfirmadas,
+    platosMasPedido: topDishes.map((d) => ({
       id: d.id,
-      name: d.name,
-      price: d.price,
-      image: d.image,
+      nombre: d.name,
+      precio: d.price,
+      imagenes: d.image ? [d.image] : [],
     })),
   })
 }

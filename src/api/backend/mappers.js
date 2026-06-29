@@ -471,12 +471,14 @@ export function mapLocalClient(client) {
 
 export function mapLocalStats(data) {
   return {
-    monthlyRevenue: data.gananciasMensuales ?? 0,
+    fromDate: data.fechaDesde ?? null,
+    untilDate: data.fechaHasta ?? null,
+    confirmedSales: data.ventasConfirmadas ?? 0,
     topDishes: (data.platosMasPedido ?? []).map((plato, index) => ({
       id: plato.id,
-      name: plato.nombre,
-      price: plato.precio ?? 0,
-      image: plato.imagenes?.[0] ?? placeholder(index),
+      name: plato.nombre ?? plato.name ?? 'Plato',
+      price: plato.precioFinal ?? plato.precio ?? plato.price ?? 0,
+      image: plato.imagenes?.[0] ?? plato.image ?? placeholder(index),
     })),
   }
 }
