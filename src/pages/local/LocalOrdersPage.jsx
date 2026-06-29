@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { confirmOrder, getLocalOrders, rejectOrder } from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
 import { ORDER_STATUS_LABELS } from '../../lib/roles'
@@ -14,6 +14,8 @@ const REJECTION_REASONS = [
 export function LocalOrdersPage() {
   const [orders, setOrders] = useState([])
   const [statusFilter, setStatusFilter] = useState('')
+  const [sortBy, setSortBy] = useState('date')       // 'date' | 'amount'
+  const [sortDir, setSortDir] = useState('desc')     // 'asc' | 'desc'
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
@@ -25,7 +27,6 @@ export function LocalOrdersPage() {
   const loadOrders = async () => {
     setLoading(true)
     setError(null)
-
     try {
       const data = await getLocalOrders(statusFilter ? { status: statusFilter } : {})
       setOrders(data)
@@ -40,17 +41,25 @@ export function LocalOrdersPage() {
     loadOrders()
   }, [statusFilter])
 
+  // Ordenamiento local: no requiere un nuevo fetch
+  const sortedOrders = useMemo(() => {
+    return [...orders].sort((a, b) => {
+      const aVal = sortBy === 'date' ? new Date(a.createdAt).getTime() : a.total
+      const bVal = sortBy === 'date' ? new Date(b.createdAt).getTime() : b.total
+      return sortDir === 'asc' ? aVal - bVal : bVal - aVal
+    })
+  }, [orders, sortBy, sortDir])
+
+  const toggleSortDir = () => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+
   const handleConfirm = async (orderId) => {
     if (!deliveryMinutes || Number(deliveryMinutes) <= 0) {
       setError('Debe ingresar el tiempo estimado de entrega para confirmar el pedido.')
       return
     }
-
     if (!window.confirm('¿Confirma el pedido? Se simulará el pago y se generará la factura.')) return
-
     setError(null)
     setMessage(null)
-
     try {
       await confirmOrder(orderId, deliveryMinutes)
       setMessage('Pedido confirmado. Factura generada y cliente notificado (simulado).')
@@ -67,12 +76,9 @@ export function LocalOrdersPage() {
       setError('Debe seleccionar o escribir un motivo de rechazo antes de continuar.')
       return
     }
-
     if (!window.confirm('¿Confirma el rechazo del pedido?')) return
-
     setError(null)
     setMessage(null)
-
     try {
       await rejectOrder(orderId, rejectReason)
       setMessage('Pedido rechazado. Cliente notificado (simulado).')
@@ -93,9 +99,12 @@ export function LocalOrdersPage() {
       {message && <p className="panel-page__success">{message}</p>}
 
       <section className="panel-card">
-        <div className="panel-actions" style={{ marginBottom: '1rem' }}>
-          <label className="panel-field" style={{ minWidth: '200px' }}>
-            <span className="panel-field__label">Filtrar por estado</span>
+        {/* ── Controles de filtro y ordenamiento ── */}
+        <div className="panel-actions" style={{ marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          
+          {/* Filtro por estado */}
+          <label className="panel-field" style={{ minWidth: '180px' }}>
+            <span className="panel-field__label">Estado</span>
             <select
               className="panel-field__select"
               value={statusFilter}
@@ -108,17 +117,70 @@ export function LocalOrdersPage() {
               <option value="cancelled">Cancelado</option>
             </select>
           </label>
+
+          {/* Ordenar por */}
+          <label className="panel-field" style={{ minWidth: '160px' }}>
+            <span className="panel-field__label">Ordenar por</span>
+            <select
+              className="panel-field__select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="date">Fecha</option>
+              <option value="amount">Monto</option>
+            </select>
+          </label>
+
+          {/* Dirección */}
+          <div className="panel-field">
+            <span className="panel-field__label">Dirección</span>
+            <div style={{ display: 'flex', height: '36px', border: '1px solid #ddd', borderRadius: '0.5rem', overflow: 'hidden' }}>
+              <button
+                type="button"
+                onClick={() => setSortDir('asc')}
+                style={{
+                  flex: 1,
+                  border: 'none',
+                  borderRight: '1px solid #ddd',
+                  background: sortDir === 'asc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
+                  color: sortDir === 'asc' ? 'var(--text-accent, #1a56db)' : 'inherit',
+                  fontWeight: sortDir === 'asc' ? 500 : 400,
+                  cursor: 'pointer',
+                  padding: '0 12px',
+                  fontSize: '13px',
+                }}
+              >
+                ↑ Asc
+              </button>
+              <button
+                type="button"
+                onClick={() => setSortDir('desc')}
+                style={{
+                  flex: 1,
+                  border: 'none',
+                  background: sortDir === 'desc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
+                  color: sortDir === 'desc' ? 'var(--text-accent, #1a56db)' : 'inherit',
+                  fontWeight: sortDir === 'desc' ? 500 : 400,
+                  cursor: 'pointer',
+                  padding: '0 12px',
+                  fontSize: '13px',
+                }}
+              >
+                ↓ Desc
+              </button>
+            </div>
+          </div>
         </div>
 
         {loading && <p className="panel-empty">Cargando pedidos...</p>}
 
-        {!loading && orders.length === 0 && (
+        {!loading && sortedOrders.length === 0 && (
           <p className="panel-empty">No se encontraron pedidos con los criterios seleccionados.</p>
         )}
 
-        {!loading && orders.length > 0 && (
+        {!loading && sortedOrders.length > 0 && (
           <div style={{ display: 'grid', gap: '1rem' }}>
-            {orders.map((order) => (
+            {sortedOrders.map((order) => (   // <-- sortedOrders en lugar de orders
               <article
                 key={order.id}
                 style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}
@@ -155,18 +217,10 @@ export function LocalOrdersPage() {
                           value={deliveryMinutes}
                           onChange={(e) => setDeliveryMinutes(e.target.value)}
                         />
-                        <button
-                          type="button"
-                          className="panel-btn panel-btn--primary"
-                          onClick={() => handleConfirm(order.id)}
-                        >
+                        <button type="button" className="panel-btn panel-btn--primary" onClick={() => handleConfirm(order.id)}>
                           Confirmar
                         </button>
-                        <button
-                          type="button"
-                          className="panel-btn panel-btn--outline"
-                          onClick={() => setConfirmingId(null)}
-                        >
+                        <button type="button" className="panel-btn panel-btn--outline" onClick={() => setConfirmingId(null)}>
                           Cancelar
                         </button>
                       </>
@@ -178,23 +232,13 @@ export function LocalOrdersPage() {
                           onChange={(e) => setRejectReason(e.target.value)}
                         >
                           {REJECTION_REASONS.map((reason) => (
-                            <option key={reason} value={reason}>
-                              {reason}
-                            </option>
+                            <option key={reason} value={reason}>{reason}</option>
                           ))}
                         </select>
-                        <button
-                          type="button"
-                          className="panel-btn panel-btn--danger"
-                          onClick={() => handleReject(order.id)}
-                        >
+                        <button type="button" className="panel-btn panel-btn--danger" onClick={() => handleReject(order.id)}>
                           Rechazar
                         </button>
-                        <button
-                          type="button"
-                          className="panel-btn panel-btn--outline"
-                          onClick={() => setRejectingId(null)}
-                        >
+                        <button type="button" className="panel-btn panel-btn--outline" onClick={() => setRejectingId(null)}>
                           Cancelar
                         </button>
                       </>
@@ -203,20 +247,14 @@ export function LocalOrdersPage() {
                         <button
                           type="button"
                           className="panel-btn panel-btn--primary"
-                          onClick={() => {
-                            setConfirmingId(order.id)
-                            setRejectingId(null)
-                          }}
+                          onClick={() => { setConfirmingId(order.id); setRejectingId(null) }}
                         >
                           Confirmar pedido
                         </button>
                         <button
                           type="button"
                           className="panel-btn panel-btn--danger"
-                          onClick={() => {
-                            setRejectingId(order.id)
-                            setConfirmingId(null)
-                          }}
+                          onClick={() => { setRejectingId(order.id); setConfirmingId(null) }}
                         >
                           Rechazar pedido
                         </button>
@@ -228,7 +266,6 @@ export function LocalOrdersPage() {
                 {order.status === 'confirmed' && order.deliveryMinutes && (
                   <p>Entrega estimada: {order.deliveryMinutes} minutos</p>
                 )}
-
                 {order.status === 'rejected' && order.rejectionReason && (
                   <p>Motivo: {order.rejectionReason}</p>
                 )}
