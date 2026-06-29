@@ -255,6 +255,7 @@ export function Login() {
         <GoogleIcon />
         CONTINUAR CON GOOGLE
       </button>
+      
       <div className="auth-divider auth-divider--login-accent" aria-hidden="true">
 
         <span className="auth-divider__line" />

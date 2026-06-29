@@ -121,6 +121,10 @@
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
+.auth-btn--google{
+    margin-top: 20px;
+}
+
 .auth-btn:hover {
   transform: translateY(-1px);
 }
