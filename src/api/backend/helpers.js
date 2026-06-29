@@ -194,10 +194,15 @@ export function buildClaimSearchBody(filters = {}) {
   if (filters.localId) body.idLocal = Number(filters.localId)
   if (filters.date) body.fechaReclamo = filters.date
   if (filters.orderStatus) body.estadoPedido = filters.orderStatus
-  if (!body.idCliente && !body.fechaReclamo && !body.estadoPedido && !body.idLocal) {
-    body.estadoPedido = 'Confirmado'
-  }
+  if (filters.claimStatus === 'pending') body.estadoReclamo = 'Pendiente'
+  if (filters.claimStatus === 'resolved') body.estadoReclamo = 'Atendido'
   return body
+}
+
+function mapClaimStatus(status) {
+  if (status === 'pending') return 'Pendiente'
+  if (status === 'resolved') return 'Resuelto'
+  return null
 }
 
 export function buildOrderListParams(filters = {}) {

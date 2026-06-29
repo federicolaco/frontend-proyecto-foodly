@@ -47,24 +47,16 @@ export async function submitClaim(payload) {
 export async function getLocalClaims(filters = {}) {
   if (isApiConfigured()) {
     const body = buildClaimSearchBody({
-      clientId: filters.clientId,
       localId: filters.localId,
+      claimStatus: filters.status,
       date: filters.date,
-      orderStatus: filters.statusFilter,
     })
     const data = await apiFetch('/reclamos/buscar_reclamo', {
       method: 'POST',
       body: JSON.stringify(body),
     })
-    let claims = (data ?? []).map(mapClaim)
-    if (filters.status === 'pending') {
-      claims = claims.filter((claim) => claim.status === 'pending')
-    } else if (filters.status === 'resolved') {
-      claims = claims.filter((claim) => claim.status === 'resolved')
-    }
-    return claims
+    return (data ?? []).map(mapClaim)
   }
-
   return mockGetLocalClaims(getSessionToken(), filters)
 }
 

@@ -420,10 +420,7 @@ export function mapUserListItem(user) {
 export function mapClaim(claim) {
   const cliente = claim.dtPedido?.dtCliente ?? claim.dtPedido?.cliente
   const clientName = [cliente?.nombre, cliente?.apellido].filter(Boolean).join(' ').trim()
-  const isResolved =
-    claim.estado === 'Solucionado' ||
-    claim.status === 'resolved' ||
-    (claim.montoReintegro != null && claim.montoReintegro > 0)
+  const isResolved = claim.estado === 'Atendido' || claim.status === 'resolved'
 
   return {
     id: claim.id,
