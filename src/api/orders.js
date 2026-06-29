@@ -42,7 +42,7 @@ export async function getPopularRestaurants(filters = {}) {
       body: JSON.stringify(buildLocalListBody(filters)),
     })
     if (!data) return []
-    return data.map((local, index) => mapLocalListItem(local, index))
+    return data.map((local) => mapLocalListItem(local))
   }
 
   return mockGetEnabledRestaurants(filters)
@@ -108,3 +108,4 @@ export async function cancelOrder(orderId) {
 
   return mockCancelClientOrder(getSessionToken(), orderId)
 }
+
