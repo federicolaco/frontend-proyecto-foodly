@@ -109,9 +109,6 @@ export function Locales() {
                       <RestaurantLogo name={restaurant.name} logo={restaurant.logo} />
                       <div className="locales-list__meta">
                         <strong>{restaurant.name}</strong>
-                        <p style={{ margin: '0.25rem 0', color: 'var(--gris-intermedio)' }}>
-                          {restaurant.foodType}
-                        </p>
                         <p>
                           <span className={`panel-badge ${restaurant.isOpen ? 'panel-badge--open' : 'panel-badge--closed'}`}>
                             {restaurant.isOpen ? 'Abierto' : 'Cerrado'}
