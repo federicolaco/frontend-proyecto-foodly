@@ -29,13 +29,8 @@ export async function fetchRestaurant(restaurantId) {
   return mockGetRestaurantById(restaurantId)
 }
 
-export function getRestaurantProduct(restaurant, productId) {
-  return restaurant.products.find((product) => product.id === Number(productId)) ?? null
-}
-
-export function buildRestaurantPath(restaurantId, dishId) {
-  const path = `/local/${restaurantId}`
-  return dishId ? `${path}?plato=${dishId}` : path
+export function buildRestaurantPath(restaurantId) {
+  return `/local/${restaurantId}`
 }
 
 export function isRestaurantOpen(restaurant) {

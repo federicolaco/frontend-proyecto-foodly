@@ -63,9 +63,7 @@ export function OrdersSidebar({ restaurants, mostOrdered, loading }) {
                   <button
                     type="button"
                     className="orders-sidebar__dish-btn"
-                    onClick={() =>
-                      navigate(buildRestaurantPath(dish.restaurantId, dish.id))
-                    }
+                    onClick={() => navigate(buildRestaurantPath(dish.restaurantId))}
                   >
                     <img
                       src={dish.image ?? getPlaceholderImage(index)}
