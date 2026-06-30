@@ -1,0 +1,56 @@
+.locales-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.locales-list__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid #eee;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.locales-list__summary {
+  min-width: 0;
+}
+
+.locales-list__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.locales-list__meta {
+  min-width: 0;
+}
+
+.locales-list__logo {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: var(--gris-claro);
+}
+
+.locales-list__logo--image {
+  object-fit: cover;
+}
+
+.locales-list__logo--fallback {
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--celeste);
+}
+
+@media (max-width: 640px) {
+  .locales-list__item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -3,8 +3,28 @@ import { useNavigate } from 'react-router-dom'
 import { getPopularRestaurants } from '../api/orders'
 import { buildRestaurantPath } from '../api/restaurant'
 import { OrdersNavbar } from '../components/OrdersNavbar'
+import './Locales.css'
 import './Orders.css'
 import './Panel.css'
+
+function RestaurantLogo({ name, logo }) {
+  if (logo) {
+    return (
+      <img
+        src={logo}
+        alt=""
+        className="locales-list__logo locales-list__logo--image"
+        aria-hidden="true"
+      />
+    )
+  }
+
+  return (
+    <span className="locales-list__logo locales-list__logo--fallback" aria-hidden="true">
+      {name.charAt(0).toUpperCase()}
+    </span>
+  )
+}
 
 export function Locales() {
   const navigate = useNavigate()
@@ -36,7 +56,10 @@ export function Locales() {
       }
     }, 300)
 
-    return () => { cancelled = true; clearTimeout(timer) }
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
   }, [search, openOnly, minRating, sort])
 
   return (
@@ -64,10 +87,10 @@ export function Locales() {
               </select>
             </label>
             <label className="panel-field" style={{ alignSelf: 'end' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                 <input type="checkbox" checked={openOnly} onChange={(e) => setOpenOnly(e.target.checked)} />
                 Solo abiertos
-              </label>
+              </span>
             </label>
           </div>
         </section>
@@ -78,24 +101,31 @@ export function Locales() {
             <p className="panel-empty">No se encontraron locales que coincidan con su búsqueda.</p>
           )}
           {!loading && restaurants.length > 0 && (
-            <div style={{ display: 'grid', gap: '1rem' }}>
-              {restaurants.map((r) => (
-                <article key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}>
-                  <div>
-                    <strong>{r.name}</strong>
-                    <p style={{ margin: '0.25rem 0', color: 'var(--gris-intermedio)' }}>{r.foodType}</p>
-                    <p>
-                      <span className={`panel-badge ${r.isOpen ? 'panel-badge--open' : 'panel-badge--closed'}`}>
-                        {r.isOpen ? 'Abierto' : 'Cerrado'}
-                      </span>
-                      {' '}· {r.rating?.toFixed(1) ?? '—'} ★
-                    </p>
+            <div className="locales-list">
+              {restaurants.map((restaurant) => (
+                <article key={restaurant.id} className="locales-list__item">
+                  <div className="locales-list__summary">
+                    <div className="locales-list__brand">
+                      <RestaurantLogo name={restaurant.name} logo={restaurant.logo} />
+                      <div className="locales-list__meta">
+                        <strong>{restaurant.name}</strong>
+                        <p style={{ margin: '0.25rem 0', color: 'var(--gris-intermedio)' }}>
+                          {restaurant.foodType}
+                        </p>
+                        <p>
+                          <span className={`panel-badge ${restaurant.isOpen ? 'panel-badge--open' : 'panel-badge--closed'}`}>
+                            {restaurant.isOpen ? 'Abierto' : 'Cerrado'}
+                          </span>
+                          {' · '}{restaurant.rating?.toFixed(1) ?? '—'} {'\u2605'}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   <button
                     type="button"
                     className="panel-btn panel-btn--primary"
-                    disabled={!r.isOpen}
-                    onClick={() => navigate(buildRestaurantPath(r.id))}
+                    disabled={!restaurant.isOpen}
+                    onClick={() => navigate(buildRestaurantPath(restaurant.id))}
                   >
                     Ver menú
                   </button>
