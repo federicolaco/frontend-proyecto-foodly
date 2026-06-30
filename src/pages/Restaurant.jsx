@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getUserDeliveryAddress } from '../api/backend/helpers'
 import { getMyLocalRating, rateLocal } from '../api/ratings'
-import { fetchRestaurant, getRestaurantProduct } from '../api/restaurant'
+import { fetchRestaurant } from '../api/restaurant'
 import { OrdersNavbar } from '../components/OrdersNavbar'
 import { StarRating } from '../components/StarRating'
 import { CartSidebar } from '../components/restaurant/CartSidebar'
@@ -16,7 +16,6 @@ import './Restaurant.css'
 export function Restaurant() {
   const { restaurantId } = useParams()
   const location = useLocation()
-  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { addToCart } = useCart()
 
@@ -81,25 +80,6 @@ export function Restaurant() {
       setRatingFormOpen(true)
     }
   }, [location.state?.openRating, restaurantId])
-
-  useEffect(() => {
-    if (!restaurant) return
-
-    const dishId = searchParams.get('plato')
-    const preselectedProduct = location.state?.preselectedProduct ?? null
-    if (!dishId && !preselectedProduct) return
-
-    const product =
-      (dishId ? getRestaurantProduct(restaurant, dishId) : null) ??
-      (preselectedProduct?.id ? getRestaurantProduct(restaurant, preselectedProduct.id) : null) ??
-      preselectedProduct
-
-    if (product) {
-      addToCart({ id: restaurant.id, name: restaurant.name }, product, 1)
-    }
-
-    navigate(`/local/${restaurantId}`, { replace: true })
-  }, [addToCart, location.state, navigate, restaurant, restaurantId, searchParams])
 
   const handleAddProduct = (product) => {
     if (!restaurant) return
