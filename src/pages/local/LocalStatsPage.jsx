@@ -7,19 +7,98 @@ const DEFAULT_PRESET = 'MES_ACTUAL'
 const EMPTY_RANGE = { fechaDesde: '', fechaHasta: '' }
 const PRESET_OPTIONS = [
   { value: 'HOY', label: 'Hoy' },
-  { value: 'ULTIMOS_7_DIAS', label: 'Ãšltimos 7 dÃ­as' },
-  { value: 'ULTIMOS_30_DIAS', label: 'Ãšltimos 30 dÃ­as' },
+  { value: 'ULTIMOS_7_DIAS', label: 'Últimos 7 días' },
+  { value: 'ULTIMOS_30_DIAS', label: 'Últimos 30 días' },
   { value: 'MES_ACTUAL', label: 'Mes actual' },
   { value: 'MES_ANTERIOR', label: 'Mes anterior' },
 ]
 
 function formatPeriodDate(value) {
-  if (!value) return 'â€”'
+  if (!value) return '—'
 
   const date = new Date(`${value}T00:00:00`)
   if (Number.isNaN(date.getTime())) return value
 
   return date.toLocaleDateString('es-UY')
+}
+
+function formatUnits(value) {
+  const quantity = Number(value ?? 0)
+  return `${quantity} ${quantity === 1 ? 'unidad' : 'unidades'}`
+}
+
+function AnalyticDishRow({ dish, index }) {
+  return (
+    <li
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        gap: '1rem',
+        padding: '0.75rem 0',
+        borderBottom: '1px solid #eee',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+        <img
+          src={dish.image}
+          alt={dish.name}
+          style={{ width: '3rem', height: '3rem', borderRadius: '0.75rem', objectFit: 'cover', flexShrink: 0 }}
+        />
+        <div style={{ minWidth: 0 }}>
+          <strong style={{ color: 'var(--gris-oscuro)' }}>
+            {index + 1}. {dish.name}
+          </strong>
+          <p style={{ margin: '0.25rem 0 0', color: 'var(--gris-intermedio)' }}>
+            {formatUnits(dish.soldQuantity)}
+          </p>
+        </div>
+      </div>
+
+      <strong style={{ color: 'var(--gris-oscuro)', whiteSpace: 'nowrap', alignSelf: 'center' }}>
+        {formatPrice(dish.soldAmount)}
+      </strong>
+    </li>
+  )
+}
+
+function AnalyticDishCard({ dish }) {
+  return (
+    <article
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'minmax(0, 1.5fr) repeat(2, minmax(120px, 0.75fr))',
+        gap: '1rem',
+        alignItems: 'center',
+        border: '1px solid #eee',
+        borderRadius: '0.75rem',
+        padding: '0.9rem 1rem',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
+        <img
+          src={dish.image}
+          alt={dish.name}
+          style={{ width: '3rem', height: '3rem', borderRadius: '0.75rem', objectFit: 'cover', flexShrink: 0 }}
+        />
+        <div style={{ minWidth: 0 }}>
+          <strong style={{ color: 'var(--gris-oscuro)' }}>{dish.name}</strong>
+          <p style={{ margin: '0.25rem 0 0', color: 'var(--gris-intermedio)' }}>
+            Plato vendido en el período
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <p className="panel-field__label">Cantidad vendida</p>
+        <strong style={{ color: 'var(--gris-oscuro)' }}>{formatUnits(dish.soldQuantity)}</strong>
+      </div>
+
+      <div>
+        <p className="panel-field__label">Monto vendido</p>
+        <strong style={{ color: 'var(--gris-oscuro)' }}>{formatPrice(dish.soldAmount)}</strong>
+      </div>
+    </article>
+  )
 }
 
 export function LocalStats() {
@@ -37,7 +116,8 @@ export function LocalStats() {
       const data = await getLocalStats(filters)
       setStats(data)
     } catch (err) {
-      setError(err.message ?? 'No pudimos cargar las estadÃ­sticas del local.')
+      setStats(null)
+      setError(err.message ?? 'No pudimos cargar las estadísticas del local.')
     } finally {
       setLoading(false)
     }
@@ -67,7 +147,11 @@ export function LocalStats() {
     loadStats({ fechaDesde, fechaHasta })
   }
 
-  if (loading && !stats) return <p className="panel-empty">Cargando estadÃ­sticas...</p>
+  if (loading && !stats) return <p className="panel-empty">Cargando estadísticas...</p>
+
+  const topDishes = stats?.topDishes ?? []
+  const salesByDish = stats?.salesByDish ?? []
+  const totalUnitsSold = salesByDish.reduce((sum, dish) => sum + Number(dish.soldQuantity ?? 0), 0)
 
   return (
     <>
@@ -77,7 +161,7 @@ export function LocalStats() {
         <div className="panel-form" style={{ marginBottom: '1.5rem' }}>
           <div className="panel-form__row panel-form__row--2">
             <label className="panel-field">
-              <span className="panel-field__label">Preset rÃ¡pido</span>
+              <span className="panel-field__label">Preset rápido</span>
               <select
                 className="panel-field__select"
                 value={selectedPreset}
@@ -157,41 +241,55 @@ export function LocalStats() {
           <>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
               <div style={{ background: '#f8f9fa', borderRadius: '0.75rem', padding: '1rem' }}>
-                <p className="panel-field__label">Ventas del perÃ­odo</p>
+                <p className="panel-field__label">Ventas del período</p>
                 <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--gris-oscuro)' }}>
                   {formatPrice(stats.confirmedSales ?? 0)}
                 </p>
               </div>
               <div style={{ background: '#f8f9fa', borderRadius: '0.75rem', padding: '1rem' }}>
-                <p className="panel-field__label">PerÃ­odo aplicado</p>
+                <p className="panel-field__label">Período aplicado</p>
                 <p style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--gris-oscuro)' }}>
                   {formatPeriodDate(stats.fromDate)} - {formatPeriodDate(stats.untilDate)}
                 </p>
               </div>
               <div style={{ background: '#f8f9fa', borderRadius: '0.75rem', padding: '1rem' }}>
-                <p className="panel-field__label">Platos destacados</p>
+                <p className="panel-field__label">Unidades vendidas</p>
                 <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--gris-oscuro)' }}>
-                  {stats.topDishes?.length ?? 0}
+                  {totalUnitsSold}
+                </p>
+              </div>
+              <div style={{ background: '#f8f9fa', borderRadius: '0.75rem', padding: '1rem' }}>
+                <p className="panel-field__label">Platos con ventas</p>
+                <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--gris-oscuro)' }}>
+                  {salesByDish.length}
                 </p>
               </div>
             </div>
 
             <p style={{ marginBottom: '1rem', color: 'var(--gris-intermedio)' }}>
-              Estas mÃ©tricas consideran Ãºnicamente pedidos en estado confirmado.
+              Estas métricas consideran únicamente pedidos en estado confirmado.
             </p>
 
-            <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Platos mÃ¡s pedidos</h2>
-            {stats.topDishes?.length === 0 ? (
-              <p className="panel-empty">No hay informaciÃ³n disponible para el perÃ­odo seleccionado.</p>
+            <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Platos más pedidos</h2>
+            {topDishes.length === 0 ? (
+              <p className="panel-empty">No hay información disponible para el período seleccionado.</p>
             ) : (
-              <ul style={{ display: 'grid', gap: '0.5rem', padding: 0, listStyle: 'none' }}>
-                {stats.topDishes.map((dish, index) => (
-                  <li key={dish.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #eee' }}>
-                    <span>{index + 1}. {dish.name}</span>
-                    <span>{formatPrice(dish.price)}</span>
-                  </li>
+              <ul style={{ display: 'grid', gap: '0.75rem', padding: 0, listStyle: 'none', marginBottom: '1.5rem' }}>
+                {topDishes.map((dish, index) => (
+                  <AnalyticDishRow key={dish.id} dish={dish} index={index} />
                 ))}
               </ul>
+            )}
+
+            <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Detalle de ventas por plato</h2>
+            {salesByDish.length === 0 ? (
+              <p className="panel-empty">No hay detalle disponible para el período seleccionado.</p>
+            ) : (
+              <div style={{ display: 'grid', gap: '0.75rem' }}>
+                {salesByDish.map((dish) => (
+                  <AnalyticDishCard key={`detail-${dish.id}`} dish={dish} />
+                ))}
+              </div>
             )}
           </>
         )}
