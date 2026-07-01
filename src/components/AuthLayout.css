@@ -6,21 +6,14 @@
 
 .auth-layout__visual {
   display: none;
-  flex-direction: column;
   background: var(--celeste);
-  align-items: stretch;
-  justify-content: flex-end;
+  background-image: var(--auth-visual-image);
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: clamp(560px, 62vw, 760px) auto;
   padding: 0;
   overflow: hidden;
-}
-
-.auth-layout__illustration {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 92vh;
-  object-fit: contain;
-  object-position: bottom center;
+  position: relative;
 }
 
 .auth-layout__panel {
@@ -61,8 +54,6 @@
 
   .auth-layout__visual {
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
     position: sticky;
     top: 0;
     height: 100vh;

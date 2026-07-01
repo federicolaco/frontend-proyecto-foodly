@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom'
-import loginRegisterVisual from '../../img/login-register.png'
+import authDeliveryPanel from '../../img/auth-delivery-panel.png'
 import './AuthLayout.css'
 
 export function AuthLayout({ children }) {
   return (
     <div className="auth-layout">
-      <aside className="auth-layout__visual" aria-hidden="true">
-        <img src={loginRegisterVisual} alt="" className="auth-layout__illustration" />
-      </aside>
+      <aside
+        className="auth-layout__visual"
+        aria-hidden="true"
+        style={{ '--auth-visual-image': `url(${authDeliveryPanel})` }}
+      />
 
       <div className="auth-layout__panel">
         <Link to="/" className="auth-layout__logo">
