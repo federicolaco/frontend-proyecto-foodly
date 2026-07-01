@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { deletePromotion, getLocalDishes, getLocalPromotions, savePromotion } from '../../api/localPanel'
+import { formatPrice } from '../../lib/cart'
 import '../Panel.css'
 
 const EMPTY_FORM = {
@@ -19,6 +20,39 @@ export function LocalPromotions() {
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
   const [saving, setSaving] = useState(false)
+
+  const selectedDish = dishes.find((dish) => String(dish.id) === String(form.dishId))
+  const discount = Number(form.discountPercent)
+  const hasValidDiscount = Number.isFinite(discount) && discount >= 1 && discount <= 100
+  const discountedPrice = selectedDish && hasValidDiscount
+    ? Math.round(selectedDish.price * (1 - discount / 100))
+    : null
+  const savings = selectedDish && discountedPrice != null
+    ? selectedDish.price - discountedPrice
+    : null
+
+  const getPromotionPricing = (promo) => {
+    const dish = dishes.find((item) => String(item.id) === String(promo.dishId))
+    if (!dish) {
+      return {
+        dishName: `Plato #${promo.dishId}`,
+        currentPrice: null,
+        finalPrice: null,
+        savings: null,
+      }
+    }
+
+    const promoDiscount = Number(promo.discountPercent)
+    const currentPrice = Number(dish.price ?? 0)
+    const finalPrice = Math.round(currentPrice * (1 - promoDiscount / 100))
+
+    return {
+      dishName: dish.name,
+      currentPrice,
+      finalPrice,
+      savings: currentPrice - finalPrice,
+    }
+  }
 
   const load = async () => {
     setLoading(true)
@@ -107,6 +141,34 @@ export function LocalPromotions() {
             <span className="panel-field__label">Descuento (%)</span>
             <input type="number" min="1" max="100" className="panel-field__input" value={form.discountPercent} onChange={(e) => setForm({ ...form, discountPercent: e.target.value })} required />
           </label>
+          {selectedDish && (
+            <div
+              className="panel-field"
+              style={{
+                gridColumn: '1 / -1',
+                padding: '1rem',
+                border: '1px solid #dbeaf5',
+                borderRadius: '0.75rem',
+                background: '#f7fbff',
+              }}
+            >
+              <span className="panel-field__label">Vista previa del precio</span>
+              <div style={{ display: 'grid', gap: '0.35rem', color: 'var(--gris-oscuro)' }}>
+                <strong>{selectedDish.name}</strong>
+                <span>Precio actual: {formatPrice(selectedDish.price)}</span>
+                {hasValidDiscount ? (
+                  <>
+                    <span>Precio con descuento: {formatPrice(discountedPrice)}</span>
+                    <span>Ahorrás: {formatPrice(savings)}</span>
+                  </>
+                ) : (
+                  <span style={{ color: 'var(--gris-intermedio)' }}>
+                    Ingresá un descuento válido para calcular el precio final.
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
           <label className="panel-field">
             <span className="panel-field__label">Inicio</span>
             <input type="date" className="panel-field__input" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} required />
@@ -132,17 +194,34 @@ export function LocalPromotions() {
         {!loading && promotions.length === 0 && <p className="panel-empty">No hay promociones registradas.</p>}
         {!loading && promotions.length > 0 && (
           <div style={{ display: 'grid', gap: '0.75rem' }}>
-            {promotions.map((promo) => (
-              <article key={promo.id} style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}>
-                <strong>{promo.title}</strong>
-                <p>Descuento: {promo.discountPercent}% · Plato #{promo.dishId}</p>
-                <p>Vigencia: {promo.startDate} — {promo.endDate}</p>
-                <div className="panel-actions" style={{ marginTop: '0.5rem' }}>
-                  <button type="button" className="panel-btn panel-btn--outline" onClick={() => setForm({ ...promo, dishId: String(promo.dishId) })}>Editar</button>
-                  <button type="button" className="panel-btn panel-btn--danger" onClick={() => handleDelete(promo.id)}>Eliminar</button>
-                </div>
-              </article>
-            ))}
+            {promotions.map((promo) => {
+              const pricing = getPromotionPricing(promo)
+
+              return (
+                <article key={promo.id} style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}>
+                  <strong>{promo.title}</strong>
+                  <p style={{ marginTop: '0.35rem' }}>
+                    Descuento: {promo.discountPercent}% · {pricing.dishName}
+                  </p>
+                  {pricing.currentPrice != null ? (
+                    <div style={{ display: 'grid', gap: '0.2rem', color: 'var(--gris-oscuro)' }}>
+                      <span>Precio actual: {formatPrice(pricing.currentPrice)}</span>
+                      <span>Precio promocional: {formatPrice(pricing.finalPrice)}</span>
+                      <span>Ahorrás: {formatPrice(pricing.savings)}</span>
+                    </div>
+                  ) : (
+                    <p style={{ color: 'var(--gris-intermedio)' }}>
+                      No se pudo resolver el precio actual del plato.
+                    </p>
+                  )}
+                  <p style={{ marginTop: '0.35rem' }}>Vigencia: {promo.startDate} — {promo.endDate}</p>
+                  <div className="panel-actions" style={{ marginTop: '0.5rem' }}>
+                    <button type="button" className="panel-btn panel-btn--outline" onClick={() => setForm({ ...promo, dishId: String(promo.dishId) })}>Editar</button>
+                    <button type="button" className="panel-btn panel-btn--danger" onClick={() => handleDelete(promo.id)}>Eliminar</button>
+                  </div>
+                </article>
+              )
+            })}
           </div>
         )}
       </section>
