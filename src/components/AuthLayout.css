@@ -8,9 +8,9 @@
   display: none;
   background: var(--celeste);
   background-image: var(--auth-visual-image);
-  background-position: center bottom;
+  background-position: center center;
   background-repeat: no-repeat;
-  background-size: clamp(560px, 62vw, 760px) auto;
+  background-size: cover;
   padding: 0;
   overflow: hidden;
   position: relative;
