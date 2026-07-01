@@ -8,6 +8,7 @@ const LOCAL_STATS_LIMIT = 5
 const STATS_AMBIGUOUS_MESSAGE = 'Debe enviar un preset o un rango libre, pero no ambos.'
 const STATS_INCOMPLETE_RANGE_MESSAGE = 'Para usar rango libre debe indicar fechaDesde y fechaHasta.'
 const STATS_INVALID_RANGE_MESSAGE = 'La fechaDesde no puede ser posterior a fechaHasta.'
+const STATS_EMPTY_MESSAGE = 'No hay ventas para el período seleccionado.'
 
 function requireUser(token) {
   const user = mockGetUserFromToken(token)
@@ -509,30 +510,47 @@ export function mockGetLocalStats(token, filters = {}) {
       })(),
   )
 
-  const dishCounts = {}
+  const dishStats = {}
   orders.forEach((order) => {
     order.items?.forEach((item) => {
-      dishCounts[item.id] = (dishCounts[item.id] ?? 0) + item.quantity
+      const dishId = Number(item.id)
+      if (!dishId) return
+
+      const dish = db.dishes.find((entry) => entry.id === dishId)
+      const quantity = Number(item.quantity ?? 0)
+      const amount = Number(item.price ?? 0) * quantity
+
+      if (!dishStats[dishId]) {
+        dishStats[dishId] = {
+          id: dishId,
+          nombre: dish?.name ?? item.name ?? `Plato #${dishId}`,
+          imagenes: dish?.image ? [dish.image] : [],
+          cantidadVendida: 0,
+          montoVendido: 0,
+        }
+      }
+
+      dishStats[dishId].cantidadVendida += quantity
+      dishStats[dishId].montoVendido += amount
     })
   })
 
-  const topDishes = Object.entries(dishCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, LOCAL_STATS_LIMIT)
-    .map(([dishId]) => db.dishes.find((d) => d.id === Number(dishId)))
-    .filter(Boolean)
-
   const ventasConfirmadas = orders.reduce((sum, o) => sum + (o.total ?? 0), 0)
+  const ventasPorPlato = Object.values(dishStats).sort((a, b) => {
+    if (b.cantidadVendida !== a.cantidadVendida) return b.cantidadVendida - a.cantidadVendida
+    if (b.montoVendido !== a.montoVendido) return b.montoVendido - a.montoVendido
+    return a.id - b.id
+  })
+
+  if (ventasPorPlato.length === 0) {
+    throw new MockApiError(400, STATS_EMPTY_MESSAGE)
+  }
 
   return mockDelay({
     fechaDesde,
     fechaHasta,
     ventasConfirmadas,
-    platosMasPedido: topDishes.map((d) => ({
-      id: d.id,
-      nombre: d.name,
-      precio: d.price,
-      imagenes: d.image ? [d.image] : [],
-    })),
+    platosMasPedido: ventasPorPlato.slice(0, LOCAL_STATS_LIMIT),
+    ventasPorPlato,
   })
 }

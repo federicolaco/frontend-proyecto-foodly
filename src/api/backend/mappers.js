@@ -470,16 +470,20 @@ export function mapLocalClient(client) {
 }
 
 export function mapLocalStats(data) {
+  const mapAnalyticDish = (plato, index) => ({
+    id: plato.id,
+    name: plato.nombre ?? plato.name ?? 'Plato',
+    image: plato.imagenes?.[0] ?? plato.image ?? placeholder(index),
+    soldQuantity: Number(plato.cantidadVendida ?? 0),
+    soldAmount: Number(plato.montoVendido ?? 0),
+  })
+
   return {
     fromDate: data.fechaDesde ?? null,
     untilDate: data.fechaHasta ?? null,
     confirmedSales: data.ventasConfirmadas ?? 0,
-    topDishes: (data.platosMasPedido ?? []).map((plato, index) => ({
-      id: plato.id,
-      name: plato.nombre ?? plato.name ?? 'Plato',
-      price: plato.precioFinal ?? plato.precio ?? plato.price ?? 0,
-      image: plato.imagenes?.[0] ?? plato.image ?? placeholder(index),
-    })),
+    topDishes: (data.platosMasPedido ?? []).map(mapAnalyticDish),
+    salesByDish: (data.ventasPorPlato ?? []).map(mapAnalyticDish),
   }
 }
 
