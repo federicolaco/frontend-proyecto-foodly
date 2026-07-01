@@ -38,7 +38,6 @@ export function LocalPromotions() {
         dishName: `Plato #${promo.dishId}`,
         currentPrice: null,
         finalPrice: null,
-        savings: null,
       }
     }
 
@@ -50,7 +49,6 @@ export function LocalPromotions() {
       dishName: dish.name,
       currentPrice,
       finalPrice,
-      savings: currentPrice - finalPrice,
     }
   }
 
@@ -207,7 +205,6 @@ export function LocalPromotions() {
                     <div style={{ display: 'grid', gap: '0.2rem', color: 'var(--gris-oscuro)' }}>
                       <span>Precio actual: {formatPrice(pricing.currentPrice)}</span>
                       <span>Precio promocional: {formatPrice(pricing.finalPrice)}</span>
-                      <span>Ahorrás: {formatPrice(pricing.savings)}</span>
                     </div>
                   ) : (
                     <p style={{ color: 'var(--gris-intermedio)' }}>
