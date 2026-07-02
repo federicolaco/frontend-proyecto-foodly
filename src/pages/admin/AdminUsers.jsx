@@ -1,10 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { getUsers, setUserBlocked } from '../../api/admin'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
 import '../Panel.css'
 
 const ROLE_LABELS = { cliente: 'Cliente', local: 'Local' }
 const STATUS_LABELS = { active: 'Activo', blocked: 'Bloqueado', pending: 'Pendiente' }
+
+const SORT_OPTIONS = [
+  { value: 'name', label: 'Nombre' },
+  { value: 'rating', label: 'Calificación' },
+]
 
 export function AdminUsers() {
   const [users, setUsers] = useState([])
@@ -15,6 +20,8 @@ export function AdminUsers() {
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
   const [processingId, setProcessingId] = useState(null)
+  const [sortBy, setSortBy] = useState('name')
+  const [sortDir, setSortDir] = useState('asc')
 
   const loadUsers = async () => {
     setLoading(true)
@@ -37,6 +44,30 @@ export function AdminUsers() {
     const timer = setTimeout(loadUsers, 300)
     return () => clearTimeout(timer)
   }, [search, roleFilter, statusFilter])
+
+  const sortedUsers = useMemo(() => {
+    const list = [...users]
+    const dir = sortDir === 'asc' ? 1 : -1
+
+    list.sort((a, b) => {
+      if (sortBy === 'rating') {
+        // Usuarios sin calificación quedan siempre al final, sin importar la dirección
+        const aHasRating = typeof a.rating === 'number'
+        const bHasRating = typeof b.rating === 'number'
+        if (!aHasRating && !bHasRating) return 0
+        if (!aHasRating) return 1
+        if (!bHasRating) return -1
+        return (a.rating - b.rating) * dir
+      }
+
+      // Orden alfabético por nombre, insensible a mayúsculas/acentos
+      return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }) * dir
+    })
+
+    return list
+  }, [users, sortBy, sortDir])
+
+  const toggleSortDir = () => setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'))
 
   const handleToggleBlock = async (user) => {
     const block = user.status !== 'blocked'
@@ -88,14 +119,36 @@ export function AdminUsers() {
                 <option value="blocked">Bloqueado</option>
               </select>
             </label>
+            <label className="panel-field">
+              <span className="panel-field__label">Ordenar por</span>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <select
+                  className="panel-field__select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="panel-btn"
+                  onClick={toggleSortDir}
+                  title={sortDir === 'asc' ? 'Ascendente' : 'Descendente'}
+                >
+                  {sortDir === 'asc' ? '↑' : '↓'}
+                </button>
+              </div>
+            </label>
           </div>
 
           {loading && <p className="panel-empty">Cargando usuarios...</p>}
-          {!loading && users.length === 0 && (
+          {!loading && sortedUsers.length === 0 && (
             <p className="panel-empty">No se encontraron usuarios que coincidan con los criterios seleccionados.</p>
           )}
 
-          {!loading && users.length > 0 && (
+          {!loading && sortedUsers.length > 0 && (
             <div style={{ overflowX: 'auto' }}>
               <table className="panel-table">
                 <thead>
@@ -109,7 +162,7 @@ export function AdminUsers() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
+                  {sortedUsers.map((user) => (
                     <tr key={user.id}>
                       <td>{user.name}</td>
                       <td>{user.email}</td>
