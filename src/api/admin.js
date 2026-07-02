@@ -63,10 +63,9 @@ export async function setUserBlocked(userId, blocked) {
   if (isApiConfigured()) {
     await apiFetch('/admins/cuentas-usuario/resolver', {
       method: 'POST',
-      body: JSON.stringify({ id: Number(userId), activo: !blocked }),
+      body: JSON.stringify({ id: Number(userId), estado: blocked ? 'Bloqueado' : 'Activo' }),
     })
     return { id: Number(userId), status: blocked ? 'blocked' : 'active' }
   }
-
   return mockSetUserBlocked(getSessionToken(), userId, blocked)
 }
