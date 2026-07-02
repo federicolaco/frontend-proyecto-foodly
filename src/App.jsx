@@ -21,6 +21,7 @@ import { Orders } from './pages/Orders'
 import { Register } from './pages/Register'
 import { RegisterLocal } from './pages/RegisterLocal'
 import { ResetPassword } from './pages/ResetPassword'
+import { ConfirmEmailChange } from './pages/ConfirmEmailChange'
 import { Restaurant } from './pages/Restaurant'
 import { ROLES } from './lib/roles'
 import { ActivarCuenta } from './pages/ActivarCuenta'
@@ -40,6 +41,7 @@ function App() {
         <Route path="/registrarse" element={<Register />} />
         <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
         <Route path="/restablecer-contrasena" element={<ResetPassword />} />
+        <Route path="/confirmar-cambio-correo" element={<ConfirmEmailChange />} />
         <Route path="/activar" element={<ActivarCuenta />} />
 
         <Route

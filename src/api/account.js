@@ -3,10 +3,12 @@ import { apiFetch, apiFetchMultipart, apiFetchSafe, isApiConfigured } from './cl
 import { formatAddress, normalizeAddress } from './backend/helpers'
 import { mapRatingSummary } from './backend/mappers'
 import {
+  mockConfirmEmailChange,
   mockConfirmPasswordChange,
   mockDeleteAccount,
   mockRequestPasswordRecovery,
   mockResetPassword,
+  mockStartEmailChange,
   mockStartPasswordChange,
   mockUpdateProfile,
   mockVerifyPasswordCode,
@@ -37,7 +39,6 @@ export async function updateProfile(payload) {
   if (isApiConfigured()) {
     const formData = new FormData()
 
-    if (payload.email) formData.append('email', payload.email.trim())
     if (user.role === 'cliente') {
       if (payload.firstName) formData.append('nombre', payload.firstName.trim())
       if (payload.lastName) formData.append('apellido', payload.lastName.trim())
@@ -66,7 +67,6 @@ export async function updateProfile(payload) {
     ([payload.firstName, payload.lastName].filter(Boolean).join(' ') || user.name)
   const updated = {
     ...user,
-    email: payload.email ?? user.email,
     name: displayName,
     firstName: payload.firstName ?? user.firstName,
     lastName: payload.lastName ?? user.lastName,
@@ -77,6 +77,30 @@ export async function updateProfile(payload) {
   }
   setStoredUser(updated)
   return updated
+}
+
+export async function startEmailChange(nuevoCorreo) {
+  if (isApiConfigured()) {
+    await apiFetch('/usuarios/cambiar-correo/iniciar', {
+      method: 'POST',
+      body: JSON.stringify({ nuevoCorreo: nuevoCorreo.trim() }),
+    })
+    return { message: 'Te enviamos un enlace de confirmación a tu correo actual. Revisalo para completar el cambio.' }
+  }
+
+  return mockStartEmailChange(getSessionToken(), nuevoCorreo)
+}
+
+export async function confirmEmailChange(token) {
+  if (isApiConfigured()) {
+    await apiFetch('/usuarios/cambiar-correo/confirmar', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    })
+    return { message: 'Correo actualizado correctamente. Iniciá sesión nuevamente.' }
+  }
+
+  return mockConfirmEmailChange(token)
 }
 
 export async function startPasswordChange(currentPassword) {

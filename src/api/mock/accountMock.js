@@ -35,16 +35,6 @@ export function mockUpdateProfile(token, payload) {
     if (index < 0) throw new MockApiError(404, 'Usuario no encontrado')
 
     const user = db.users[index]
-    if (payload.email) {
-      const normalizedEmail = payload.email.trim().toLowerCase()
-      const emailInUse = db.users.some((entry) => (
-        entry.id !== sessionUser.id && entry.email.toLowerCase() === normalizedEmail
-      ))
-      if (emailInUse) {
-        throw new MockApiError(409, 'El correo electrÃ³nico ingresado ya estÃ¡ asociado a otra cuenta.')
-      }
-      user.email = normalizedEmail
-    }
     if (payload.firstName) user.firstName = payload.firstName.trim()
     if (payload.lastName) user.lastName = payload.lastName.trim()
     if (payload.name) user.name = payload.name.trim()
@@ -169,6 +159,70 @@ export function mockResetPassword(token, newPassword) {
   delete recoveries[token]
   localStorage.setItem('foodly_mock_recoveries', JSON.stringify(recoveries))
   return mockDelay({ message: 'Contraseña restablecida. Ya puede iniciar sesión.' })
+}
+
+const EMAIL_CHANGES_KEY = 'foodly_mock_email_changes'
+
+function getEmailChanges() {
+  try {
+    return JSON.parse(localStorage.getItem(EMAIL_CHANGES_KEY) ?? '{}')
+  } catch {
+    return {}
+  }
+}
+
+function saveEmailChanges(changes) {
+  localStorage.setItem(EMAIL_CHANGES_KEY, JSON.stringify(changes))
+}
+
+export function mockStartEmailChange(token, nuevoCorreo) {
+  ensureMockDb()
+  const user = requireUser(token)
+  const normalizedEmail = nuevoCorreo.trim().toLowerCase()
+
+  if (normalizedEmail === user.email.toLowerCase()) {
+    throw new MockApiError(400, 'El nuevo correo debe ser distinto al actual.')
+  }
+
+  const db = getDb()
+  const emailInUse = db.users.some((entry) => (
+    entry.id !== user.id && entry.email.toLowerCase() === normalizedEmail
+  ))
+  if (emailInUse) {
+    throw new MockApiError(409, 'El correo ya está asociado a otra cuenta.')
+  }
+
+  const mockToken = `mock_email_change_${user.id}_${Date.now()}`
+  const changes = getEmailChanges()
+  changes[mockToken] = { userId: user.id, nuevoCorreo: normalizedEmail, expiresAt: Date.now() + 30 * 60 * 1000 }
+  saveEmailChanges(changes)
+
+  return mockDelay({
+    message: `Te enviamos un enlace de confirmación a ${user.email} (mock, no se envía correo real).`,
+    mockToken,
+  })
+}
+
+export function mockConfirmEmailChange(mockToken) {
+  ensureMockDb()
+  const changes = getEmailChanges()
+  const entry = changes[mockToken]
+  if (!entry || Date.now() > entry.expiresAt) {
+    throw new MockApiError(400, 'El enlace de confirmación no es válido o ha expirado.')
+  }
+
+  const updated = updateDb((db) => {
+    const index = db.users.findIndex((u) => u.id === entry.userId)
+    if (index < 0) throw new MockApiError(404, 'Usuario no encontrado')
+    db.users[index].email = entry.nuevoCorreo
+    return sanitizeUser(db.users[index])
+  })
+
+  delete changes[mockToken]
+  saveEmailChanges(changes)
+
+  if (getSessionToken()) setStoredUser(updated)
+  return mockDelay({ message: 'Correo actualizado correctamente.' })
 }
 
 export function mockDeleteAccount(token) {

@@ -4,6 +4,7 @@ import {
   confirmPasswordChange,
   deleteAccount,
   getMyClientRating,
+  startEmailChange,
   startPasswordChange,
   updateProfile,
   verifyPasswordChangeCode,
@@ -74,6 +75,10 @@ export function AccountSettings() {
   const [message, setMessage] = useState(null)
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState(user.email ?? '')
+  const [newEmail, setNewEmail] = useState('')
+  const [emailChangeLoading, setEmailChangeLoading] = useState(false)
+  const [emailChangeMessage, setEmailChangeMessage] = useState(null)
+  const [emailChangeError, setEmailChangeError] = useState(null)
   const [photoFile, setPhotoFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(user.photo ?? null)
 
@@ -123,7 +128,6 @@ export function AccountSettings() {
     setMessage(null)
     try {
       await updateProfile({
-        email,
         firstName,
         lastName,
         name: localName,
@@ -137,6 +141,22 @@ export function AccountSettings() {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleStartEmailChange = async (event) => {
+    event.preventDefault()
+    setEmailChangeLoading(true)
+    setEmailChangeError(null)
+    setEmailChangeMessage(null)
+    try {
+      const res = await startEmailChange(newEmail)
+      setEmailChangeMessage(res.message)
+      setNewEmail('')
+    } catch (err) {
+      setEmailChangeError(err.message)
+    } finally {
+      setEmailChangeLoading(false)
     }
   }
 
@@ -270,8 +290,8 @@ export function AccountSettings() {
                       type="email"
                       className="panel-field__input"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
+                      disabled
+                      readOnly
                     />
                   </label>
                   {user.role === ROLES.CLIENT && (
@@ -324,6 +344,31 @@ export function AccountSettings() {
               </div>
               <button type="submit" className="panel-btn panel-btn--primary account-profile-layout__submit" disabled={loading}>
                 Guardar cambios
+              </button>
+            </form>
+          )}
+
+          {tab === 'profile' && (
+            <form className="panel-form" onSubmit={handleStartEmailChange} style={{ marginTop: '2rem' }}>
+              <h3 className="panel-page__subtitle">Cambiar correo electr&oacute;nico</h3>
+              <p className="panel-page__subtitle">
+                Por seguridad, te enviaremos un enlace de confirmaci&oacute;n a tu correo actual
+                (<strong>{user.email}</strong>). El correo no cambia hasta que confirmes desde ese enlace.
+              </p>
+              {emailChangeError && <p className="auth-page__error" role="alert">{emailChangeError}</p>}
+              {emailChangeMessage && <p className="panel-page__subtitle">{emailChangeMessage}</p>}
+              <label className="panel-field">
+                <span className="panel-field__label">Nuevo correo electr&oacute;nico</span>
+                <input
+                  type="email"
+                  className="panel-field__input"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  required
+                />
+              </label>
+              <button type="submit" className="panel-btn panel-btn--outline" disabled={emailChangeLoading || !newEmail}>
+                Enviar enlace de confirmaci&oacute;n
               </button>
             </form>
           )}
