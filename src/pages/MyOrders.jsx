@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getClaimForOrder, submitClaim } from '../api/claims'
 import { cancelOrder, getMyOrders } from '../api/orders'
@@ -13,6 +13,15 @@ const COMPENSATION_TYPES = [
   { id: 'compensacion', label: 'Otra compensación' },
 ]
 
+const SORT_OPTIONS = [
+  { id: 'date_desc', label: 'Fecha (más reciente primero)' },
+  { id: 'date_asc', label: 'Fecha (más antigua primero)' },
+  { id: 'price_desc', label: 'Precio (mayor a menor)' },
+  { id: 'price_asc', label: 'Precio (menor a mayor)' },
+  { id: 'restaurant_asc', label: 'Restaurante (A-Z)' },
+  { id: 'restaurant_desc', label: 'Restaurante (Z-A)' },
+]
+
 function getOrderBadgeVariant(status) {
   if (status === 'pending') return 'pending'
   if (status === 'confirmed') return 'confirmed'
@@ -20,10 +29,44 @@ function getOrderBadgeVariant(status) {
   return 'closed'
 }
 
+function sortOrders(orders, sortBy) {
+  const sorted = [...orders]
+
+  switch (sortBy) {
+    case 'date_asc':
+      sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      break
+    case 'date_desc':
+      sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      break
+    case 'price_asc':
+      sorted.sort((a, b) => a.total - b.total)
+      break
+    case 'price_desc':
+      sorted.sort((a, b) => b.total - a.total)
+      break
+    case 'restaurant_asc':
+      sorted.sort((a, b) =>
+        (a.restaurantName ?? '').localeCompare(b.restaurantName ?? '', 'es', { sensitivity: 'base' }),
+      )
+      break
+    case 'restaurant_desc':
+      sorted.sort((a, b) =>
+        (b.restaurantName ?? '').localeCompare(a.restaurantName ?? '', 'es', { sensitivity: 'base' }),
+      )
+      break
+    default:
+      break
+  }
+
+  return sorted
+}
+
 export function MyOrders() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
   const [statusFilter, setStatusFilter] = useState('')
+  const [sortBy, setSortBy] = useState('date_desc')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
@@ -31,6 +74,7 @@ export function MyOrders() {
   const [claimReason, setClaimReason] = useState('')
   const [claimCompensation, setClaimCompensation] = useState(COMPENSATION_TYPES[0].id)
   const [orderMeta, setOrderMeta] = useState({})
+  const [hasAnyOrders, setHasAnyOrders] = useState(true)
 
   const loadOrders = async () => {
     setLoading(true)
@@ -39,6 +83,12 @@ export function MyOrders() {
     try {
       const data = await getMyOrders(statusFilter ? { status: statusFilter } : {})
       setOrders(data)
+
+      // Solo cuando no hay filtro activo sabemos con certeza si el usuario
+      // tiene pedidos en total o no.
+      if (!statusFilter) {
+        setHasAnyOrders(data.length > 0)
+      }
 
       const meta = {}
       await Promise.all(
@@ -69,6 +119,8 @@ export function MyOrders() {
   useEffect(() => {
     loadOrders()
   }, [statusFilter])
+
+  const sortedOrders = useMemo(() => sortOrders(orders, sortBy), [orders, sortBy])
 
   const handleCancel = async (orderId) => {
     if (!window.confirm('¿Confirma la cancelación del pedido?')) return
@@ -116,6 +168,10 @@ export function MyOrders() {
     })
   }
 
+  const emptyMessage = statusFilter
+    ? 'No se encontraron pedidos que coincidan con los criterios seleccionados.'
+    : 'Aún no ha realizado ningún pedido.'
+
   return (
     <div className="panel-page">
       <OrdersNavbar />
@@ -127,36 +183,58 @@ export function MyOrders() {
         {message && <p className="panel-page__success">{message}</p>}
 
         <section className="panel-card">
-          <label className="panel-field" style={{ maxWidth: '220px', marginBottom: '1rem' }}>
-            <span className="panel-field__label">Filtrar por estado</span>
-            <select
-              className="panel-field__select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">Todos</option>
-              <option value="pending">Pendiente</option>
-              <option value="confirmed">Confirmado</option>
-              <option value="delivered">Entregado</option>
-              <option value="rejected">Rechazado</option>
-              <option value="cancelled">Cancelado</option>
-            </select>
-          </label>
+          <div className="panel-actions" style={{ gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            <label className="panel-field" style={{ maxWidth: '220px' }}>
+              <span className="panel-field__label">Filtrar por estado</span>
+              <select
+                className="panel-field__select"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">Todos</option>
+                <option value="pending">Pendiente</option>
+                <option value="confirmed">Confirmado</option>
+                <option value="delivered">Entregado</option>
+                <option value="rejected">Rechazado</option>
+                <option value="cancelled">Cancelado</option>
+              </select>
+            </label>
+
+            <label className="panel-field" style={{ maxWidth: '260px' }}>
+              <span className="panel-field__label">Ordenar por</span>
+              <select
+                className="panel-field__select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                {SORT_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
 
           {loading && <p className="panel-empty">Cargando pedidos...</p>}
 
-          {!loading && orders.length === 0 && (
+          {!loading && sortedOrders.length === 0 && (
             <p className="panel-empty">
-              Aún no ha realizado ningún pedido.{` `}
-              <Link to="/pedidos" style={{ color: 'var(--celeste)', fontWeight: 700 }}>
-                ¡Explore los locales disponibles!
-              </Link>
+              {emptyMessage}
+              {!hasAnyOrders && (
+                <>
+                  {` `}
+                  <Link to="/pedidos" style={{ color: 'var(--celeste)', fontWeight: 700 }}>
+                    ¡Explore los locales disponibles!
+                  </Link>
+                </>
+              )}
             </p>
           )}
 
-          {!loading && orders.length > 0 && (
+          {!loading && sortedOrders.length > 0 && (
             <div className="my-orders__list">
-              {orders.map((order) => {
+              {sortedOrders.map((order) => {
                 const meta = orderMeta[order.id] ?? {}
 
                 return (
