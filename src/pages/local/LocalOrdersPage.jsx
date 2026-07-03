@@ -10,6 +10,7 @@ const REJECTION_REASONS = [
   'Demasiados pedidos',
   'Otro',
 ]
+const CUSTOM_REJECTION_REASON = 'Otro'
 
 function getOrderBadgeVariant(status) {
   if (status === 'pending') return 'pending'
@@ -29,7 +30,8 @@ export function LocalOrdersPage() {
   const [confirmingId, setConfirmingId] = useState(null)
   const [deliveryMinutes, setDeliveryMinutes] = useState('')
   const [rejectingId, setRejectingId] = useState(null)
-  const [rejectReason, setRejectReason] = useState(REJECTION_REASONS[0])
+  const [rejectReason, setRejectReason] = useState('')
+  const [customRejectReason, setCustomRejectReason] = useState('')
 
   const loadOrders = async () => {
     setLoading(true)
@@ -56,6 +58,37 @@ export function LocalOrdersPage() {
     })
   }, [orders, sortBy, sortDir])
 
+  const resetRejectState = () => {
+    setRejectingId(null)
+    setRejectReason('')
+    setCustomRejectReason('')
+  }
+
+  const getEffectiveRejectReason = () => {
+    if (rejectReason === CUSTOM_REJECTION_REASON) {
+      return customRejectReason.trim()
+    }
+
+    return rejectReason.trim()
+  }
+
+  const handleOpenReject = (orderId) => {
+    setConfirmingId(null)
+    setRejectingId(orderId)
+    setRejectReason('')
+    setCustomRejectReason('')
+    setError(null)
+    setMessage(null)
+  }
+
+  const handleRejectReasonChange = (value) => {
+    setRejectReason(value)
+
+    if (value !== CUSTOM_REJECTION_REASON) {
+      setCustomRejectReason('')
+    }
+  }
+
   const handleConfirm = async (orderId) => {
     if (!deliveryMinutes || Number(deliveryMinutes) <= 0) {
       setError('Debe ingresar el tiempo estimado de entrega para confirmar el pedido.')
@@ -76,7 +109,8 @@ export function LocalOrdersPage() {
   }
 
   const handleReject = async (orderId) => {
-    if (!rejectReason.trim()) {
+    const effectiveRejectReason = getEffectiveRejectReason()
+    if (!effectiveRejectReason) {
       setError('Debe seleccionar o escribir un motivo de rechazo antes de continuar.')
       return
     }
@@ -84,9 +118,9 @@ export function LocalOrdersPage() {
     setError(null)
     setMessage(null)
     try {
-      await rejectOrder(orderId, rejectReason)
+      await rejectOrder(orderId, effectiveRejectReason)
       setMessage('Pedido rechazado. Cliente notificado.')
-      setRejectingId(null)
+      resetRejectState()
       await loadOrders()
     } catch (err) {
       setError(err.message)
@@ -235,16 +269,31 @@ export function LocalOrdersPage() {
                         <select
                           className="panel-field__select"
                           value={rejectReason}
-                          onChange={(e) => setRejectReason(e.target.value)}
+                          onChange={(e) => handleRejectReasonChange(e.target.value)}
                         >
+                          <option value="">Seleccionar motivo</option>
                           {REJECTION_REASONS.map((reason) => (
                             <option key={reason} value={reason}>{reason}</option>
                           ))}
                         </select>
-                        <button type="button" className="panel-btn panel-btn--danger" onClick={() => handleReject(order.id)}>
+                        {rejectReason === CUSTOM_REJECTION_REASON && (
+                          <textarea
+                            className="panel-field__textarea"
+                            rows="3"
+                            placeholder="Escriba el motivo del rechazo"
+                            value={customRejectReason}
+                            onChange={(e) => setCustomRejectReason(e.target.value)}
+                          />
+                        )}
+                        <button
+                          type="button"
+                          className="panel-btn panel-btn--danger"
+                          disabled={!getEffectiveRejectReason()}
+                          onClick={() => handleReject(order.id)}
+                        >
                           Rechazar
                         </button>
-                        <button type="button" className="panel-btn panel-btn--outline" onClick={() => setRejectingId(null)}>
+                        <button type="button" className="panel-btn panel-btn--outline" onClick={resetRejectState}>
                           Cancelar
                         </button>
                       </>
@@ -260,7 +309,7 @@ export function LocalOrdersPage() {
                         <button
                           type="button"
                           className="panel-btn panel-btn--danger"
-                          onClick={() => { setRejectingId(order.id); setConfirmingId(null) }}
+                          onClick={() => handleOpenReject(order.id)}
                         >
                           Rechazar pedido
                         </button>
