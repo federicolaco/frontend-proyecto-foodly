@@ -4,6 +4,7 @@ import {
   confirmPasswordChange,
   deleteAccount,
   getMyClientRating,
+  getMyClientRatingDetails,
   startEmailChange,
   startPasswordChange,
   updateProfile,
@@ -99,12 +100,14 @@ export function AccountSettings() {
   const [passStep, setPassStep] = useState(1)
 
   const [rating, setRating] = useState(null)
+  const [ratingDetails, setRatingDetails] = useState([])
 
   const visibleTabs = TABS.filter((t) => !t.roles || t.roles.includes(user.role))
 
   useEffect(() => {
     if (tab !== 'rating' || user.role !== ROLES.CLIENT) return
     getMyClientRating().then(setRating).catch(() => setRating({ average: 0, total: 0, breakdown: {} }))
+    getMyClientRatingDetails().then(setRatingDetails).catch(() => setRatingDetails([]))
   }, [tab, user.role])
 
   useEffect(() => () => {
@@ -428,6 +431,28 @@ export function AccountSettings() {
                       </div>
                     ))}
                   </div>
+
+                  {ratingDetails.length > 0 && (
+                    <div className="rating-comments">
+                      <h3 className="panel-page__subtitle">Comentarios de los locales</h3>
+                      <div className="rating-comments__list">
+                        {ratingDetails.map((r, i) => (
+                          <article key={`${r.localId}-${i}`} className="rating-comments__item">
+                            <div className="panel-actions">
+                              <strong>{r.localName}</strong>
+                              <span className="panel-badge">{r.score} ★</span>
+                            </div>
+                            {r.comment && <p className="rating-comments__text">{r.comment}</p>}
+                            {r.createdAt && (
+                              <p className="rating-comments__date">
+                                {new Date(r.createdAt).toLocaleDateString('es-AR')}
+                              </p>
+                            )}
+                          </article>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>

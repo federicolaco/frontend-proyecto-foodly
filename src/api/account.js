@@ -13,7 +13,7 @@ import {
   mockUpdateProfile,
   mockVerifyPasswordCode,
 } from './mock/accountMock'
-import { mockGetClientRatingSummary } from './mock/ratingsMock'
+import { mockGetClientRatingDetails, mockGetClientRatingSummary } from './mock/ratingsMock'
 
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -195,4 +195,20 @@ export async function getMyClientRating() {
   }
 
   return mockGetClientRatingSummary(getSessionToken())
+}
+
+export async function getMyClientRatingDetails() {
+  if (isApiConfigured()) {
+    const user = getStoredUser()
+    const data = await apiFetchSafe(`/calificaciones/${user.id}/calificacion/detalle`)
+    return (data ?? []).map((d) => ({
+      localId: d.idLocal,
+      localName: d.nombreLocal,
+      score: d.puntaje,
+      comment: d.comentario ?? '',
+      createdAt: d.fecha,
+    }))
+  }
+
+  return mockGetClientRatingDetails(getSessionToken())
 }
