@@ -4,6 +4,7 @@ import { buildLocalClientFilterBody } from './backend/helpers'
 import { mapLocalClient, mapRatingSummary } from './backend/mappers'
 import {
   mockGetLocalClients,
+  mockGetLocalRatingDetails,
   mockGetLocalRatingSummary,
   mockGetMyLocalRating,
   mockHasRatedLocal,
@@ -63,6 +64,21 @@ export async function getLocalRatingSummary() {
   }
 
   return mockGetLocalRatingSummary(getSessionToken())
+}
+
+export async function getLocalRatingDetails() {
+  if (isApiConfigured()) {
+    const data = await apiFetchSafe('/calificaciones/local/mi-calificacion/detalle')
+    return (data ?? []).map((d) => ({
+      clientId: d.idCliente,
+      clientName: d.nombreCliente,
+      score: d.puntaje,
+      comment: d.comentario ?? '',
+      createdAt: d.fecha,
+    }))
+  }
+
+  return mockGetLocalRatingDetails(getSessionToken())
 }
 
 export async function getLocalClients(filters = {}) {

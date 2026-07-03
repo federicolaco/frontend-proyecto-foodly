@@ -162,6 +162,32 @@ export function mockGetLocalRatingSummary(token) {
   return mockDelay(buildRatingSummary(ratings))
 }
 
+export function mockGetLocalRatingDetails(token) {
+  ensureMockDb()
+  const user = requireUser(token)
+  if (user.role !== 'local' || !user.restaurantId) {
+    throw new MockApiError(403, 'Acceso denegado')
+  }
+
+  const db = getDb()
+  const ratings = db.ratings.filter(
+    (r) => r.type === 'cliente_to_local' && r.localId === user.restaurantId,
+  )
+
+  const detalle = ratings.map((r) => {
+    const cliente = db.users.find((u) => u.id === r.clientId)
+    return {
+      idCliente: r.clientId,
+      nombreCliente: cliente?.name ?? `Cliente #${r.clientId}`,
+      puntaje: r.score,
+      comentario: r.comment ?? '',
+      fecha: r.createdAt,
+    }
+  })
+
+  return mockDelay(detalle)
+}
+
 export function mockGetLocalClients(token, filters = {}) {
   ensureMockDb()
   const user = requireUser(token)

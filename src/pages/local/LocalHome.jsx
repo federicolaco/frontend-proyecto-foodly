@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { closeLocal, getMyLocal, openLocal } from '../../api/localPanel'
-import { getLocalRatingSummary } from '../../api/ratings'
+import { getLocalRatingDetails, getLocalRatingSummary } from '../../api/ratings'
+import '../Account.css'
 import '../Panel.css'
 
 export function LocalHome() {
   const [restaurant, setRestaurant] = useState(null)
   const [rating, setRating] = useState(null)
+  const [ratingDetails, setRatingDetails] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
@@ -16,9 +18,14 @@ export function LocalHome() {
     setError(null)
 
     try {
-      const [data, ratingData] = await Promise.all([getMyLocal(), getLocalRatingSummary()])
+      const [data, ratingData, ratingDetailsData] = await Promise.all([
+        getMyLocal(),
+        getLocalRatingSummary(),
+        getLocalRatingDetails().catch(() => []),
+      ])
       setRestaurant(data)
       setRating(ratingData)
+      setRatingDetails(ratingDetailsData)
     } catch (err) {
       setError(err.message ?? 'No pudimos cargar la información del local.')
     } finally {
@@ -116,7 +123,45 @@ export function LocalHome() {
             {rating?.total === 0 ? (
               <p className="panel-empty" style={{ padding: 0 }}>Su local todavía no ha recibido calificaciones de los clientes.</p>
             ) : (
-              <p><strong>{rating.average}</strong> / 5 · {rating.total} valoraciones</p>
+              <>
+                <p><strong>{rating.average}</strong> / 5 · {rating.total} valoraciones</p>
+                <div className="rating-summary">
+                  {[5, 4, 3, 2, 1].map((star) => (
+                    <div key={star} className="rating-summary__row">
+                      <span>{star}★</span>
+                      <div className="rating-summary__bar">
+                        <div
+                          className="rating-summary__fill"
+                          style={{ width: `${rating.total ? (rating.breakdown[star] / rating.total) * 100 : 0}%` }}
+                        />
+                      </div>
+                      <span>{rating.breakdown[star] ?? 0}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {ratingDetails.length > 0 && (
+                  <div className="rating-comments">
+                    <h3 className="panel-page__subtitle">Comentarios de los clientes</h3>
+                    <div className="rating-comments__list">
+                      {ratingDetails.map((r, i) => (
+                        <article key={`${r.clientId}-${i}`} className="rating-comments__item">
+                          <div className="panel-actions">
+                            <strong>{r.clientName}</strong>
+                            <span className="panel-badge">{r.score} ★</span>
+                          </div>
+                          {r.comment && <p className="rating-comments__text">{r.comment}</p>}
+                          {r.createdAt && (
+                            <p className="rating-comments__date">
+                              {new Date(r.createdAt).toLocaleDateString('es-AR')}
+                            </p>
+                          )}
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </>
