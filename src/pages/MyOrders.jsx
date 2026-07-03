@@ -183,7 +183,10 @@ export function MyOrders() {
         {message && <p className="panel-page__success">{message}</p>}
 
         <section className="panel-card">
-          <div className="panel-actions" style={{ gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          <div
+            className="panel-actions"
+            style={{ gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem', justifyContent: 'space-between' }}
+          >
             <label className="panel-field" style={{ maxWidth: '220px' }}>
               <span className="panel-field__label">Filtrar por estado</span>
               <select
@@ -200,7 +203,7 @@ export function MyOrders() {
               </select>
             </label>
 
-            <label className="panel-field" style={{ maxWidth: '260px' }}>
+            <label className="panel-field" style={{ maxWidth: '260px', marginLeft: 'auto' }}>
               <span className="panel-field__label">Ordenar por</span>
               <select
                 className="panel-field__select"
