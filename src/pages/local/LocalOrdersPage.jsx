@@ -147,8 +147,8 @@ export function LocalOrdersPage() {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="">Todos</option>
               <option value="pending">Pendiente</option>
+              <option value="">Todos</option>
               <option value="confirmed">Confirmado</option>
               <option value="delivered">Entregado</option>
               <option value="rejected">Rechazado</option>
