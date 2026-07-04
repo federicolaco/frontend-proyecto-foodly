@@ -63,6 +63,7 @@ export function Register() {
           idToken: tokenResponse.access_token,
           address,
           document,
+          esRegistro: true,
         })
         navigate(getHomePathForRole(user.role), { replace: true })
       } catch (err) {

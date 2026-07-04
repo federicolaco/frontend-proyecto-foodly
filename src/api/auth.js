@@ -161,12 +161,13 @@ export async function register(payload) {
 
 export async function registerWithGoogle(payload) {
   if (isApiConfigured()) {
-    const data = await apiFetch('/clientes/google', {
+     const data = await apiFetch('/clientes/google', {
       method: 'POST',
       body: JSON.stringify({
         idToken: payload.idToken,
         direccion: normalizeAddress(payload.address),
         documento: payload.document ?? null,
+        esRegistro: payload.esRegistro ?? false,
       }),
     })
     const mapped = mapLoginResponse(data)
