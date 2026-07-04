@@ -89,7 +89,6 @@ export async function getLocalClients(filters = {}) {
       method: 'POST',
       body: JSON.stringify(buildLocalClientFilterBody(filters)),
     })
-    console.log('RAW clientes del backend:', data) // 👈 temporal
     return (data ?? []).map(mapLocalClient)
   }
   return mockGetLocalClients(getSessionToken(), filters)
