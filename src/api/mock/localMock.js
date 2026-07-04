@@ -433,9 +433,34 @@ export function mockGetLocalPromotions(token) {
   }
 
   const db = getDb()
-  return mockDelay(
-    db.promotions.filter((promo) => promo.restaurantId === user.restaurantId && promo.active !== false),
-  )
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const groups = db.promotions
+    .filter((promo) => promo.restaurantId === user.restaurantId && promo.active !== false)
+    .reduce((result, promo) => {
+      const startDate = new Date(`${String(promo.startDate ?? promo.fechaInicio).split('T')[0]}T00:00:00`)
+      const endDate = new Date(`${String(promo.endDate ?? promo.fechaFin).split('T')[0]}T00:00:00`)
+
+      if (today < startDate) {
+        result.proximas.push(promo)
+        return result
+      }
+
+      if (today > endDate) {
+        result.vencidas.push(promo)
+        return result
+      }
+
+      result.vigentes.push(promo)
+      return result
+    }, {
+      vigentes: [],
+      vencidas: [],
+      proximas: [],
+    })
+
+  return mockDelay(groups)
 }
 
 export function mockSavePromotion(token, payload) {

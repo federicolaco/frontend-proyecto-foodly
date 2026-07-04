@@ -12,8 +12,32 @@ const EMPTY_FORM = {
   endDate: '',
 }
 
+const EMPTY_PROMOTION_GROUPS = {
+  vigentes: [],
+  vencidas: [],
+  proximas: [],
+}
+
+const PROMOTION_SECTIONS = [
+  {
+    key: 'vigentes',
+    title: 'Promociones vigentes',
+    emptyMessage: 'No hay promociones vigentes.',
+  },
+  {
+    key: 'proximas',
+    title: 'Próximas promociones',
+    emptyMessage: 'No hay promociones próximas.',
+  },
+  {
+    key: 'vencidas',
+    title: 'Promociones vencidas',
+    emptyMessage: 'No hay promociones vencidas.',
+  },
+]
+
 export function LocalPromotions() {
-  const [promotions, setPromotions] = useState([])
+  const [promotionGroups, setPromotionGroups] = useState(EMPTY_PROMOTION_GROUPS)
   const [dishes, setDishes] = useState([])
   const [form, setForm] = useState(EMPTY_FORM)
   const [loading, setLoading] = useState(true)
@@ -57,7 +81,7 @@ export function LocalPromotions() {
     setError(null)
     try {
       const [promos, dishList] = await Promise.all([getLocalPromotions(), getLocalDishes()])
-      setPromotions(promos.filter((p) => p.active !== false))
+      setPromotionGroups(promos)
       setDishes(dishList.filter((d) => d.active))
     } catch (err) {
       setError(err.message)
@@ -110,6 +134,42 @@ export function LocalPromotions() {
     } catch (err) {
       setError(err.message)
     }
+  }
+
+  const renderPromotionCard = (promo) => {
+    const pricing = getPromotionPricing(promo)
+
+    return (
+      <article key={promo.id} style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}>
+        <strong>{promo.title}</strong>
+        <p style={{ marginTop: '0.35rem' }}>
+          Descuento: {promo.discountPercent}% · {pricing.dishName}
+        </p>
+        {pricing.currentPrice != null ? (
+          <div style={{ display: 'grid', gap: '0.2rem', color: 'var(--gris-oscuro)' }}>
+            <span>Precio actual: {formatPrice(pricing.currentPrice)}</span>
+            <span>Precio promocional: {formatPrice(pricing.finalPrice)}</span>
+          </div>
+        ) : (
+          <p style={{ color: 'var(--gris-intermedio)' }}>
+            No se pudo resolver el precio actual del plato.
+          </p>
+        )}
+        <p style={{ marginTop: '0.35rem' }}>Vigencia: {promo.startDate} — {promo.endDate}</p>
+        <div className="panel-actions" style={{ marginTop: '0.5rem' }}>
+          <button
+            type="button"
+            className="panel-btn panel-btn--outline"
+            onClick={() => setForm({ ...promo, dishId: String(promo.dishId) })}
+          >
+            Editar
+          </button>
+          <button type="button" className="panel-btn panel-btn--danger" onClick={() => handleDelete(promo.id)}>
+            Eliminar
+          </button>
+        </div>
+      </article>
+    )
   }
 
   return (
@@ -187,40 +247,24 @@ export function LocalPromotions() {
       </section>
 
       <section className="panel-card">
-        <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Promociones activas</h2>
+        <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Promociones por estado</h2>
         {loading && <p className="panel-empty">Cargando...</p>}
-        {!loading && promotions.length === 0 && <p className="panel-empty">No hay promociones registradas.</p>}
-        {!loading && promotions.length > 0 && (
-          <div style={{ display: 'grid', gap: '0.75rem' }}>
-            {promotions.map((promo) => {
-              const pricing = getPromotionPricing(promo)
+        {!loading && PROMOTION_SECTIONS.map((section, index) => {
+          const promotions = promotionGroups[section.key] ?? []
 
-              return (
-                <article key={promo.id} style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}>
-                  <strong>{promo.title}</strong>
-                  <p style={{ marginTop: '0.35rem' }}>
-                    Descuento: {promo.discountPercent}% · {pricing.dishName}
-                  </p>
-                  {pricing.currentPrice != null ? (
-                    <div style={{ display: 'grid', gap: '0.2rem', color: 'var(--gris-oscuro)' }}>
-                      <span>Precio actual: {formatPrice(pricing.currentPrice)}</span>
-                      <span>Precio promocional: {formatPrice(pricing.finalPrice)}</span>
-                    </div>
-                  ) : (
-                    <p style={{ color: 'var(--gris-intermedio)' }}>
-                      No se pudo resolver el precio actual del plato.
-                    </p>
-                  )}
-                  <p style={{ marginTop: '0.35rem' }}>Vigencia: {promo.startDate} — {promo.endDate}</p>
-                  <div className="panel-actions" style={{ marginTop: '0.5rem' }}>
-                    <button type="button" className="panel-btn panel-btn--outline" onClick={() => setForm({ ...promo, dishId: String(promo.dishId) })}>Editar</button>
-                    <button type="button" className="panel-btn panel-btn--danger" onClick={() => handleDelete(promo.id)}>Eliminar</button>
-                  </div>
-                </article>
-              )
-            })}
-          </div>
-        )}
+          return (
+            <section key={section.key} style={{ marginTop: index === 0 ? 0 : '1.5rem' }}>
+              <h3 style={{ marginBottom: '0.75rem', color: 'var(--gris-oscuro)' }}>{section.title}</h3>
+              {promotions.length === 0 ? (
+                <p className="panel-empty">{section.emptyMessage}</p>
+              ) : (
+                <div style={{ display: 'grid', gap: '0.75rem' }}>
+                  {promotions.map(renderPromotionCard)}
+                </div>
+              )}
+            </section>
+          )
+        })}
       </section>
     </>
   )

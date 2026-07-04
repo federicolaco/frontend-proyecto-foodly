@@ -34,6 +34,80 @@ import {
 
 const DEFAULT_LOCAL_STATS_PRESET = 'MES_ACTUAL'
 
+function createEmptyPromotionGroups() {
+  return {
+    vigentes: [],
+    vencidas: [],
+    proximas: [],
+  }
+}
+
+function normalizePromotionItem(promo) {
+  const mappedPromotion = mapLocalPromotion(promo)
+
+  return {
+    ...mappedPromotion,
+    dishId: mappedPromotion.dishId ?? promo.dishId,
+    title: mappedPromotion.title === 'Promoción' && promo.title ? promo.title : mappedPromotion.title,
+    discountPercent: mappedPromotion.discountPercent || promo.discountPercent || 0,
+    startDate: mappedPromotion.startDate ?? promo.startDate,
+    endDate: mappedPromotion.endDate ?? promo.endDate,
+  }
+}
+
+function getPromotionSortTimestamp(dateValue) {
+  const normalizedDate = typeof dateValue === 'string' ? dateValue.split('T')[0] : ''
+  const timestamp = Date.parse(normalizedDate)
+  return Number.isFinite(timestamp) ? timestamp : null
+}
+
+function sortPromotionGroup(promotions, groupKey) {
+  const direction = groupKey === 'vencidas' ? -1 : 1
+
+  return [...promotions].sort((left, right) => {
+    const leftDateField = groupKey === 'proximas' ? left.startDate : left.endDate
+    const rightDateField = groupKey === 'proximas' ? right.startDate : right.endDate
+    const leftTimestamp = getPromotionSortTimestamp(leftDateField)
+    const rightTimestamp = getPromotionSortTimestamp(rightDateField)
+
+    if (leftTimestamp == null && rightTimestamp == null) {
+      return Number(left.id ?? 0) - Number(right.id ?? 0)
+    }
+
+    if (leftTimestamp == null) return 1
+    if (rightTimestamp == null) return -1
+
+    if (leftTimestamp === rightTimestamp) {
+      return Number(left.id ?? 0) - Number(right.id ?? 0)
+    }
+
+    return (leftTimestamp - rightTimestamp) * direction
+  })
+}
+
+function normalizePromotionGroups(response) {
+  if (response == null) {
+    return createEmptyPromotionGroups()
+  }
+
+  if (Array.isArray(response)) {
+    throw new Error('El endpoint de promociones devolvió una lista plana y el frontend espera grupos por vigencia.')
+  }
+
+  if (typeof response !== 'object') {
+    throw new Error('El endpoint de promociones devolvió un formato inválido.')
+  }
+
+  const groups = createEmptyPromotionGroups()
+
+  for (const groupKey of Object.keys(groups)) {
+    const rawGroup = Array.isArray(response[groupKey]) ? response[groupKey] : []
+    groups[groupKey] = sortPromotionGroup(rawGroup.map(normalizePromotionItem), groupKey)
+  }
+
+  return groups
+}
+
 function getLocalId() {
   const user = getStoredUser()
   return user.restaurantId ?? user.localId ?? user.id
@@ -239,10 +313,10 @@ export async function getLocalPromotions() {
   if (isApiConfigured()) {
     const localId = getLocalId()
     const response = await apiFetchSafe(`/locales/busqueda_promocion_local/${localId}`)
-    return (response ?? []).map(mapLocalPromotion)
+    return normalizePromotionGroups(response)
   }
 
-  return mockGetLocalPromotions(getSessionToken())
+  return normalizePromotionGroups(await mockGetLocalPromotions(getSessionToken()))
 }
 
 export async function savePromotion(payload) {
@@ -257,10 +331,10 @@ export async function savePromotion(payload) {
         method: 'POST',
         body: JSON.stringify(body),
       })
-    return mapLocalPromotion(response)
+    return normalizePromotionItem(response)
   }
 
-  return mockSavePromotion(getSessionToken(), payload)
+  return normalizePromotionItem(await mockSavePromotion(getSessionToken(), payload))
 }
 
 export async function deletePromotion(promotionId) {
