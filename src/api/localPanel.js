@@ -205,7 +205,7 @@ export async function getLocalOrders(filters = {}) {
     const params = buildOrderListParams(filters)
     const qs = params.toString()
     const data = await apiFetch(`/pedidos/listar-pedido-local/${localId}${qs ? `?${qs}` : ''}`)
-    console.log('RAW pedido del backend:', data) // 👈 temporal
+   console.log('RAW pedido del backend:', JSON.stringify(data, null, 2))
     return (data ?? []).map(mapOrderListItem)
   }
   return mockGetLocalOrders(getSessionToken(), filters)
