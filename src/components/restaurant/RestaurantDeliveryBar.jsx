@@ -69,7 +69,7 @@ export function RestaurantDeliveryBar({ address, onAddressChange }) {
 
       {isEditing && (
         <form className="restaurant-delivery-bar__editor" onSubmit={handleSubmit}>
-          <p className="restaurant-delivery-bar__editor-title">Cambiar dirección solo para este envío</p>
+          <p className="restaurant-delivery-bar__editor-title">Cambiar direcciÃ³n solo para este envÃ­o</p>
 
           <div className="restaurant-delivery-bar__grid">
             <label className="restaurant-delivery-bar__field">
@@ -83,7 +83,7 @@ export function RestaurantDeliveryBar({ address, onAddressChange }) {
             </label>
 
             <label className="restaurant-delivery-bar__field">
-              <span>Número</span>
+              <span>NÃºmero</span>
               <input
                 type="text"
                 value={draftAddress.numero}
@@ -103,7 +103,7 @@ export function RestaurantDeliveryBar({ address, onAddressChange }) {
             </label>
 
             <label className="restaurant-delivery-bar__field">
-              <span>Código postal</span>
+              <span>CÃ³digo postal</span>
               <input
                 type="text"
                 value={draftAddress.codigoPostal}
@@ -122,7 +122,7 @@ export function RestaurantDeliveryBar({ address, onAddressChange }) {
               Cancelar
             </button>
             <button type="submit" className="restaurant-delivery-bar__action">
-              Guardar envío
+              Guardar envÃ­o
             </button>
           </div>
         </form>
@@ -130,4 +130,3 @@ export function RestaurantDeliveryBar({ address, onAddressChange }) {
     </div>
   )
 }
-
