@@ -21,7 +21,7 @@ function getOrderBadgeVariant(status) {
 
 export function LocalOrdersPage() {
   const [orders, setOrders] = useState([])
-  const [statusFilter, setStatusFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('pending')
   const [sortBy, setSortBy] = useState('date')
   const [sortDir, setSortDir] = useState('desc')
   const [loading, setLoading] = useState(true)
