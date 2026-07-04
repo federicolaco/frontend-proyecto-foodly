@@ -235,6 +235,28 @@
   margin: 0;
 }
 
+.my-orders__rejection {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  background: #fff4f2;
+  border: 1px solid #f5c6c0;
+}
+
+.my-orders__rejection-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #8e2c1e;
+}
+
+.my-orders__rejection-text {
+  margin: 0;
+  color: #6b3b33;
+  overflow-wrap: anywhere;
+}
+
 .my-orders__actions {
   display: flex;
   flex-wrap: wrap;

@@ -239,6 +239,7 @@ export function MyOrders() {
             <div className="my-orders__list">
               {sortedOrders.map((order) => {
                 const meta = orderMeta[order.id] ?? {}
+                const motivoRechazo = order.motivoRechazo ?? order.rejectionReason
 
                 return (
                   <article key={order.id} className="my-orders__card">
@@ -256,6 +257,13 @@ export function MyOrders() {
                         <p>Total: {formatPrice(order.total)}</p>
                         <p>{new Date(order.createdAt).toLocaleString('es-AR')}</p>
                       </div>
+
+                      {order.status === 'rejected' && motivoRechazo && (
+                        <div className="my-orders__rejection">
+                          <p className="my-orders__rejection-title">Motivo del rechazo</p>
+                          <p className="my-orders__rejection-text">{motivoRechazo}</p>
+                        </div>
+                      )}
 
                       {order.status === 'pending' && (
                         <button

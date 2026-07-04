@@ -303,6 +303,7 @@ export function mapOrderListItem(pedido) {
     .filter(Boolean)
     .join(' ')
     .trim()
+  const motivoRechazo = pedido.motivoRechazo ?? pedido.rejectionReason ?? null
 
   return {
     id: pedido.id,
@@ -316,6 +317,8 @@ export function mapOrderListItem(pedido) {
     createdAt: pedido.fecha ?? new Date().toISOString(),
     deliveryMinutes: parseDeliveryMinutes(pedido.tiempoEstEntrega),
     itemCount: pedido.cantidadItems ?? 0,
+    motivoRechazo,
+    rejectionReason: motivoRechazo,
   }
 }
 
