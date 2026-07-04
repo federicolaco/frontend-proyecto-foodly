@@ -31,6 +31,14 @@ export function LocalClients() {
     return () => clearTimeout(timer)
   }, [search])
 
+  const handleOpenRating = (client) => {
+    setError(null)
+    setMessage(null)
+    setScore(client.myScore ?? 5)
+    setComment(client.myComment ?? '')
+    setRatingClientId(client.id)
+  }
+
   const handleRate = async (clientId) => {
     setError(null)
     setMessage(null)
@@ -39,6 +47,7 @@ export function LocalClients() {
       setMessage('Calificación registrada.')
       setRatingClientId(null)
       setComment('')
+      setScore(5)
       await load()
     } catch (err) {
       setError(err.message)
@@ -70,23 +79,20 @@ export function LocalClients() {
                   <span>Calificación global: {client.rating ? client.rating.toFixed(1) : '—'}</span>
                 </div>
 
-                {!client.alreadyRated && (
-                  ratingClientId === client.id ? (
-                    <div style={{ marginTop: '0.75rem' }}>
-                      <StarRating value={score} onChange={setScore} />
-                      <textarea className="panel-field__textarea" rows={2} placeholder="Comentario (opcional)" value={comment} onChange={(e) => setComment(e.target.value)} style={{ marginTop: '0.5rem' }} />
-                      <div className="panel-actions" style={{ marginTop: '0.5rem' }}>
-                        <button type="button" className="panel-btn panel-btn--primary" onClick={() => handleRate(client.id)}>Enviar calificación</button>
-                        <button type="button" className="panel-btn panel-btn--outline" onClick={() => setRatingClientId(null)}>Cancelar</button>
-                      </div>
+                {ratingClientId === client.id ? (
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <StarRating value={score} onChange={setScore} />
+                    <textarea className="panel-field__textarea" rows={2} placeholder="Comentario (opcional)" value={comment} onChange={(e) => setComment(e.target.value)} style={{ marginTop: '0.5rem' }} />
+                    <div className="panel-actions" style={{ marginTop: '0.5rem' }}>
+                      <button type="button" className="panel-btn panel-btn--primary" onClick={() => handleRate(client.id)}>Enviar calificación</button>
+                      <button type="button" className="panel-btn panel-btn--outline" onClick={() => setRatingClientId(null)}>Cancelar</button>
                     </div>
-                  ) : (
-                    <button type="button" className="panel-btn panel-btn--outline" style={{ marginTop: '0.5rem' }} onClick={() => setRatingClientId(client.id)}>
-                      Calificar cliente
-                    </button>
-                  )
+                  </div>
+                ) : (
+                  <button type="button" className="panel-btn panel-btn--outline" style={{ marginTop: '0.5rem' }} onClick={() => handleOpenRating(client)}>
+                    {client.alreadyRated ? 'Editar calificación' : 'Calificar cliente'}
+                  </button>
                 )}
-                {client.alreadyRated && <p style={{ marginTop: '0.5rem', color: 'var(--gris-intermedio)' }}>Ya calificó a este cliente.</p>}
               </article>
             ))}
           </div>

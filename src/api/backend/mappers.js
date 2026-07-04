@@ -465,7 +465,9 @@ export function mapLocalClient(client) {
     id: client.id,
     name: [client.nombre, client.apellido].filter(Boolean).join(' ').trim() || client.name,
     rating: client.calificacionGlobal ?? client.rating ?? 0,
-    alreadyRated: client.alreadyRated ?? false,
+    alreadyRated: client.yaCalificado ?? client.alreadyRated ?? false,
+    myScore: client.miPuntaje ?? null,
+    myComment: client.miComentario ?? '',
   }
 }
 
