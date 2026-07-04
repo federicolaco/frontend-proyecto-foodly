@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { getLocalStats } from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
 import '../Panel.css'
@@ -7,14 +7,14 @@ const DEFAULT_PRESET = 'MES_ACTUAL'
 const EMPTY_RANGE = { fechaDesde: '', fechaHasta: '' }
 const PRESET_OPTIONS = [
   { value: 'HOY', label: 'Hoy' },
-  { value: 'ULTIMOS_7_DIAS', label: 'Últimos 7 días' },
-  { value: 'ULTIMOS_30_DIAS', label: 'Últimos 30 días' },
+  { value: 'ULTIMOS_7_DIAS', label: 'Ãšltimos 7 dÃ­as' },
+  { value: 'ULTIMOS_30_DIAS', label: 'Ãšltimos 30 dÃ­as' },
   { value: 'MES_ACTUAL', label: 'Mes actual' },
   { value: 'MES_ANTERIOR', label: 'Mes anterior' },
 ]
 
 function formatPeriodDate(value) {
-  if (!value) return '—'
+  if (!value) return 'â€”'
 
   const date = new Date(`${value}T00:00:00`)
   if (Number.isNaN(date.getTime())) return value
@@ -83,7 +83,7 @@ function AnalyticDishCard({ dish }) {
         <div style={{ minWidth: 0 }}>
           <strong style={{ color: 'var(--gris-oscuro)' }}>{dish.name}</strong>
           <p style={{ margin: '0.25rem 0 0', color: 'var(--gris-intermedio)' }}>
-            Plato vendido en el período
+            Plato vendido en el perÃ­odo
           </p>
         </div>
       </div>
@@ -103,29 +103,27 @@ function AnalyticDishCard({ dish }) {
 
 export function LocalStats() {
   const [stats, setStats] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [selectedPreset, setSelectedPreset] = useState(DEFAULT_PRESET)
   const [range, setRange] = useState(EMPTY_RANGE)
+  const [hasSearched, setHasSearched] = useState(false)
 
   const loadStats = async (filters) => {
     setLoading(true)
     setError(null)
+    setHasSearched(true)
 
     try {
       const data = await getLocalStats(filters)
       setStats(data)
     } catch (err) {
       setStats(null)
-      setError(err.message ?? 'No pudimos cargar las estadísticas del local.')
+      setError(err.message ?? 'No pudimos cargar las estadÃ­sticas del local.')
     } finally {
       setLoading(false)
     }
   }
-
-  useEffect(() => {
-    loadStats({ preset: DEFAULT_PRESET })
-  }, [])
 
   const handleApplyPreset = () => {
     loadStats({ preset: selectedPreset })
@@ -135,11 +133,15 @@ export function LocalStats() {
     const { fechaDesde, fechaHasta } = range
 
     if (!fechaDesde || !fechaHasta) {
+      setStats(null)
+      setHasSearched(true)
       setError('Para usar rango libre debe indicar fechaDesde y fechaHasta.')
       return
     }
 
     if (fechaDesde > fechaHasta) {
+      setStats(null)
+      setHasSearched(true)
       setError('La fechaDesde no puede ser posterior a fechaHasta.')
       return
     }
@@ -147,7 +149,14 @@ export function LocalStats() {
     loadStats({ fechaDesde, fechaHasta })
   }
 
-  if (loading && !stats) return <p className="panel-empty">Cargando estadísticas...</p>
+  const handleClearFilters = () => {
+    setSelectedPreset(DEFAULT_PRESET)
+    setRange(EMPTY_RANGE)
+    setStats(null)
+    setError(null)
+    setHasSearched(false)
+    setLoading(false)
+  }
 
   const topDishes = stats?.topDishes ?? []
   const salesByDish = stats?.salesByDish ?? []
@@ -161,7 +170,7 @@ export function LocalStats() {
         <div className="panel-form" style={{ marginBottom: '1.5rem' }}>
           <div className="panel-form__row panel-form__row--2">
             <label className="panel-field">
-              <span className="panel-field__label">Preset rápido</span>
+              <span className="panel-field__label">Preset rÃ¡pido</span>
               <select
                 className="panel-field__select"
                 value={selectedPreset}
@@ -229,25 +238,29 @@ export function LocalStats() {
             <button
               type="button"
               className="panel-btn panel-btn--outline"
-              onClick={() => setRange(EMPTY_RANGE)}
+              onClick={handleClearFilters}
               disabled={loading}
             >
-              Limpiar rango
+              Limpiar filtros
             </button>
           </div>
         </div>
 
-        {stats && (
+        {loading ? (
+          <p className="panel-empty">Cargando estadÃ­sticas...</p>
+        ) : !hasSearched ? (
+          <p className="panel-empty">Selecciona un perÃ­odo y aplica la bÃºsqueda para ver estadÃ­sticas.</p>
+        ) : stats ? (
           <>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
               <div style={{ background: '#f8f9fa', borderRadius: '0.75rem', padding: '1rem' }}>
-                <p className="panel-field__label">Ventas del período</p>
+                <p className="panel-field__label">Ventas del perÃ­odo</p>
                 <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--gris-oscuro)' }}>
                   {formatPrice(stats.confirmedSales ?? 0)}
                 </p>
               </div>
               <div style={{ background: '#f8f9fa', borderRadius: '0.75rem', padding: '1rem' }}>
-                <p className="panel-field__label">Período aplicado</p>
+                <p className="panel-field__label">PerÃ­odo aplicado</p>
                 <p style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--gris-oscuro)' }}>
                   {formatPeriodDate(stats.fromDate)} - {formatPeriodDate(stats.untilDate)}
                 </p>
@@ -267,12 +280,12 @@ export function LocalStats() {
             </div>
 
             <p style={{ marginBottom: '1rem', color: 'var(--gris-intermedio)' }}>
-              Estas métricas consideran únicamente pedidos en estado confirmado.
+              Estas mÃ©tricas consideran Ãºnicamente pedidos en estado confirmado.
             </p>
 
-            <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Platos más pedidos</h2>
+            <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Platos mÃ¡s pedidos</h2>
             {topDishes.length === 0 ? (
-              <p className="panel-empty">No hay información disponible para el período seleccionado.</p>
+              <p className="panel-empty">No hay informaciÃ³n disponible para el perÃ­odo seleccionado.</p>
             ) : (
               <ul style={{ display: 'grid', gap: '0.75rem', padding: 0, listStyle: 'none', marginBottom: '1.5rem' }}>
                 {topDishes.map((dish, index) => (
@@ -283,7 +296,7 @@ export function LocalStats() {
 
             <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Detalle de ventas por plato</h2>
             {salesByDish.length === 0 ? (
-              <p className="panel-empty">No hay detalle disponible para el período seleccionado.</p>
+              <p className="panel-empty">No hay detalle disponible para el perÃ­odo seleccionado.</p>
             ) : (
               <div style={{ display: 'grid', gap: '0.75rem' }}>
                 {salesByDish.map((dish) => (
@@ -292,7 +305,7 @@ export function LocalStats() {
               </div>
             )}
           </>
-        )}
+        ) : null}
       </section>
     </>
   )
