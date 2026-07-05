@@ -139,7 +139,7 @@ export function RegisterLocal() {
       await submitLocalRegistration({
         name,
         email,
-        address: ({ street, streetNumber, city, postalCode }),
+        address: addressFromFields({ street, streetNumber, city, postalCode }),
         description,
         password: isApiConfigured() ? password : undefined,
         logo: logoFile,
