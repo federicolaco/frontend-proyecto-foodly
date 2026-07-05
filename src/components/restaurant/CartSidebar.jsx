@@ -5,6 +5,19 @@ import { formatPrice } from '../../lib/cart'
 import { useCart } from '../../context/CartContext'
 import './CartSidebar.css'
 
+const PAYMENT_METHODS = [
+  {
+    id: 'mercadopago',
+    label: 'Mercado Pago',
+    description: 'Pagás online y te redirigimos para completar el pago.',
+  },
+  {
+    id: 'efectivo',
+    label: 'Efectivo',
+    description: 'Confirmás el pedido ahora y pagás al recibirlo.',
+  },
+]
+
 function BagIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -37,6 +50,7 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
   const hasItems = cart.items.length > 0
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHODS[0].id)
 
   const handleCheckout = async () => {
     if (!hasItems) return
@@ -47,6 +61,7 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
     try {
       const order = await createOrder({
         restaurantId: cart.restaurantId,
+        paymentMethod,
         deliveryAddress,
         items: cart.items.map((item) => ({
           id: item.id,
@@ -56,12 +71,26 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
         })),
       })
 
-      if (!order.mpInitPoint) {
+      if (paymentMethod === 'mercadopago' && !order.mpInitPoint) {
         throw new Error('No pudimos generar el link de pago. Intente nuevamente.')
       }
 
       clearCart()
-      window.location.href = order.mpInitPoint
+
+      if (paymentMethod === 'mercadopago') {
+        window.location.href = order.mpInitPoint
+        return
+      }
+
+      const successParams = new URLSearchParams({
+        metodo: paymentMethod,
+      })
+
+      if (order.id) {
+        successParams.set('pedido', String(order.id))
+      }
+
+      navigate(`/pago/exito?${successParams.toString()}`)
     } catch (err) {
       setError(err.message ?? 'No pudimos registrar el pedido.')
       setLoading(false)
@@ -139,6 +168,32 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
         )}
 
         <div className="cart-sidebar__summary">
+          {hasItems && (
+            <fieldset className="cart-sidebar__payment-methods">
+              <legend className="cart-sidebar__payment-title">Método de pago</legend>
+              <div className="cart-sidebar__payment-options">
+                {PAYMENT_METHODS.map((method) => (
+                  <label
+                    key={method.id}
+                    className={`cart-sidebar__payment-option${
+                      paymentMethod === method.id ? ' cart-sidebar__payment-option--active' : ''
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={method.id}
+                      checked={paymentMethod === method.id}
+                      onChange={(event) => setPaymentMethod(event.target.value)}
+                    />
+                    <span className="cart-sidebar__payment-label">{method.label}</span>
+                    <span className="cart-sidebar__payment-description">{method.description}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+
           <div className="cart-sidebar__row">
             <span>Subtotal</span>
             <span>{formatPrice(subtotal)}</span>
@@ -155,7 +210,13 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
           disabled={!hasItems || !restaurantOpen || loading}
           onClick={handleCheckout}
         >
-          {loading ? 'REDIRIGIENDO A MERCADO PAGO...' : 'FINALIZAR PEDIDO'}
+          {loading
+            ? paymentMethod === 'mercadopago'
+              ? 'REDIRIGIENDO A MERCADO PAGO...'
+              : 'CONFIRMANDO PEDIDO EN EFECTIVO...'
+            : paymentMethod === 'mercadopago'
+              ? 'PAGAR CON MERCADO PAGO'
+              : 'CONFIRMAR PEDIDO EN EFECTIVO'}
         </button>
       </section>
     </aside>

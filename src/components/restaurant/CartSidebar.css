@@ -139,6 +139,66 @@
   flex-shrink: 0;
 }
 
+.cart-sidebar__payment-methods {
+  border: 0;
+  margin: 0 0 0.85rem;
+  padding: 0;
+}
+
+.cart-sidebar__payment-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--gris-oscuro);
+  margin-bottom: 0.65rem;
+}
+
+.cart-sidebar__payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.cart-sidebar__payment-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "input label"
+    "input description";
+  column-gap: 0.65rem;
+  row-gap: 0.15rem;
+  align-items: start;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid #d9eaf3;
+  border-radius: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.cart-sidebar__payment-option input {
+  grid-area: input;
+  margin-top: 0.2rem;
+  accent-color: var(--celeste);
+}
+
+.cart-sidebar__payment-option--active {
+  border-color: var(--celeste);
+  background: #f1fbff;
+}
+
+.cart-sidebar__payment-label {
+  grid-area: label;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--gris-oscuro);
+}
+
+.cart-sidebar__payment-description {
+  grid-area: description;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--gris-intermedio);
+}
+
 .cart-sidebar__row {
   display: flex;
   justify-content: space-between;

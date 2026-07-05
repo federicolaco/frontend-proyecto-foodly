@@ -4,7 +4,10 @@ import './PaymentStatus.css'
 
 export function PaymentSuccess() {
   const [searchParams] = useSearchParams()
-  const externalReference = searchParams.get('external_reference')
+  const paymentMethod = searchParams.get('metodo')
+  const externalReference =
+    searchParams.get('pedido') ?? searchParams.get('external_reference')
+  const isCashPayment = paymentMethod === 'efectivo'
 
   return (
     <div className="payment-status-page">
@@ -12,10 +15,11 @@ export function PaymentSuccess() {
       <main className="payment-status-page__main contenedor">
         <div className="payment-status-card payment-status-card--success">
           <span className="payment-status-card__icon" aria-hidden="true">✓</span>
-          <h1>¡Pago aprobado!</h1>
+          <h1>{isCashPayment ? 'Pedido confirmado' : '¡Pago aprobado!'}</h1>
           <p>
-            Tu pedido{externalReference ? ` #${externalReference}` : ''} fue registrado
-            correctamente. El local lo confirmará en breve.
+            {isCashPayment
+              ? `Tu pedido${externalReference ? ` #${externalReference}` : ''} fue registrado para pagar en efectivo. El local lo confirmará en breve.`
+              : `Tu pedido${externalReference ? ` #${externalReference}` : ''} fue registrado correctamente. El local lo confirmará en breve.`}
           </p>
           <Link to="/mis-pedidos" className="payment-status-card__btn">
             Ver mis pedidos

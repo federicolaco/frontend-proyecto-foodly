@@ -335,11 +335,13 @@ export function mapPendingLocalRequest(solicitud) {
 }
 
 export function buildOrderPayload(clientId, payload) {
+  const paymentMethod = payload.paymentMethod ?? 'mercadopago'
+
   return {
     dtPedido: {
       dtLocal: { id: Number(payload.restaurantId) },
       dtCliente: { id: Number(clientId) },
-      medioDePago: 'mercadopago',
+      medioDePago: paymentMethod,
       pagoSimulado: false,
       domicilioEntrega: payload.deliveryAddress ?? {
         calle: 'Sin especificar',
