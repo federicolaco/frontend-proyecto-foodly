@@ -14,7 +14,7 @@ export function PaymentFailure() {
           <span className="payment-status-card__icon" aria-hidden="true">✕</span>
           <h1>No pudimos procesar el pago</h1>
           <p>
-            El pago{externalReference ? ` del pedido #${externalReference}` : ''} fue
+            El pago{externalReference ? ` del pedido (ID ${externalReference})` : ''} fue
             rechazado o cancelado. Podés intentar nuevamente desde el local.
           </p>
           <Link to="/pedidos" className="payment-status-card__btn">

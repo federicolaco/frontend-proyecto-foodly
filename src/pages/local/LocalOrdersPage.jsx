@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { confirmOrder, getLocalOrders, rejectOrder } from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
+import { formatDateTime } from '../../lib/format'
 import { ORDER_STATUS_LABELS } from '../../lib/roles'
 import '../Panel.css'
 
@@ -226,7 +227,7 @@ export function LocalOrdersPage() {
                 style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}
               >
                 <div className="panel-actions" style={{ justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                  <strong>Pedido #{order.id}</strong>
+                  <strong>Pedido (ID {order.id})</strong>
                   <span className={`panel-badge panel-badge--${getOrderBadgeVariant(order.status)}`}>
                     {ORDER_STATUS_LABELS[order.status] ?? order.status}
                   </span>
@@ -234,7 +235,7 @@ export function LocalOrdersPage() {
 
                 <p>Cliente: {order.clientName}</p>
                 <p>Total: {formatPrice(order.total)}</p>
-                <p>Fecha: {new Date(order.createdAt).toLocaleString('es-AR')}</p>
+                <p>Fecha: {formatDateTime(order.createdAt)}</p>
 
                 <ul style={{ margin: '0.5rem 0', paddingLeft: '1.25rem' }}>
                   {order.items.map((item) => (

@@ -15,6 +15,7 @@ import { isMockMode } from '../../api/client'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
 import { StarRating } from '../../components/StarRating'
 import { getStoredUser } from '../../lib/auth'
+import { formatDate } from '../../lib/format'
 import { ROLES } from '../../lib/roles'
 import '../Account.css'
 import '../Panel.css'
@@ -445,7 +446,7 @@ export function AccountSettings() {
                             {r.comment && <p className="rating-comments__text">{r.comment}</p>}
                             {r.createdAt && (
                               <p className="rating-comments__date">
-                                {new Date(r.createdAt).toLocaleDateString('es-AR')}
+                                {formatDate(r.createdAt)}
                               </p>
                             )}
                           </article>
