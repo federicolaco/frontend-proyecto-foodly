@@ -1,5 +1,5 @@
 import { getSessionToken } from '../lib/auth'
-import { apiFetch, isApiConfigured } from './client'
+import { apiFetch, apiFetchSafe, isApiConfigured } from './client'
 import { buildClaimSearchBody } from './backend/helpers'
 import { mapClaim } from './backend/mappers'
 import {
@@ -8,24 +8,6 @@ import {
   mockResolveClaim,
   mockSubmitClaim,
 } from './mock/claimsMock'
-
-const CLAIMED_ORDERS_KEY = 'foodly_claimed_orders'
-
-function readClaimedOrders() {
-  try {
-    return JSON.parse(localStorage.getItem(CLAIMED_ORDERS_KEY) ?? '[]')
-  } catch {
-    return []
-  }
-}
-
-function rememberClaimedOrder(orderId) {
-  const id = Number(orderId)
-  const claimed = readClaimedOrders()
-  if (!claimed.includes(id)) {
-    localStorage.setItem(CLAIMED_ORDERS_KEY, JSON.stringify([...claimed, id]))
-  }
-}
 
 export async function submitClaim(payload) {
   if (isApiConfigured()) {
@@ -37,7 +19,6 @@ export async function submitClaim(payload) {
         dtPedido: { id: Number(payload.orderId) },
       }),
     })
-    rememberClaimedOrder(payload.orderId)
     return { orderId: Number(payload.orderId), status: 'pending' }
   }
 
@@ -78,10 +59,8 @@ export async function resolveClaim(claimId, resolution) {
 
 export async function getClaimForOrder(orderId) {
   if (isApiConfigured()) {
-    if (readClaimedOrders().includes(Number(orderId))) {
-      return { orderId: Number(orderId), status: 'pending' }
-    }
-    return null
+    const data = await apiFetchSafe(`/reclamos/mi-reclamo/${Number(orderId)}`, { method: 'GET' })
+    return data ? mapClaim(data) : null
   }
 
   return mockGetClientClaimsForOrder(getSessionToken(), orderId)

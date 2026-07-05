@@ -62,6 +62,10 @@ function sortOrders(orders, sortBy) {
   return sorted
 }
 
+function getClaimLookupErrorMessage(error) {
+  return error?.message ?? 'No pudimos verificar el estado del reclamo.'
+}
+
 export function MyOrders() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
@@ -100,11 +104,19 @@ export function MyOrders() {
               return
             }
 
-            const [claim, rated] = await Promise.all([
-              getClaimForOrder(order.id).catch(() => null),
-              hasRatedLocal(order.restaurantId).catch(() => false),
+            const [claimResult, ratedResult] = await Promise.allSettled([
+              getClaimForOrder(order.id),
+              hasRatedLocal(order.restaurantId),
             ])
-            meta[order.id] = { claim, rated }
+
+            meta[order.id] = {
+              claim: claimResult.status === 'fulfilled' ? claimResult.value : null,
+              claimLookupError:
+                claimResult.status === 'rejected'
+                  ? getClaimLookupErrorMessage(claimResult.reason)
+                  : null,
+              rated: ratedResult.status === 'fulfilled' ? ratedResult.value : false,
+            }
           }),
       )
 
@@ -281,6 +293,13 @@ export function MyOrders() {
                             <p className="my-orders__claim-status">
                               Reclamo presentado ({meta.claim.status === 'resolved' ? 'atendido' : 'pendiente'})
                             </p>
+                          ) : meta.claimLookupError ? (
+                            <p
+                              className="my-orders__claim-status my-orders__claim-status--warning"
+                              role="status"
+                            >
+                              No pudimos verificar el estado del reclamo: {meta.claimLookupError}
+                            </p>
                           ) : (
                             <button
                               type="button"
@@ -302,7 +321,10 @@ export function MyOrders() {
                       )}
                     </div>
 
-                    {['confirmed', 'delivered'].includes(order.status) && claimingId === order.id && !meta.claim && (
+                    {['confirmed', 'delivered'].includes(order.status) &&
+                      claimingId === order.id &&
+                      !meta.claim &&
+                      !meta.claimLookupError && (
                       <div className="my-orders__claim-form">
                         <textarea
                           className="panel-field__textarea"

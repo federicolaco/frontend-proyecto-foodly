@@ -275,6 +275,12 @@
   color: var(--gris-intermedio);
 }
 
+.my-orders__claim-status--warning {
+  color: #c0392b;
+  max-width: 28rem;
+  overflow-wrap: anywhere;
+}
+
 .my-orders__claim-form {
   display: grid;
   gap: 0.5rem;
