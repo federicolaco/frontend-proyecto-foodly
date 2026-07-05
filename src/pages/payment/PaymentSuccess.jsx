@@ -18,8 +18,8 @@ export function PaymentSuccess() {
           <h1>{isCashPayment ? 'Pedido confirmado' : '¡Pago aprobado!'}</h1>
           <p>
             {isCashPayment
-              ? `Tu pedido${externalReference ? ` #${externalReference}` : ''} fue registrado para pagar en efectivo. El local lo confirmará en breve.`
-              : `Tu pedido${externalReference ? ` #${externalReference}` : ''} fue registrado correctamente. El local lo confirmará en breve.`}
+              ? `Tu pedido${externalReference ? ` (ID ${externalReference})` : ''} fue registrado para pagar en efectivo. El local lo confirmará en breve.`
+              : `Tu pedido${externalReference ? ` (ID ${externalReference})` : ''} fue registrado correctamente. El local lo confirmará en breve.`}
           </p>
           <Link to="/mis-pedidos" className="payment-status-card__btn">
             Ver mis pedidos

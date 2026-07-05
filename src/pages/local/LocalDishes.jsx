@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { deleteDish, getLocalDishes, saveDish } from '../../api/localPanel'
+import { formatPrice } from '../../lib/cart'
 import '../Panel.css'
 
 const EMPTY_FORM = {
@@ -238,7 +239,7 @@ export function LocalDishes() {
                       )}
                     </td>
                     <td>{dish.name}</td>
-                    <td>${dish.price.toLocaleString('es-AR')}</td>
+                    <td>{formatPrice(dish.price)}</td>
                     <td>{dish.categoryId}</td>
                     <td>
                       <div className="panel-actions">

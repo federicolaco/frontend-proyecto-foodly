@@ -14,7 +14,7 @@ export function PaymentPending() {
           <span className="payment-status-card__icon" aria-hidden="true">⏳</span>
           <h1>Pago en proceso</h1>
           <p>
-            Tu pago{externalReference ? ` del pedido #${externalReference}` : ''} está
+            Tu pago{externalReference ? ` del pedido (ID ${externalReference})` : ''} está
             siendo procesado. Te avisaremos cuando se confirme.
           </p>
           <Link to="/mis-pedidos" className="payment-status-card__btn">

@@ -83,7 +83,7 @@ export function LocalClaims() {
             {claims.map((claim) => (
               <article key={claim.id} style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}>
                 <div className="panel-actions" style={{ justifyContent: 'space-between' }}>
-                  <strong>Reclamo #{claim.id} — Pedido #{claim.orderId}</strong>
+                  <strong>Reclamo (ID {claim.id}) — Pedido (ID {claim.orderId})</strong>
                   <span className={`panel-badge panel-badge--${claim.status === 'pending' ? 'pending' : 'confirmed'}`}>
                     {claim.status === 'pending' ? 'Pendiente' : 'Atendido'}
                   </span>

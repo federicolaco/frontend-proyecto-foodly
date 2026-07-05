@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { approveLocalRequest, getPendingLocalRequests, rejectLocalRequest } from '../../api/admin'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
+import { formatDate } from '../../lib/format'
 import '../Panel.css'
 
 export function AdminLocalRequests() {
@@ -104,7 +105,7 @@ export function AdminLocalRequests() {
                       <td>{request.email}</td>
                       <td>{request.address}</td>
                       <td>{request.description.slice(0, 80)}...</td>
-                      <td>{new Date(request.createdAt).toLocaleDateString('es-AR')}</td>
+                      <td>{formatDate(request.createdAt)}</td>
                       <td>
                         <div className="panel-actions">
                           <button

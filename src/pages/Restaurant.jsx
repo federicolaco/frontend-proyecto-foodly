@@ -11,6 +11,7 @@ import { RestaurantBanner } from '../components/restaurant/RestaurantBanner'
 import { RestaurantDeliveryBar } from '../components/restaurant/RestaurantDeliveryBar'
 import { useCart } from '../context/CartContext'
 import { getStoredUser } from '../lib/auth'
+import { formatDateTime } from '../lib/format'
 import './Restaurant.css'
 
 export function Restaurant() {
@@ -203,7 +204,7 @@ export function Restaurant() {
                   {currentRating?.createdAt && (
                     <p className="restaurant-page__rating-meta">
                       Última actualización:{' '}
-                      {new Date(currentRating.createdAt).toLocaleString('es-AR')}
+                      {formatDateTime(currentRating.createdAt)}
                     </p>
                   )}
                 </div>

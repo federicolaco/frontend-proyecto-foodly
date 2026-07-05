@@ -5,6 +5,7 @@ import { cancelOrder, getMyOrders } from '../api/orders'
 import { hasRatedLocal } from '../api/ratings'
 import { OrdersNavbar } from '../components/OrdersNavbar'
 import { formatPrice } from '../lib/cart'
+import { formatDateTime } from '../lib/format'
 import { ORDER_STATUS_LABELS } from '../lib/roles'
 import './Panel.css'
 
@@ -256,7 +257,7 @@ export function MyOrders() {
                 return (
                   <article key={order.id} className="my-orders__card">
                     <div className="panel-actions my-orders__header">
-                      <strong>#{order.id} — {order.restaurantName}</strong>
+                      <strong>Pedido (ID {order.id}) — {order.restaurantName}</strong>
                       <span
                         className={`panel-badge panel-badge--${getOrderBadgeVariant(order.status)}`}
                       >
@@ -267,7 +268,7 @@ export function MyOrders() {
                     <div className="my-orders__content">
                       <div className="my-orders__details">
                         <p>Total: {formatPrice(order.total)}</p>
-                        <p>{new Date(order.createdAt).toLocaleString('es-AR')}</p>
+                        <p>{formatDateTime(order.createdAt)}</p>
                       </div>
 
                       {order.status === 'rejected' && motivoRechazo && (

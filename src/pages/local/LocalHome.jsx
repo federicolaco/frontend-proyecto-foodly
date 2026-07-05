@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { closeLocal, getMyLocal, openLocal } from '../../api/localPanel'
 import { getLocalRatingDetails, getLocalRatingSummary } from '../../api/ratings'
+import { formatDate } from '../../lib/format'
 import '../Account.css'
 import '../Panel.css'
 
@@ -153,7 +154,7 @@ export function LocalHome() {
                           {r.comment && <p className="rating-comments__text">{r.comment}</p>}
                           {r.createdAt && (
                             <p className="rating-comments__date">
-                              {new Date(r.createdAt).toLocaleDateString('es-AR')}
+                              {formatDate(r.createdAt)}
                             </p>
                           )}
                         </article>
