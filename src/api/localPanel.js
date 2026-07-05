@@ -18,16 +18,18 @@ import {
 } from './backend/mappers'
 import {
   mockConfirmOrder,
+  mockCreateLocalCategory,
   mockDeleteDish,
+  mockDeletePromotion,
+  mockGetLocalCategories,
   mockGetLocalDishes,
   mockGetLocalOrders,
   mockGetLocalPromotions,
   mockGetLocalRestaurant,
+  mockGetLocalStats,
   mockRejectOrder,
   mockSaveDish,
   mockSavePromotion,
-  mockDeletePromotion,
-  mockGetLocalStats,
   mockSetLocalOpenState,
   mockSubmitLocalRequest,
 } from './mock/localMock'
@@ -239,6 +241,36 @@ export async function getLocalDishes() {
   return mockGetLocalDishes(getSessionToken())
 }
 
+export async function getLocalCategories() {
+  if (isApiConfigured()) {
+    const localId = getLocalId()
+    const response = await apiFetchSafe(`/locales/${localId}/categorias`)
+    return (response ?? []).map((category) => ({
+      id: category.id,
+      name: category.nombre,
+    }))
+  }
+
+  return mockGetLocalCategories(getSessionToken())
+}
+
+export async function createLocalCategory(nombre) {
+  if (isApiConfigured()) {
+    const localId = getLocalId()
+    const response = await apiFetch('/locales/categorias', {
+      method: 'POST',
+      body: JSON.stringify({ nombre, idLocal: Number(localId) }),
+    })
+
+    return {
+      id: response.id,
+      name: response.nombre,
+    }
+  }
+
+  return mockCreateLocalCategory(getSessionToken(), nombre)
+}
+
 export async function saveDish(payload) {
   if (isApiConfigured()) {
     const localId = getLocalId()
@@ -279,7 +311,6 @@ export async function getLocalOrders(filters = {}) {
     const params = buildOrderListParams(filters)
     const qs = params.toString()
     const data = await apiFetch(`/pedidos/listar-pedido-local/${localId}${qs ? `?${qs}` : ''}`)
-   console.log('RAW pedido del backend:', JSON.stringify(data, null, 2))
     return (data ?? []).map(mapOrderListItem)
   }
   return mockGetLocalOrders(getSessionToken(), filters)
