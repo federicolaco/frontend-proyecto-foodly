@@ -104,6 +104,59 @@ function getOrderDateOnly(order) {
   return typeof rawDate === 'string' ? rawDate.split('T')[0] : null
 }
 
+function normalizeCategoryName(value = '') {
+  return String(value).trim().replace(/\s+/g, ' ')
+}
+
+function findCategoryById(db, localId, categoryId) {
+  if (categoryId == null || categoryId === '') return null
+  return db.categories.find(
+    (category) =>
+      Number(category.localId) === Number(localId) &&
+      String(category.id) === String(categoryId),
+  ) ?? null
+}
+
+function findCategoryByName(db, localId, categoryName) {
+  const normalizedName = normalizeCategoryName(categoryName).toLowerCase()
+  if (!normalizedName) return null
+
+  return db.categories.find(
+    (category) =>
+      Number(category.localId) === Number(localId) &&
+      normalizeCategoryName(category.name).toLowerCase() === normalizedName,
+  ) ?? null
+}
+
+function mapCategoryForClient(category) {
+  if (!category) return null
+  return {
+    id: category.id,
+    name: category.name,
+  }
+}
+
+function mapMockDish(db, dish) {
+  const category = findCategoryById(db, dish.restaurantId, dish.categoryId)
+
+  return {
+    ...dish,
+    categoryId: category ? String(category.id) : '',
+    categoryName: category?.name ?? 'Sin categoria',
+  }
+}
+
+function resolveDishCategory(db, localId, categoryId) {
+  if (categoryId == null || categoryId === '') return null
+
+  const category = findCategoryById(db, localId, categoryId)
+  if (!category) {
+    throw new MockApiError(400, 'La categoria seleccionada no pertenece al local.')
+  }
+
+  return category
+}
+
 export function mockSubmitLocalRequest(token, payload) {
   ensureMockDb()
   const user = requireUser(token)
@@ -198,7 +251,6 @@ export function mockResolveLocalRequest(token, requestId, action) {
         deliveryTime: '30-40 minutos',
         image: null,
         foodType: request.description.slice(0, 40),
-        categories: [{ id: 'general', label: 'GENERAL' }],
       })
 
       db.users[userIndex].localEnabled = true
@@ -271,8 +323,57 @@ export function mockGetLocalDishes(token) {
 
   const db = getDb()
   return mockDelay(
-    db.dishes.filter((dish) => dish.restaurantId === user.restaurantId),
+    db.dishes
+      .filter((dish) => dish.restaurantId === user.restaurantId)
+      .map((dish) => mapMockDish(db, dish)),
   )
+}
+
+export function mockGetLocalCategories(token) {
+  ensureMockDb()
+  const user = requireUser(token)
+  if (user.role !== 'local' || !user.restaurantId) {
+    throw new MockApiError(403, 'Acceso denegado')
+  }
+
+  const db = getDb()
+  return mockDelay(
+    db.categories
+      .filter((category) => Number(category.localId) === Number(user.restaurantId))
+      .sort((left, right) => left.name.localeCompare(right.name))
+      .map(mapCategoryForClient),
+  )
+}
+
+export function mockCreateLocalCategory(token, nombre) {
+  ensureMockDb()
+  const user = requireUser(token)
+  if (user.role !== 'local' || !user.restaurantId) {
+    throw new MockApiError(403, 'Acceso denegado')
+  }
+
+  const normalizedName = normalizeCategoryName(nombre)
+  if (!normalizedName) {
+    throw new MockApiError(400, 'El nombre de la categoria es obligatorio.')
+  }
+
+  const result = updateDb((db) => {
+    const existingCategory = findCategoryByName(db, user.restaurantId, normalizedName)
+    if (existingCategory) {
+      throw new MockApiError(409, 'Ya existe una categoria con ese nombre para este local.')
+    }
+
+    const category = {
+      id: nextId(db, 'category'),
+      localId: user.restaurantId,
+      name: normalizedName,
+    }
+
+    db.categories.push(category)
+    return mapCategoryForClient(category)
+  })
+
+  return mockDelay(result)
 }
 
 export function mockSaveDish(token, dishPayload) {
@@ -287,10 +388,12 @@ export function mockSaveDish(token, dishPayload) {
   }
 
   if (!dishPayload.price || Number(dishPayload.price) <= 0) {
-    throw new MockApiError(400, 'El precio debe ser un valor numérico mayor a cero.')
+    throw new MockApiError(400, 'El precio debe ser un valor num??rico mayor a cero.')
   }
 
   const result = updateDb((db) => {
+    const category = resolveDishCategory(db, user.restaurantId, dishPayload.categoryId)
+
     if (dishPayload.id) {
       const index = db.dishes.findIndex(
         (dish) => dish.id === Number(dishPayload.id) && dish.restaurantId === user.restaurantId,
@@ -302,16 +405,16 @@ export function mockSaveDish(token, dishPayload) {
         name: dishPayload.name.trim(),
         description: dishPayload.description?.trim() ?? '',
         price: Number(dishPayload.price),
-        categoryId: dishPayload.categoryId ?? db.dishes[index].categoryId,
+        categoryId: category?.id ?? null,
         active: dishPayload.active ?? db.dishes[index].active,
       }
-      return db.dishes[index]
+      return mapMockDish(db, db.dishes[index])
     }
 
     const dish = {
       id: nextId(db, 'dish'),
       restaurantId: user.restaurantId,
-      categoryId: dishPayload.categoryId ?? 'general',
+      categoryId: category?.id ?? null,
       name: dishPayload.name.trim(),
       description: dishPayload.description?.trim() ?? '',
       price: Number(dishPayload.price),
@@ -320,7 +423,7 @@ export function mockSaveDish(token, dishPayload) {
     }
 
     db.dishes.push(dish)
-    return dish
+    return mapMockDish(db, dish)
   })
 
   return mockDelay(result)

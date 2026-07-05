@@ -25,37 +25,62 @@ function placeholder(index = 0) {
   return PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length]
 }
 
-function normalizeDishCategory(category) {
+function normalizeDishCategoryInfo(category) {
+  if (category == null) {
+    return { id: '', name: 'Sin categoria' }
+  }
+
   if (typeof category === 'string') {
     const trimmed = category.trim()
-    return trimmed || 'general'
+    return {
+      id: trimmed,
+      name: trimmed || 'Sin categoria',
+    }
   }
 
   if (typeof category === 'number') {
-    return String(category)
+    return {
+      id: String(category),
+      name: `Categoria #${category}`,
+    }
   }
 
-  if (category && typeof category === 'object') {
-    return (
-      category.id ??
-      category.codigo ??
-      category.nombre ??
-      category.name ??
-      'general'
-    )
+  if (typeof category === 'object') {
+    const rawName = category.nombre ?? category.name ?? category.label ?? category.categoryName
+    const id = category.id ?? category.codigo ?? category.categoryId ?? rawName ?? ''
+    const name = typeof rawName === 'string' ? rawName.trim() : rawName
+
+    return {
+      id: id == null || id === '' ? '' : String(id),
+      name: name || (id != null && id !== '' ? `Categoria #${id}` : 'Sin categoria'),
+    }
   }
 
-  return 'general'
+  return { id: '', name: 'Sin categoria' }
 }
 
-function getDishCategory(plato) {
-  return normalizeDishCategory(
+function getDishCategoryInfo(plato) {
+  const categorySource =
+    plato?.dtCategoria ??
     plato?.categoria ??
-      plato?.categoryId ??
-      plato?.category ??
-      plato?.dtCategoria ??
-      plato?.categoriaPlato,
-  )
+    plato?.categoriaPlato ??
+    plato?.category ??
+    (plato?.categoryId != null || plato?.categoryName
+      ? {
+          id: plato?.categoryId ?? '',
+          name: plato?.categoryName,
+        }
+      : null)
+
+  return normalizeDishCategoryInfo(categorySource)
+}
+
+function getDishCategoryId(plato) {
+  return getDishCategoryInfo(plato).id
+}
+
+function getDishCategoryName(plato) {
+  return getDishCategoryInfo(plato).name
 }
 
 export function mapLoginResponse(data, extras = {}) {
@@ -137,7 +162,8 @@ export function mapPlatoListItem(plato, index = 0) {
     restaurant: restaurant?.nombre ?? 'Local',
     image: plato.imagenes?.[0] ?? placeholder(index),
     price: plato.precio ?? 0,
-    categoryId: getDishCategory(plato),
+    categoryId: getDishCategoryId(plato),
+    categoryName: getDishCategoryName(plato),
   }
 }
 
@@ -186,7 +212,8 @@ function mapPromotedDishListItem(promo, index = 0) {
     discountPercent,
     isPromotion: true,
     promotionTitle: promo.descripcion ?? null,
-    categoryId: getDishCategory(plato),
+    categoryId: getDishCategoryId(plato),
+    categoryName: getDishCategoryName(plato),
   }
 }
 
@@ -213,6 +240,7 @@ function mergeDishWithPromotion(baseDish, promotedDish) {
     dishId: promotedDish.dishId ?? baseDish.id,
     originalPrice: basePrice || promotedDish.originalPrice,
     categoryId: baseDish.categoryId ?? promotedDish.categoryId,
+    categoryName: baseDish.categoryName ?? promotedDish.categoryName,
   }
 }
 
@@ -259,19 +287,17 @@ export function mapRestaurantDetail(local, platos = []) {
     enabled: true,
     products: platos
       .filter((plato) => plato.disponible !== false)
-      .map((plato, index) => {
-        console.log('plato recibido:', plato) // ← agregar esto temporalmente
-        return {
-          id: plato.id,
-          categoryId: getDishCategory(plato),
-          name: plato.nombre,
-          description: plato.descripcion ?? '',
-          price: plato.precio ?? 0,
-          precioFinal: plato.precioFinal ?? plato.precio ?? 0,
-          tienePromocion: plato.tienePromocion ?? false,
-          image: plato.imagenes?.[0] ?? placeholder(index),
-        }
-      }),
+      .map((plato, index) => ({
+        id: plato.id,
+        categoryId: getDishCategoryId(plato),
+        categoryName: getDishCategoryName(plato),
+        name: plato.nombre,
+        description: plato.descripcion ?? '',
+        price: plato.precio ?? 0,
+        precioFinal: plato.precioFinal ?? plato.precio ?? 0,
+        tienePromocion: plato.tienePromocion ?? false,
+        image: plato.imagenes?.[0] ?? placeholder(index),
+      })),
   }
 }
 export function mapLocalPanelRestaurant(local, extras = {}) {
@@ -289,7 +315,8 @@ export function mapLocalDish(plato, index = 0) {
   return {
     id: plato.id,
     restaurantId: plato.dtLocal?.id ?? plato.local?.id,
-    categoryId: getDishCategory(plato),
+    categoryId: getDishCategoryId(plato),
+    categoryName: getDishCategoryName(plato),
     name: plato.nombre,
     description: plato.descripcion ?? '',
     price: plato.precio ?? 0,
@@ -363,7 +390,7 @@ export function buildDishPayload(localId, payload) {
     nombre: payload.name?.trim(),
     descripcion: payload.description?.trim() ?? payload.name?.trim() ?? 'Plato',
     precio: Number(payload.price),
-    categoria: normalizeDishCategory(payload.categoryId ?? payload.categoria),
+    dtCategoria: payload.categoryId ? { id: Number(payload.categoryId) } : null,
     disponible: payload.active ?? true,
     dtLocal: { id: Number(localId) },
   }

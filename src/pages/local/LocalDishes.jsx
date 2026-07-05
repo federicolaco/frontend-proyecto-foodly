@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { deleteDish, getLocalDishes, saveDish } from '../../api/localPanel'
+import {
+  createLocalCategory,
+  deleteDish,
+  getLocalCategories,
+  getLocalDishes,
+  saveDish,
+} from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
 import '../Panel.css'
 
@@ -8,19 +14,31 @@ const EMPTY_FORM = {
   name: '',
   description: '',
   price: '',
-  categoryId: 'general',
+  categoryId: '',
   imageFile: null,
   imagePreview: null,
 }
 
 export function LocalDishes() {
   const [dishes, setDishes] = useState([])
+  const [categories, setCategories] = useState([])
+  const [creatingCategory, setCreatingCategory] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
   const [form, setForm] = useState(EMPTY_FORM)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
   const [saving, setSaving] = useState(false)
   const imageInputRef = useRef(null)
+
+  const loadCategories = async () => {
+    try {
+      const data = await getLocalCategories()
+      setCategories(data)
+    } catch {
+      setCategories([])
+    }
+  }
 
   const loadDishes = async () => {
     setLoading(true)
@@ -38,6 +56,7 @@ export function LocalDishes() {
 
   useEffect(() => {
     loadDishes()
+    loadCategories()
   }, [])
 
   const handleImageChange = (event) => {
@@ -49,6 +68,44 @@ export function LocalDishes() {
       imageFile: file,
       imagePreview: URL.createObjectURL(file),
     }))
+  }
+
+  const handleCategoryChange = (event) => {
+    const { value } = event.target
+
+    if (value === '__new__') {
+      setCreatingCategory(true)
+      return
+    }
+
+    setForm((prev) => ({ ...prev, categoryId: value }))
+  }
+
+  const handleCreateCategory = async () => {
+    const categoryName = newCategoryName.trim()
+    if (!categoryName) return
+
+    setSaving(true)
+    setError(null)
+    setMessage(null)
+
+    try {
+      const created = await createLocalCategory(categoryName)
+      setCategories((prev) => [...prev, created])
+      setForm((prev) => ({ ...prev, categoryId: String(created.id) }))
+      setCreatingCategory(false)
+      setNewCategoryName('')
+      setMessage('Categoria creada.')
+    } catch (err) {
+      setError(err.message ?? 'No pudimos crear la categoria.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleCancelCategoryCreation = () => {
+    setCreatingCategory(false)
+    setNewCategoryName('')
   }
 
   const handleSubmit = async (event) => {
@@ -66,8 +123,10 @@ export function LocalDishes() {
     try {
       await saveDish(form)
       setForm(EMPTY_FORM)
+      setCreatingCategory(false)
+      setNewCategoryName('')
       if (imageInputRef.current) imageInputRef.current.value = ''
-      setMessage(form.id ? 'Plato actualizado.' : 'Plato agregado al catálogo.')
+      setMessage(form.id ? 'Plato actualizado.' : 'Plato agregado al catalogo.')
       await loadDishes()
     } catch (err) {
       setError(err.message)
@@ -82,20 +141,24 @@ export function LocalDishes() {
       name: dish.name,
       description: dish.description ?? '',
       price: String(dish.price),
-      categoryId: dish.categoryId ?? 'general',
+      categoryId: String(dish.categoryId ?? ''),
       imageFile: null,
       imagePreview: dish.image ?? null,
     })
+    setCreatingCategory(false)
+    setNewCategoryName('')
     if (imageInputRef.current) imageInputRef.current.value = ''
   }
 
   const handleCancel = () => {
     setForm(EMPTY_FORM)
+    setCreatingCategory(false)
+    setNewCategoryName('')
     if (imageInputRef.current) imageInputRef.current.value = ''
   }
 
   const handleDelete = async (dishId) => {
-    if (!window.confirm('¿Desea eliminar este plato del catálogo?')) return
+    if (!window.confirm('Desea eliminar este plato del catalogo?')) return
 
     setError(null)
     setMessage(null)
@@ -147,7 +210,7 @@ export function LocalDishes() {
           </label>
 
           <label className="panel-field" style={{ gridColumn: '1 / -1' }}>
-            <span className="panel-field__label">Descripción</span>
+            <span className="panel-field__label">Descripcion</span>
             <textarea
               rows={3}
               className="panel-field__textarea"
@@ -157,17 +220,52 @@ export function LocalDishes() {
           </label>
 
           <label className="panel-field">
-            <span className="panel-field__label">Categoría</span>
-            <input
-              className="panel-field__input"
-              value={form.categoryId}
-              onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-            />
+            <span className="panel-field__label">Categoria</span>
+            {!creatingCategory ? (
+              <select
+                className="panel-field__input"
+                value={form.categoryId}
+                onChange={handleCategoryChange}
+              >
+                <option value="">Seleccionar categoria</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+                <option value="__new__">+ Crear nueva categoria</option>
+              </select>
+            ) : (
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input
+                  className="panel-field__input"
+                  placeholder="Nombre de la categoria"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="panel-btn panel-btn--outline"
+                  onClick={handleCreateCategory}
+                  disabled={saving}
+                >
+                  Guardar
+                </button>
+                <button
+                  type="button"
+                  className="panel-btn panel-btn--outline"
+                  onClick={handleCancelCategoryCreation}
+                  disabled={saving}
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
           </label>
 
           <label className="panel-field">
             <span className="panel-field__label">
-              Imagen del plato{form.id ? ' (opcional, deje vacío para mantener la actual)' : ''}
+              Imagen del plato{form.id ? ' (opcional, deje vacio para mantener la actual)' : ''}
             </span>
             <input
               ref={imageInputRef}
@@ -206,12 +304,12 @@ export function LocalDishes() {
       </section>
 
       <section className="panel-card">
-        <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Catálogo</h2>
+        <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Catalogo</h2>
 
         {loading && <p className="panel-empty">Cargando platos...</p>}
 
         {!loading && dishes.length === 0 && (
-          <p className="panel-empty">Aún no hay platos en el catálogo.</p>
+          <p className="panel-empty">Aun no hay platos en el catalogo.</p>
         )}
 
         {!loading && dishes.length > 0 && (
@@ -222,7 +320,7 @@ export function LocalDishes() {
                   <th>Imagen</th>
                   <th>Nombre</th>
                   <th>Precio</th>
-                  <th>Categoría</th>
+                  <th>Categoria</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -240,7 +338,7 @@ export function LocalDishes() {
                     </td>
                     <td>{dish.name}</td>
                     <td>{formatPrice(dish.price)}</td>
-                    <td>{dish.categoryId}</td>
+                    <td>{dish.categoryName ?? 'Sin categoria'}</td>
                     <td>
                       <div className="panel-actions">
                         <button

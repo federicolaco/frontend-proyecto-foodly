@@ -30,8 +30,24 @@ function requireClient(token) {
   return user
 }
 
+function getDishCategory(db, restaurantId, categoryId) {
+  if (categoryId == null || categoryId === '') return null
+
+  return db.categories.find(
+    (category) =>
+      Number(category.localId) === Number(restaurantId) &&
+      String(category.id) === String(categoryId),
+  ) ?? null
+}
+
+function sameCategory(left, right) {
+  return String(left ?? '') === String(right ?? '')
+}
+
 function buildDishListItem(dish, db) {
   const restaurant = db.restaurants.find((r) => r.id === dish.restaurantId)
+  const category = getDishCategory(db, dish.restaurantId, dish.categoryId)
+
   return {
     id: dish.id,
     restaurantId: dish.restaurantId,
@@ -39,7 +55,8 @@ function buildDishListItem(dish, db) {
     restaurant: restaurant?.name ?? 'Local',
     image: dish.image ?? getMockPlaceholderImage(dish.id),
     price: dish.price,
-    categoryId: dish.categoryId,
+    categoryId: category ? String(category.id) : '',
+    categoryName: category?.name ?? 'Sin categoria',
   }
 }
 
@@ -67,6 +84,7 @@ function buildPromotionListItem(promo, db) {
 function buildPromotedDishListItem(promo, db) {
   const dish = db.dishes.find((d) => d.id === promo.dishId)
   const restaurant = db.restaurants.find((r) => r.id === promo.restaurantId)
+  const category = dish ? getDishCategory(db, dish.restaurantId, dish.categoryId) : null
   const basePrice = dish?.price ?? 0
   const discountedPrice = Math.round(basePrice * (1 - promo.discountPercent / 100))
   const dishId = dish?.id ?? promo.dishId ?? `promo-dish-${promo.id}`
@@ -84,7 +102,8 @@ function buildPromotedDishListItem(promo, db) {
     discountPercent: promo.discountPercent,
     isPromotion: true,
     promotionTitle: promo.title,
-    categoryId: dish?.categoryId,
+    categoryId: category ? String(category.id) : '',
+    categoryName: category?.name ?? 'Sin categoria',
   }
 }
 
@@ -111,6 +130,7 @@ function mergeDishWithPromotion(baseDish, promotedDish) {
     dishId: promotedDish.dishId ?? baseDish.id,
     originalPrice: basePrice || promotedDish.originalPrice,
     categoryId: baseDish.categoryId ?? promotedDish.categoryId,
+    categoryName: baseDish.categoryName ?? promotedDish.categoryName,
   }
 }
 
@@ -185,7 +205,7 @@ export function mockSearchDishesAndPromotions(query = '', options = {}) {
   }
 
   if (options.category) {
-    dishes = dishes.filter((dish) => dish.categoryId === options.category)
+    dishes = dishes.filter((dish) => sameCategory(dish.categoryId, options.category))
   }
 
   const dishMap = new Map(
@@ -210,7 +230,7 @@ export function mockSearchDishesAndPromotions(query = '', options = {}) {
   }
 
   if (options.category) {
-    combined = combined.filter((item) => item.categoryId === options.category)
+    combined = combined.filter((item) => sameCategory(item.categoryId, options.category))
   }
 
   if (options.maxPrice) {
@@ -269,14 +289,19 @@ export function mockGetRestaurantById(restaurantId) {
 
   const products = db.dishes
     .filter((dish) => dish.restaurantId === restaurant.id && dish.active)
-    .map((dish) => ({
-      id: dish.id,
-      categoryId: dish.categoryId,
-      name: dish.name,
-      description: dish.description,
-      price: dish.price,
-      image: dish.image ?? getMockPlaceholderImage(dish.id),
-    }))
+    .map((dish) => {
+      const category = getDishCategory(db, dish.restaurantId, dish.categoryId)
+
+      return {
+        id: dish.id,
+        categoryId: category ? String(category.id) : '',
+        categoryName: category?.name ?? 'Sin categoria',
+        name: dish.name,
+        description: dish.description,
+        price: dish.price,
+        image: dish.image ?? getMockPlaceholderImage(dish.id),
+      }
+    })
 
   return mockDelay({
     ...restaurant,
