@@ -287,6 +287,7 @@ export function mockGetRestaurantById(restaurantId) {
 export function mockCreateOrder(token, payload) {
   ensureMockDb()
   const user = requireClient(token)
+  const paymentMethod = payload.paymentMethod ?? 'mercadopago'
 
   if (!payload.items?.length) {
     throw new MockApiError(400, 'Debe agregar al menos un plato para realizar el pedido.')
@@ -321,6 +322,7 @@ export function mockCreateOrder(token, payload) {
       clientName: user.name,
       restaurantId: restaurant.id,
       restaurantName: restaurant.name,
+      paymentMethod,
       items: payload.items,
       total,
       status: 'pending',

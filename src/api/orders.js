@@ -70,23 +70,29 @@ export async function searchDishes(query = '', options = {}) {
 }
 
 export async function createOrder(payload) {
+  const paymentMethod = payload.paymentMethod ?? 'mercadopago'
+
   if (isApiConfigured()) {
     const user = getStoredUser()
     const deliveryAddress =
       payload.deliveryAddress ?? getUserDeliveryAddress(user)
     const response = await apiFetch('/pedidos', {
       method: 'POST',
-      body: JSON.stringify(buildOrderPayload(user.id, { ...payload, deliveryAddress })),
+      body: JSON.stringify(
+        buildOrderPayload(user.id, { ...payload, paymentMethod, deliveryAddress }),
+      ),
     })
     return {
       id: response.id,
       status: 'pending',
       total: response.total ?? payload.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
       restaurantId: payload.restaurantId,
-      mpInitPoint: response.mpInitPoint ?? null, 
+      paymentMethod,
+      mpInitPoint: response.mpInitPoint ?? null,
     }
   }
-  return mockCreateOrder(getSessionToken(), payload)
+
+  return mockCreateOrder(getSessionToken(), { ...payload, paymentMethod })
 }
 
 export async function getMyOrders(filters = {}) {
