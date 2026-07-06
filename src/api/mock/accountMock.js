@@ -56,7 +56,12 @@ export function mockUpdateProfile(token, payload) {
   setStoredUser(updated)
   return mockDelay(updated)
 }
-
+export function mockActivateAccount(token) {
+  if (!token) {
+    throw new MockApiError(400, 'El enlace de activación no es válido.')
+  }
+  return mockDelay({ message: 'Cuenta activada correctamente.' })
+}
 export function mockStartPasswordChange(token, currentPassword) {
   ensureMockDb()
   const user = requireUser(token)

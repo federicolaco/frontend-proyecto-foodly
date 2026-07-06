@@ -42,7 +42,7 @@ function App() {
         <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
         <Route path="/restablecer-contrasena" element={<ResetPassword />} />
         <Route path="/confirmar-cambio-correo" element={<ConfirmEmailChange />} />
-        <Route path="/activar" element={<ActivarCuenta />} />
+        <Route path="/activar-cuenta" element={<ActivarCuenta />} />
 
         <Route
           path="/cuenta"

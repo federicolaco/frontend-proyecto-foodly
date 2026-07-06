@@ -3,6 +3,7 @@ import { apiFetch, apiFetchMultipart, apiFetchSafe, isApiConfigured } from './cl
 import { formatAddress, normalizeAddress } from './backend/helpers'
 import { mapRatingSummary } from './backend/mappers'
 import {
+  mockActivateAccount,
   mockConfirmEmailChange,
   mockConfirmPasswordChange,
   mockDeleteAccount,
@@ -127,6 +128,15 @@ export async function verifyPasswordChangeCode(code) {
   }
 
   return mockVerifyPasswordCode(getSessionToken(), code)
+}
+
+export async function activateAccount(token) {
+  if (isApiConfigured()) {
+    await apiFetch(`/usuarios/activar?token=${encodeURIComponent(token)}`, { method: 'POST' })
+    return { message: 'Cuenta activada correctamente.' }
+  }
+
+  return mockActivateAccount(token)
 }
 
 export async function confirmPasswordChange(newPassword, confirmPassword) {

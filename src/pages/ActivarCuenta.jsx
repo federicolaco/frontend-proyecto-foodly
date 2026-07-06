@@ -1,29 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { apiFetch } from '../api/client'
+import { activateAccount } from '../api/account'
 import { AuthLayout } from '../components/AuthLayout'
 import './AuthPages.css'
 
 export function ActivarCuenta() {
   const [searchParams] = useSearchParams()
-  const email = searchParams.get('email') ?? ''
+  const token = searchParams.get('token') ?? ''
 
-  const [estado, setEstado] = useState('pendiente') 
+  const [estado, setEstado] = useState(token ? 'pendiente' : 'error')
   const [loading, setLoading] = useState(false)
-  const [mensaje, setMensaje] = useState(null)
-
-  useEffect(() => {
-    if (!email) {
-      setEstado('error')
-      setMensaje('El enlace de activación no es válido.')
-    }
-  }, [email])
+  const [mensaje, setMensaje] = useState(token ? null : 'El enlace de activación no es válido.')
 
   const handleActivar = async () => {
     setLoading(true)
     setMensaje(null)
     try {
-      await apiFetch(`/usuarios/activar?email=${encodeURIComponent(email)}`, { method: 'POST' })
+      await activateAccount(token)
       setEstado('activado')
     } catch (err) {
       setEstado('error')
@@ -32,20 +25,21 @@ export function ActivarCuenta() {
       setLoading(false)
     }
   }
-return (
+
+  return (
     <AuthLayout>
       <h1 className="auth-pagetitle">Activar cuenta</h1>
 
       {estado === 'pendiente' && (
         <>
           <p className="auth-pagesection-title">
-            Hacé clic en el botón para activar tu cuenta asociada a <strong>{email}</strong>.
+            Hacé clic en el botón para activar tu cuenta.
           </p>
           {mensaje && <p className="auth-pageerror" role="alert">{mensaje}</p>}
           <button
             className="auth-btn auth-btn--primary"
             onClick={handleActivar}
-            disabled={loading || !email}
+            disabled={loading || !token}
           >
             {loading ? 'ACTIVANDO...' : 'ACTIVAR CUENTA'}
           </button>
