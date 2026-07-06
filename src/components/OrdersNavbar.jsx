@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { getAppNavLinks, getProfileMenuItems } from '../lib/navLinks'
 import { getStoredUser } from '../lib/auth'
 import { useCart } from '../context/CartContext'
+import { NotificationBell } from './NotificationBell'
 import { ProfileMenu } from './ProfileMenu'
 import './OrdersNavbar.css'
 
@@ -94,6 +95,8 @@ export function OrdersNavbar() {
 
           <div className="orders-navbar__actions">
             <span className="orders-navbar__greeting">¡Hola, {user.name}!</span>
+
+            <NotificationBell />
 
             <div className="orders-navbar__profile-wrap">
               <button
