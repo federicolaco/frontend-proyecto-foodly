@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import './RestaurantInfoModal.css'
+import './RestaurantinfoModal.css'
 
 export function RestaurantInfoModal({ open, onClose, title, children }) {
   useEffect(() => {
