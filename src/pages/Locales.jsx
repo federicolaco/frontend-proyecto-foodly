@@ -86,10 +86,19 @@ export function Locales() {
                 <option value="rating">Calificación</option>
               </select>
             </label>
-            <label className="panel-field" style={{ alignSelf: 'end' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input type="checkbox" checked={openOnly} onChange={(e) => setOpenOnly(e.target.checked)} />
-                Solo abiertos
+            <label className="panel-field locales-filter__toggle-field">
+              <span className="panel-field__label">Disponibilidad</span>
+              <span className="locales-filter__toggle">
+                <input
+                  type="checkbox"
+                  className="locales-filter__toggle-input"
+                  checked={openOnly}
+                  onChange={(e) => setOpenOnly(e.target.checked)}
+                />
+                <span className="locales-filter__toggle-track" aria-hidden="true">
+                  <span className="locales-filter__toggle-thumb" />
+                </span>
+                <span className="locales-filter__toggle-text">Solo abiertos</span>
               </span>
             </label>
           </div>
