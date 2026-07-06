@@ -16,6 +16,16 @@ const PASSWORD_HINT = {
   ],
 }
 
+const PASSWORD_MIN_LENGTH = 8
+
+function isPasswordValid(password) {
+  return (
+    password.length >= PASSWORD_MIN_LENGTH &&
+    /[A-Z]/.test(password) &&
+    /\d/.test(password)
+  )
+}
+
 function GoogleIcon() {
   return (
     <svg className="auth-btn__google-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -85,6 +95,11 @@ export function Register() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError(null)
+
+    if (!isPasswordValid(password)) {
+      setError('La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.')
+      return
+    }
 
     if (password !== confirmPassword) {
       setError('Las contraseñas ingresadas no coinciden. Por favor, verifique e inténtelo de nuevo.')
