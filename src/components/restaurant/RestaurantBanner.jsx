@@ -26,11 +26,14 @@ export function RestaurantBanner({ restaurant, onShowComments, onShowPhotos }) {
         </span>
       )}
       <div className="restaurant-banner__info">
-        <h1 className="restaurant-banner__name">{restaurant.name}</h1>
-        <p className="restaurant-banner__rating">
-          <StarIcon />
-          <span>{restaurant.rating}</span>
-        </p>
+        <div>
+          <h1 className="restaurant-banner__name">{restaurant.name}</h1>
+          <p className="restaurant-banner__rating">
+            <StarIcon />
+            <span>{restaurant.rating}</span>
+          </p>
+        </div>
+
         <div className="restaurant-banner__actions">
           <button type="button" className="restaurant-banner__action-btn" onClick={onShowComments}>
             Ver comentarios
