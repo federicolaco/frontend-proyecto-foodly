@@ -10,6 +10,7 @@ import { LocalClaims } from './pages/local/LocalClaims'
 import { LocalClients } from './pages/local/LocalClients'
 import { LocalDishes } from './pages/local/LocalDishes'
 import { LocalHome } from './pages/local/LocalHome'
+import { LocalLayout } from './pages/local/LocalLayout'
 import { LocalOrdersPage } from './pages/local/LocalOrdersPage'
 import { LocalPromotions } from './pages/local/LocalPromotions'
 import { LocalStats } from './pages/local/LocalStatsPage'
@@ -134,7 +135,7 @@ function App() {
           path="/local-panel"
           element={
             <ProtectedRoute roles={[ROLES.LOCAL]}>
-              
+              <LocalLayout />
             </ProtectedRoute>
           }
         >
