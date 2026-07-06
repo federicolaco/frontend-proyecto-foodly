@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getClaimForOrder, submitClaim } from '../api/claims'
-import { cancelOrder, getMyOrders } from '../api/orders'
+import { cancelOrder, getMyOrders, retryOrderPayment } from '../api/orders'
 import { hasRatedLocal } from '../api/ratings'
 import { OrdersNavbar } from '../components/OrdersNavbar'
 import { formatPrice } from '../lib/cart'
@@ -11,12 +11,12 @@ import './Panel.css'
 
 const COMPENSATION_TYPES = [
   { id: 'reintegro', label: 'Reintegro del monto' },
-  { id: 'compensacion', label: 'Otra compensación' },
+  { id: 'compensacion', label: 'Otra compensacion' },
 ]
 
 const SORT_OPTIONS = [
-  { id: 'date_desc', label: 'Fecha (más reciente primero)' },
-  { id: 'date_asc', label: 'Fecha (más antigua primero)' },
+  { id: 'date_desc', label: 'Fecha (mas reciente primero)' },
+  { id: 'date_asc', label: 'Fecha (mas antigua primero)' },
   { id: 'price_desc', label: 'Precio (mayor a menor)' },
   { id: 'price_asc', label: 'Precio (menor a mayor)' },
   { id: 'restaurant_asc', label: 'Restaurante (A-Z)' },
@@ -28,6 +28,10 @@ function getOrderBadgeVariant(status) {
   if (status === 'confirmed') return 'confirmed'
   if (status === 'delivered') return 'delivered'
   return 'closed'
+}
+
+function getOrderStatusLabel(order) {
+  return order.visibleStatus ?? order.estadoVisible ?? ORDER_STATUS_LABELS[order.status] ?? order.status
 }
 
 function sortOrders(orders, sortBy) {
@@ -80,6 +84,8 @@ export function MyOrders() {
   const [claimCompensation, setClaimCompensation] = useState(COMPENSATION_TYPES[0].id)
   const [orderMeta, setOrderMeta] = useState({})
   const [hasAnyOrders, setHasAnyOrders] = useState(true)
+  const [retryingId, setRetryingId] = useState(null)
+  const [cancellingId, setCancellingId] = useState(null)
 
   const loadOrders = async () => {
     setLoading(true)
@@ -89,8 +95,6 @@ export function MyOrders() {
       const data = await getMyOrders(statusFilter ? { status: statusFilter } : {})
       setOrders(data)
 
-      // Solo cuando no hay filtro activo sabemos con certeza si el usuario
-      // tiene pedidos en total o no.
       if (!statusFilter) {
         setHasAnyOrders(data.length > 0)
       }
@@ -136,10 +140,11 @@ export function MyOrders() {
   const sortedOrders = useMemo(() => sortOrders(orders, sortBy), [orders, sortBy])
 
   const handleCancel = async (orderId) => {
-    if (!window.confirm('¿Confirma la cancelación del pedido?')) return
+    if (!window.confirm('Confirma la cancelacion del pedido?')) return
 
     setMessage(null)
     setError(null)
+    setCancellingId(orderId)
 
     try {
       await cancelOrder(orderId)
@@ -147,6 +152,28 @@ export function MyOrders() {
       await loadOrders()
     } catch (err) {
       setError(err.message)
+    } finally {
+      setCancellingId(null)
+    }
+  }
+
+  const handleRetryPayment = async (orderId) => {
+    setMessage(null)
+    setError(null)
+    setRetryingId(orderId)
+
+    try {
+      const order = await retryOrderPayment(orderId)
+
+      if (!order.mpInitPoint) {
+        throw new Error('No pudimos generar el enlace para reintentar el pago.')
+      }
+
+      window.location.href = order.mpInitPoint
+    } catch (err) {
+      setError(err.message ?? 'No pudimos reintentar el pago.')
+    } finally {
+      setRetryingId(null)
     }
   }
 
@@ -183,7 +210,7 @@ export function MyOrders() {
 
   const emptyMessage = statusFilter
     ? 'No se encontraron pedidos que coincidan con los criterios seleccionados.'
-    : 'Aún no ha realizado ningún pedido.'
+    : 'Aun no ha realizado ningun pedido.'
 
   return (
     <div className="panel-page">
@@ -239,9 +266,9 @@ export function MyOrders() {
               {emptyMessage}
               {!hasAnyOrders && (
                 <>
-                  {` `}
+                  {' '}
                   <Link to="/pedidos" style={{ color: 'var(--celeste)', fontWeight: 700 }}>
-                    ¡Explore los locales disponibles!
+                    Explore los locales disponibles.
                   </Link>
                 </>
               )}
@@ -253,15 +280,19 @@ export function MyOrders() {
               {sortedOrders.map((order) => {
                 const meta = orderMeta[order.id] ?? {}
                 const motivoRechazo = order.motivoRechazo ?? order.rejectionReason
+                const isPaymentPending = order.paymentPending ?? order.pagoPendiente
+                const canRetryPayment = order.canRetryPayment ?? order.permiteReintentarPago
+                const isRetryingPayment = retryingId === order.id
+                const isCancellingOrder = cancellingId === order.id
 
                 return (
                   <article key={order.id} className="my-orders__card">
                     <div className="panel-actions my-orders__header">
-                      <strong>Pedido (ID {order.id}) — {order.restaurantName}</strong>
+                      <strong>Pedido (ID {order.id}) - {order.restaurantName}</strong>
                       <span
                         className={`panel-badge panel-badge--${getOrderBadgeVariant(order.status)}`}
                       >
-                        {ORDER_STATUS_LABELS[order.status] ?? order.status}
+                        {getOrderStatusLabel(order)}
                       </span>
                     </div>
 
@@ -278,14 +309,38 @@ export function MyOrders() {
                         </div>
                       )}
 
+                      {isPaymentPending && (
+                        <div className="my-orders__payment-pending">
+                          <p className="my-orders__payment-pending-title">Pago pendiente</p>
+                          <p className="my-orders__payment-pending-text">
+                            El pedido fue creado, pero el pago todavia no quedo acreditado.
+                            Podes reintentarlo o cancelarlo.
+                          </p>
+                        </div>
+                      )}
+
                       {order.status === 'pending' && (
-                        <button
-                          type="button"
-                          className="panel-btn panel-btn--danger my-orders__action-btn"
-                          onClick={() => handleCancel(order.id)}
-                        >
-                          Cancelar pedido
-                        </button>
+                        <div className="my-orders__actions">
+                          {canRetryPayment && (
+                            <button
+                              type="button"
+                              className="panel-btn panel-btn--primary my-orders__action-btn"
+                              onClick={() => handleRetryPayment(order.id)}
+                              disabled={isRetryingPayment || isCancellingOrder}
+                            >
+                              {isRetryingPayment ? 'Redirigiendo...' : 'Reintentar pago'}
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            className="panel-btn panel-btn--danger my-orders__action-btn"
+                            onClick={() => handleCancel(order.id)}
+                            disabled={isRetryingPayment || isCancellingOrder}
+                          >
+                            {isCancellingOrder ? 'Cancelando...' : 'Cancelar pedido'}
+                          </button>
+                        </div>
                       )}
 
                       {['confirmed', 'delivered'].includes(order.status) && (
@@ -316,7 +371,7 @@ export function MyOrders() {
                             className="panel-btn panel-btn--outline my-orders__action-btn"
                             onClick={() => handleOpenRating(order)}
                           >
-                            {meta.rated ? 'Editar calificación del local' : 'Calificar local'}
+                            {meta.rated ? 'Editar calificacion del local' : 'Calificar local'}
                           </button>
                         </div>
                       )}
