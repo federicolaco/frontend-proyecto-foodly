@@ -53,6 +53,11 @@
   margin-top: 0.6rem;
 }
 
+.restaurant-banner__info{
+  display: flex;
+  justify-content: space-between;
+}
+
 .restaurant-banner__action-btn {
   padding: 0.4rem 0.8rem;
   border-radius: 999px;
