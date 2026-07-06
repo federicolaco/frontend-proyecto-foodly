@@ -257,6 +257,28 @@
   overflow-wrap: anywhere;
 }
 
+.my-orders__payment-pending {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  background: #fff8e8;
+  border: 1px solid #f3d38a;
+}
+
+.my-orders__payment-pending-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #8a5a00;
+}
+
+.my-orders__payment-pending-text {
+  margin: 0;
+  color: #6f5323;
+  overflow-wrap: anywhere;
+}
+
 .my-orders__actions {
   display: flex;
   flex-wrap: wrap;

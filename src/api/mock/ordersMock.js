@@ -22,6 +22,32 @@ export function getMockPlaceholderImage(index = 0) {
   return PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length]
 }
 
+function buildMockMercadoPagoInitPoint(orderId) {
+  return `/pago/pendiente?external_reference=${orderId}`
+}
+
+function mapMockClientOrder(order) {
+  const isPaymentPending =
+    order.paymentMethod === 'mercadopago' &&
+    order.status === 'pending' &&
+    order.paid === false
+  const estadoVisible = isPaymentPending ? 'Pendiente de pago' : null
+  const mpInitPoint = isPaymentPending
+    ? order.mpInitPoint ?? buildMockMercadoPagoInitPoint(order.id)
+    : order.mpInitPoint ?? null
+
+  return {
+    ...order,
+    estadoVisible,
+    visibleStatus: estadoVisible,
+    pagoPendiente: isPaymentPending,
+    paymentPending: isPaymentPending,
+    permiteReintentarPago: isPaymentPending,
+    canRetryPayment: isPaymentPending,
+    mpInitPoint,
+  }
+}
+
 function requireClient(token) {
   const user = mockGetUserFromToken(token)
   if (!user) throw new MockApiError(401, 'Sesión inválida')
@@ -341,8 +367,9 @@ export function mockCreateOrder(token, payload) {
   const total = payload.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
   const result = updateDb((dbInner) => {
+    const orderId = nextId(dbInner, 'order')
     const order = {
-      id: nextId(dbInner, 'order'),
+      id: orderId,
       clientId: user.id,
       clientName: user.name,
       restaurantId: restaurant.id,
@@ -351,14 +378,19 @@ export function mockCreateOrder(token, payload) {
       items: payload.items,
       total,
       status: 'pending',
+      paid: paymentMethod === 'efectivo',
       createdAt: new Date().toISOString(),
+      mpInitPoint:
+        paymentMethod === 'mercadopago'
+          ? buildMockMercadoPagoInitPoint(orderId)
+          : null,
     }
 
     dbInner.orders.push(order)
     return order
   })
 
-  return mockDelay(result)
+  return mockDelay(mapMockClientOrder(result))
 }
 
 export function mockGetClientOrders(token, filters = {}) {
@@ -373,7 +405,7 @@ export function mockGetClientOrders(token, filters = {}) {
   }
 
   orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-  return mockDelay(orders)
+  return mockDelay(orders.map(mapMockClientOrder))
 }
 
 export function mockCancelClientOrder(token, orderId) {
@@ -399,4 +431,21 @@ export function mockCancelClientOrder(token, orderId) {
   })
 
   return mockDelay(result)
+}
+
+export function mockRetryClientOrderPayment(token, orderId) {
+  ensureMockDb()
+  const user = requireClient(token)
+
+  const order = getDb().orders.find(
+    (entry) => entry.id === Number(orderId) && entry.clientId === user.id,
+  )
+
+  if (!order) throw new MockApiError(404, 'Pedido no encontrado')
+
+  if (order.paymentMethod !== 'mercadopago' || order.status !== 'pending' || order.paid !== false) {
+    throw new MockApiError(400, 'Este pedido no admite reintentar el pago.')
+  }
+
+  return mockDelay(mapMockClientOrder(order))
 }

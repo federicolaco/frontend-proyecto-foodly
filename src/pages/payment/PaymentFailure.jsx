@@ -11,14 +11,15 @@ export function PaymentFailure() {
       <OrdersNavbar />
       <main className="payment-status-page__main contenedor">
         <div className="payment-status-card payment-status-card--error">
-          <span className="payment-status-card__icon" aria-hidden="true">✕</span>
-          <h1>No pudimos procesar el pago</h1>
+          <span className="payment-status-card__icon" aria-hidden="true">X</span>
+          <h1>No pudimos confirmar el pago</h1>
           <p>
-            El pago{externalReference ? ` del pedido (ID ${externalReference})` : ''} fue
-            rechazado o cancelado. Podés intentar nuevamente desde el local.
+            Todavia no pudimos acreditar el pago
+            {externalReference ? ` del pedido (ID ${externalReference})` : ''}. Revisa el estado
+            en Mis Pedidos y, si corresponde, reintenta el pago desde alli.
           </p>
-          <Link to="/pedidos" className="payment-status-card__btn">
-            Volver a pedidos
+          <Link to="/mis-pedidos" className="payment-status-card__btn">
+            Ver mis pedidos
           </Link>
         </div>
       </main>

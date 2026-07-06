@@ -331,6 +331,13 @@ export function mapOrderListItem(pedido) {
     .join(' ')
     .trim()
   const motivoRechazo = pedido.motivoRechazo ?? pedido.rejectionReason ?? null
+  const estadoVisible =
+    typeof pedido.estadoVisible === 'string' && pedido.estadoVisible.trim()
+      ? pedido.estadoVisible.trim()
+      : null
+  const pagoPendiente = Boolean(pedido.pagoPendiente)
+  const permiteReintentarPago = Boolean(pedido.permiteReintentarPago)
+  const mpInitPoint = pedido.mpInitPoint ?? null
 
   return {
     id: pedido.id,
@@ -346,6 +353,13 @@ export function mapOrderListItem(pedido) {
     itemCount: pedido.cantidadItems ?? 0,
     motivoRechazo,
     rejectionReason: motivoRechazo,
+    estadoVisible,
+    visibleStatus: estadoVisible,
+    pagoPendiente,
+    paymentPending: pagoPendiente,
+    permiteReintentarPago,
+    canRetryPayment: permiteReintentarPago,
+    mpInitPoint,
   }
 }
 

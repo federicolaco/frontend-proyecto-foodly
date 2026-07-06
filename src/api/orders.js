@@ -19,6 +19,7 @@ import {
   mockGetClientOrders,
   mockGetEnabledRestaurants,
   mockGetMostOrdered,
+  mockRetryClientOrderPayment,
   mockSearchDishesAndPromotions,
 } from './mock/ordersMock'
 
@@ -113,5 +114,14 @@ export async function cancelOrder(orderId) {
   }
 
   return mockCancelClientOrder(getSessionToken(), orderId)
+}
+
+export async function retryOrderPayment(orderId) {
+  if (isApiConfigured()) {
+    const response = await apiFetch(`/pedidos/${orderId}/reintentar-pago`, { method: 'POST' })
+    return mapOrderListItem(response)
+  }
+
+  return mockRetryClientOrderPayment(getSessionToken(), orderId)
 }
 
