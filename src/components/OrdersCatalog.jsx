@@ -20,6 +20,8 @@ export function OrdersCatalog() {
   const [view, setView] = useState('all')
   const [sort, setSort] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
+  const [category, setCategory] = useState('')
+  const [categories, setCategories] = useState([])
   const [dishes, setDishes] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -39,7 +41,24 @@ export function OrdersCatalog() {
         if (maxPrice) options.maxPrice = maxPrice
 
         const results = await searchDishes(query, options)
-        if (!cancelled) setDishes(results)
+
+        if (!cancelled) {
+          const availableCategories = Array.from(
+            new Set(
+              results
+                .map((dish) => dish.categoryName)
+                .filter((name) => name && name !== 'Sin categoria'),
+            ),
+          ).sort((a, b) => a.localeCompare(b))
+
+          setCategories(availableCategories)
+
+          const filtered = category
+            ? results.filter((dish) => dish.categoryName === category)
+            : results
+
+          setDishes(filtered)
+        }
       } catch {
         if (!cancelled) {
           setError('No pudimos cargar los platos. Intentá de nuevo.')
@@ -54,7 +73,13 @@ export function OrdersCatalog() {
       cancelled = true
       clearTimeout(timer)
     }
-  }, [query, view, sort, maxPrice])
+  }, [query, view, sort, maxPrice, category])
+
+  useEffect(() => {
+    if (category && !categories.includes(category)) {
+      setCategory('')
+    }
+  }, [categories, category])
 
   return (
     <section className="orders-catalog">
@@ -92,6 +117,21 @@ export function OrdersCatalog() {
           </div>
 
           <div className="orders-catalog__actions">
+            <select
+              className="orders-catalog__select"
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+              aria-label="Filtrar por categoría"
+              disabled={categories.length === 0}
+            >
+              <option value="">Todas las categorías</option>
+              {categories.map((categoryName) => (
+                <option key={categoryName} value={categoryName}>
+                  {categoryName}
+                </option>
+              ))}
+            </select>
+
             <select
               className="orders-catalog__select"
               value={sort}

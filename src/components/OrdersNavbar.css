@@ -15,15 +15,47 @@
   padding-block: 1rem;
 }
 
-.orders-navbar__menu {
+.orders-navbar__links {
   justify-self: start;
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 4px;
+  align-items: center;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.orders-navbar__links::-webkit-scrollbar {
+  display: none;
+}
+
+.orders-navbar__link {
+  white-space: nowrap;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
   background: none;
   border: none;
+  color: var(--blanco);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.8rem;
   cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.orders-navbar__link:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.orders-navbar__link--active {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .orders-navbar__profile-photo {
@@ -31,14 +63,6 @@
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
-}
-
-.orders-navbar__menu span {
-  display: block;
-  width: 26px;
-  height: 3px;
-  background: var(--blanco);
-  border-radius: 2px;
 }
 
 .orders-navbar__logo {
@@ -99,6 +123,15 @@
 
   .orders-navbar__greeting {
     display: inline;
+  }
+
+  .orders-navbar__links {
+    gap: 0.6rem;
+  }
+
+  .orders-navbar__link {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.9rem;
   }
 }
 

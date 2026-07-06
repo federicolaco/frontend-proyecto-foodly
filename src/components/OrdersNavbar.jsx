@@ -1,9 +1,8 @@
 import { useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { getAppNavLinks, getProfileMenuItems } from '../lib/navLinks'
 import { getStoredUser } from '../lib/auth'
 import { useCart } from '../context/CartContext'
-import { NavBurgerMenu } from './NavBurgerMenu'
 import { ProfileMenu } from './ProfileMenu'
 import './OrdersNavbar.css'
 
@@ -38,11 +37,11 @@ function CartIcon() {
 
 export function OrdersNavbar() {
   const navigate = useNavigate()
+  const location = useLocation()
   const user = getStoredUser()
   const profileBtnRef = useRef(null)
   const { cart, itemCount } = useCart()
 
-  const [menuOpen, setMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
 
   const navLinks = getAppNavLinks(user)
@@ -67,20 +66,23 @@ export function OrdersNavbar() {
   }
 
   return (
-    <>
       <header className="orders-navbar">
         <nav className="orders-navbar__inner contenedor">
-          <button
-            type="button"
-            className="orders-navbar__menu"
-            aria-label="Abrir menú de navegación"
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen(true)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
+          <ul className="orders-navbar__links">
+            {navLinks.map((link) => (
+              <li key={link.to}>
+                <button
+                  type="button"
+                  className={`orders-navbar__link${
+                    location.pathname === link.to ? ' orders-navbar__link--active' : ''
+                  }`}
+                  onClick={() => navigate(link.to)}
+                >
+                  {link.label}
+                </button>
+              </li>
+            ))}
+          </ul>
 
           <button
             type="button"
@@ -140,14 +142,5 @@ export function OrdersNavbar() {
           </div>
         </nav>
       </header>
-
-      <NavBurgerMenu
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        links={navLinks}
-        title="Navegación"
-        userName={user.name}
-      />
-    </>
   )
 }
