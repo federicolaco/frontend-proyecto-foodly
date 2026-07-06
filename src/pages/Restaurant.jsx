@@ -9,7 +9,7 @@ import { CartSidebar } from '../components/restaurant/CartSidebar'
 import { MenuProductList } from '../components/restaurant/MenuProductList'
 import { RestaurantBanner } from '../components/restaurant/RestaurantBanner'
 import { RestaurantDeliveryBar } from '../components/restaurant/RestaurantDeliveryBar'
-import { RestaurantInfoModal } from '../components/restaurant/RestaurantInfoModal'
+/* import { RestaurantInfoModal } from '../components/restaurant/RestaurantInfoModal' */
 import { useCart } from '../context/CartContext'
 import { getStoredUser } from '../lib/auth'
 import { formatDateTime } from '../lib/format'
@@ -305,67 +305,6 @@ export function Restaurant() {
           />
         </div>
       </main>
-
-      <RestaurantInfoModal
-        open={commentsOpen}
-        onClose={() => setCommentsOpen(false)}
-        title={`Comentarios de ${restaurant.name}`}
-      >
-        {commentsLoading && <p className="restaurant-info-modal__empty">Cargando comentarios...</p>}
-
-        {!commentsLoading && commentsError && (
-          <p className="restaurant-info-modal__error" role="alert">
-            {commentsError}
-          </p>
-        )}
-
-        {!commentsLoading && !commentsError && comments.length === 0 && (
-          <p className="restaurant-info-modal__empty">Este local todavía no tiene comentarios.</p>
-        )}
-
-        {!commentsLoading && !commentsError && comments.length > 0 && (
-          <div className="restaurant-comments">
-            {comments.map((comment, index) => (
-              <div key={comment.clientId ?? index} className="restaurant-comments__item">
-                <div className="restaurant-comments__header">
-                  <span className="restaurant-comments__author">{comment.clientName ?? 'Cliente'}</span>
-                  {comment.createdAt && (
-                    <span className="restaurant-comments__date">{formatDateTime(comment.createdAt)}</span>
-                  )}
-                </div>
-                <div className="restaurant-comments__stars">
-                  <StarRating value={comment.score ?? 0} readOnly />
-                </div>
-                {comment.comment && <p className="restaurant-comments__text">{comment.comment}</p>}
-              </div>
-            ))}
-          </div>
-        )}
-      </RestaurantInfoModal>
-
-      <RestaurantInfoModal
-        open={photosOpen}
-        onClose={() => setPhotosOpen(false)}
-        title={`Fotos de ${restaurant.name}`}
-      >
-        {(!restaurant.images || restaurant.images.length === 0) && (
-          <p className="restaurant-info-modal__empty">Este local todavía no cargó fotos.</p>
-        )}
-
-        {restaurant.images && restaurant.images.length > 0 && (
-          <div className="restaurant-photos">
-            {restaurant.images.map((image, index) => (
-              <div key={image ?? index} className="restaurant-photos__item">
-                <img
-                  src={image}
-                  alt={`Foto ${index + 1} de ${restaurant.name}`}
-                  className="restaurant-photos__image"
-                />
-              </div>
-            ))}
-          </div>
-        )}
-      </RestaurantInfoModal>
     </div>
   )
 }
