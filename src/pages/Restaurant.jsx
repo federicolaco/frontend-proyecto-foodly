@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { getUserDeliveryAddress } from '../api/backend/helpers'
-import { getMyLocalRating, rateLocal } from '../api/ratings'
+import { getLocalPublicComments, getMyLocalRating, rateLocal } from '../api/ratings'
 import { fetchRestaurant } from '../api/restaurant'
 import { OrdersNavbar } from '../components/OrdersNavbar'
 import { StarRating } from '../components/StarRating'
@@ -9,6 +9,7 @@ import { CartSidebar } from '../components/restaurant/CartSidebar'
 import { MenuProductList } from '../components/restaurant/MenuProductList'
 import { RestaurantBanner } from '../components/restaurant/RestaurantBanner'
 import { RestaurantDeliveryBar } from '../components/restaurant/RestaurantDeliveryBar'
+import { RestaurantInfoModal } from '../components/restaurant/RestaurantInfoModal'
 import { useCart } from '../context/CartContext'
 import { getStoredUser } from '../lib/auth'
 import { formatDateTime } from '../lib/format'
@@ -35,6 +36,12 @@ export function Restaurant() {
   const [ratingSaving, setRatingSaving] = useState(false)
   const [ratingError, setRatingError] = useState(null)
   const [ratingMessage, setRatingMessage] = useState(null)
+
+  const [commentsOpen, setCommentsOpen] = useState(false)
+  const [comments, setComments] = useState([])
+  const [commentsLoading, setCommentsLoading] = useState(false)
+  const [commentsError, setCommentsError] = useState(null)
+  const [photosOpen, setPhotosOpen] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -143,6 +150,25 @@ export function Restaurant() {
     }
   }
 
+  const handleShowComments = async () => {
+    setCommentsOpen(true)
+    setCommentsError(null)
+    setCommentsLoading(true)
+
+    try {
+      const data = await getLocalPublicComments(restaurant.id)
+      setComments(data)
+    } catch {
+      setCommentsError('No pudimos cargar los comentarios de este local.')
+    } finally {
+      setCommentsLoading(false)
+    }
+  }
+
+  const handleShowPhotos = () => {
+    setPhotosOpen(true)
+  }
+
   if (loading) {
     return (
       <div className="restaurant-page">
@@ -187,7 +213,11 @@ export function Restaurant() {
 
         <div className="restaurant-page__layout">
           <div className="restaurant-page__menu-column">
-            <RestaurantBanner restaurant={restaurant} />
+            <RestaurantBanner
+              restaurant={restaurant}
+              onShowComments={handleShowComments}
+              onShowPhotos={handleShowPhotos}
+            />
 
             <section className="restaurant-page__rating-card">
               <div className="restaurant-page__rating-header">
@@ -275,6 +305,67 @@ export function Restaurant() {
           />
         </div>
       </main>
+
+      <RestaurantInfoModal
+        open={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
+        title={`Comentarios de ${restaurant.name}`}
+      >
+        {commentsLoading && <p className="restaurant-info-modal__empty">Cargando comentarios...</p>}
+
+        {!commentsLoading && commentsError && (
+          <p className="restaurant-info-modal__error" role="alert">
+            {commentsError}
+          </p>
+        )}
+
+        {!commentsLoading && !commentsError && comments.length === 0 && (
+          <p className="restaurant-info-modal__empty">Este local todavía no tiene comentarios.</p>
+        )}
+
+        {!commentsLoading && !commentsError && comments.length > 0 && (
+          <div className="restaurant-comments">
+            {comments.map((comment, index) => (
+              <div key={comment.clientId ?? index} className="restaurant-comments__item">
+                <div className="restaurant-comments__header">
+                  <span className="restaurant-comments__author">{comment.clientName ?? 'Cliente'}</span>
+                  {comment.createdAt && (
+                    <span className="restaurant-comments__date">{formatDateTime(comment.createdAt)}</span>
+                  )}
+                </div>
+                <div className="restaurant-comments__stars">
+                  <StarRating value={comment.score ?? 0} readOnly />
+                </div>
+                {comment.comment && <p className="restaurant-comments__text">{comment.comment}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+      </RestaurantInfoModal>
+
+      <RestaurantInfoModal
+        open={photosOpen}
+        onClose={() => setPhotosOpen(false)}
+        title={`Fotos de ${restaurant.name}`}
+      >
+        {(!restaurant.images || restaurant.images.length === 0) && (
+          <p className="restaurant-info-modal__empty">Este local todavía no cargó fotos.</p>
+        )}
+
+        {restaurant.images && restaurant.images.length > 0 && (
+          <div className="restaurant-photos">
+            {restaurant.images.map((image, index) => (
+              <div key={image ?? index} className="restaurant-photos__item">
+                <img
+                  src={image}
+                  alt={`Foto ${index + 1} de ${restaurant.name}`}
+                  className="restaurant-photos__image"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </RestaurantInfoModal>
     </div>
   )
 }

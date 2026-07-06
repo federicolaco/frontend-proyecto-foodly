@@ -8,8 +8,7 @@ function StarIcon() {
   )
 }
 
-export function RestaurantBanner({ restaurant }) {
-  const reviewCount = restaurant.reviews ?? 0
+export function RestaurantBanner({ restaurant, onShowComments, onShowPhotos }) {
   const initial = restaurant.name?.charAt(0)?.toUpperCase() ?? '?'
 
   return (
@@ -30,13 +29,18 @@ export function RestaurantBanner({ restaurant }) {
         <h1 className="restaurant-banner__name">{restaurant.name}</h1>
         <p className="restaurant-banner__rating">
           <StarIcon />
-          <span>
-            {restaurant.rating} (+ {reviewCount} opiniones)
-          </span>
+          <span>{restaurant.rating}</span>
         </p>
+        <div className="restaurant-banner__actions">
+          <button type="button" className="restaurant-banner__action-btn" onClick={onShowComments}>
+            Ver comentarios
+          </button>
+          <button type="button" className="restaurant-banner__action-btn" onClick={onShowPhotos}>
+            Ver fotos del local
+          </button>
+        </div>
       </div>
       <p className="restaurant-banner__hours">{restaurant.hours}</p>
     </section>
   )
 }
-

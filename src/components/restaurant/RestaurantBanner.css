@@ -46,6 +46,28 @@
   color: var(--celeste);
 }
 
+.restaurant-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.restaurant-banner__action-btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--gris-oscuro);
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.restaurant-banner__action-btn:hover {
+  background: var(--blanco);
+}
+
 .restaurant-banner__hours {
   font-size: 0.8rem;
   font-weight: 700;
@@ -64,4 +86,3 @@
     text-align: left;
   }
 }
-

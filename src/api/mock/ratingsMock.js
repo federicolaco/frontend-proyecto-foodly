@@ -188,6 +188,27 @@ export function mockGetLocalRatingDetails(token) {
   return mockDelay(detalle)
 }
 
+export function mockGetLocalRatingDetailsByLocalId(localId) {
+  ensureMockDb()
+  const db = getDb()
+  const ratings = db.ratings.filter(
+    (r) => r.type === 'cliente_to_local' && r.localId === Number(localId),
+  )
+
+  const detalle = ratings.map((r) => {
+    const cliente = db.users.find((u) => u.id === r.clientId)
+    return {
+      idCliente: r.clientId,
+      nombreCliente: cliente?.name ?? `Cliente #${r.clientId}`,
+      puntaje: r.score,
+      comentario: r.comment ?? '',
+      fecha: r.createdAt,
+    }
+  })
+
+  return mockDelay(detalle)
+}
+
 export function mockGetLocalClients(token, filters = {}) {
   ensureMockDb()
   const user = requireUser(token)
