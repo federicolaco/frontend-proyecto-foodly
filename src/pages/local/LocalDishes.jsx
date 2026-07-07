@@ -9,6 +9,20 @@ import {
 import { formatPrice } from '../../lib/cart'
 import '../Panel.css'
 
+function CameraIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M4 8h3l1.5-2h7L17 8h3a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2v-8a2 2 0 012-2z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="13" r="3.5" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  )
+}
+
 const EMPTY_FORM = {
   id: null,
   name: '',
@@ -81,28 +95,6 @@ export function LocalDishes() {
     setForm((prev) => ({ ...prev, categoryId: value }))
   }
 
-  const handleCreateCategory = async () => {
-    const categoryName = newCategoryName.trim()
-    if (!categoryName) return
-
-    setSaving(true)
-    setError(null)
-    setMessage(null)
-
-    try {
-      const created = await createLocalCategory(categoryName)
-      setCategories((prev) => [...prev, created])
-      setForm((prev) => ({ ...prev, categoryId: String(created.id) }))
-      setCreatingCategory(false)
-      setNewCategoryName('')
-      setMessage('Categoria creada.')
-    } catch (err) {
-      setError(err.message ?? 'No pudimos crear la categoria.')
-    } finally {
-      setSaving(false)
-    }
-  }
-
   const handleCancelCategoryCreation = () => {
     setCreatingCategory(false)
     setNewCategoryName('')
@@ -116,17 +108,38 @@ export function LocalDishes() {
       return
     }
 
+    if (creatingCategory && !newCategoryName.trim()) {
+      setError('Ingrese un nombre para la nueva categoria o cancele su creacion.')
+      return
+    }
+
     setSaving(true)
     setError(null)
     setMessage(null)
 
     try {
-      await saveDish(form)
+      let categoryId = form.categoryId
+      let nuevaCategoriaNombre = null
+
+      if (creatingCategory) {
+        const created = await createLocalCategory(newCategoryName.trim())
+        setCategories((prev) => [...prev, created])
+        categoryId = String(created.id)
+        nuevaCategoriaNombre = created.name
+      }
+
+      await saveDish({ ...form, categoryId })
       setForm(EMPTY_FORM)
       setCreatingCategory(false)
       setNewCategoryName('')
       if (imageInputRef.current) imageInputRef.current.value = ''
-      setMessage(form.id ? 'Plato actualizado.' : 'Plato agregado al catalogo.')
+      setMessage(
+        nuevaCategoriaNombre
+          ? `Plato agregado con la nueva categoria "${nuevaCategoriaNombre}".`
+          : form.id
+            ? 'Plato actualizado.'
+            : 'Plato agregado al catalogo.',
+      )
       await loadDishes()
     } catch (err) {
       setError(err.message)
@@ -242,51 +255,63 @@ export function LocalDishes() {
                   placeholder="Nombre de la categoria"
                   value={newCategoryName}
                   onChange={(e) => setNewCategoryName(e.target.value)}
+                  autoFocus
                 />
-                <button
-                  type="button"
-                  className="panel-btn panel-btn--outline"
-                  onClick={handleCreateCategory}
-                  disabled={saving}
-                >
-                  Guardar
-                </button>
                 <button
                   type="button"
                   className="panel-btn panel-btn--outline"
                   onClick={handleCancelCategoryCreation}
                   disabled={saving}
                 >
-                  Cancelar
+                  Usar categoria existente
                 </button>
               </div>
             )}
+            {creatingCategory && (
+              <span className="panel-field__hint">
+                La categoria se creara automaticamente al guardar el plato.
+              </span>
+            )}
           </label>
 
-          <label className="panel-field">
-            <span className="panel-field__label">
-              Imagen del plato{form.id ? ' (opcional, deje vacio para mantener la actual)' : ''}
-            </span>
+          <div className="dish-photo" style={{ gridColumn: '1 / -1' }}>
+            <button
+              type="button"
+              className="dish-photo__avatar-btn"
+              onClick={() => imageInputRef.current?.click()}
+              aria-label="Subir imagen del plato"
+            >
+              {form.imagePreview ? (
+                <img src={form.imagePreview} alt="" />
+              ) : (
+                <span className="dish-photo__placeholder">
+                  <CameraIcon />
+                  <span>Imagen</span>
+                </span>
+              )}
+            </button>
+            <div className="dish-photo__actions">
+              <button
+                type="button"
+                className="panel-btn panel-btn--outline"
+                onClick={() => imageInputRef.current?.click()}
+              >
+                {form.imagePreview ? 'Cambiar imagen' : 'Agregar imagen'}
+              </button>
+              <p className="dish-photo__hint">
+                JPG o PNG{form.id ? ' (opcional, deje vacio para mantener la actual)' : ''}
+              </p>
+            </div>
             <input
               ref={imageInputRef}
               type="file"
               accept="image/jpeg,image/png"
-              className="panel-field__input"
+              className="dish-photo__file-input"
               onChange={handleImageChange}
             />
-          </label>
+          </div>
 
-          {form.imagePreview && (
-            <div style={{ gridColumn: '1 / -1' }}>
-              <img
-                src={form.imagePreview}
-                alt=""
-                style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }}
-              />
-            </div>
-          )}
-
-          <div className="panel-actions" style={{ alignItems: 'end' }}>
+          <div className="panel-actions panel-actions--center">
             <button type="submit" className="panel-btn panel-btn--primary" disabled={saving}>
               {form.id ? 'Guardar cambios' : 'Agregar plato'}
             </button>
