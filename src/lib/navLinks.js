@@ -56,6 +56,14 @@ export function getProfileMenuItems(user) {
     })
   }
 
+
+  if (user.role === ROLES.ADMIN) {
+    items.push({
+      label: 'Panel de administración',
+      to: '/admin/solicitudes',
+      action: 'navigate',
+    })
+  }
   items.push({ label: 'Cerrar sesión', action: 'logout' })
 
   return items
