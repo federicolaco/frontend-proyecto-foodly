@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
 import { approveLocalRequest, getPendingLocalRequests, rejectLocalRequest } from '../../api/admin'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
 import '../Panel.css'
 
 export function AdminLocalRequests() {
-  const navigate = useNavigate()
   const [requests, setRequests] = useState([])
+  const [search, setSearch] = useState('')
+  const [sort, setSort] = useState('name-asc')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
@@ -29,6 +29,23 @@ export function AdminLocalRequests() {
   useEffect(() => {
     loadRequests()
   }, [])
+
+  const filteredRequests = useMemo(() => {
+    const term = search.trim().toLowerCase()
+    const filtered = term
+      ? requests.filter(
+          (r) =>
+            r.name?.toLowerCase().includes(term) ||
+            r.email?.toLowerCase().includes(term),
+        )
+      : requests
+
+    const [, dir] = sort.split('-')
+    return [...filtered].sort((a, b) => {
+      const cmp = (a.name ?? '').localeCompare(b.name ?? '')
+      return dir === 'asc' ? cmp : -cmp
+    })
+  }, [requests, search, sort])
 
   const handleResolve = async (requestId, action) => {
     const label = action === 'approve' ? 'aprobar' : 'rechazar'
@@ -64,12 +81,6 @@ export function AdminLocalRequests() {
           Revisá y resolvé las solicitudes de habilitación pendientes.
         </p>
 
-        <nav className="panel-nav">
-          <Link to="/admin/solicitudes" className="panel-nav__link panel-nav__link--active">
-            Solicitudes pendientes
-          </Link>
-        </nav>
-
         {error && (
           <p className="panel-page__error" role="alert">
             {error}
@@ -77,14 +88,35 @@ export function AdminLocalRequests() {
         )}
         {message && <p className="panel-page__success">{message}</p>}
 
+        <div className="panel-actions" style={{ marginBottom: '1rem', justifyContent: 'space-between' }}>
+          <label className="panel-field" style={{ minWidth: '260px' }}>
+            <span className="panel-field__label">Buscar por nombre o correo</span>
+            <input
+              type="text"
+              className="panel-field__input"
+              placeholder="Buscar..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
+
+          <label className="panel-field" style={{ minWidth: '220px' }}>
+            <span className="panel-field__label">Ordenar por</span>
+            <select className="panel-field__select" value={sort} onChange={(e) => setSort(e.target.value)}>
+              <option value="name-asc">Nombre: A-Z</option>
+              <option value="name-desc">Nombre: Z-A</option>
+            </select>
+          </label>
+        </div>
+
         <section className="panel-card">
           {loading && <p className="panel-empty">Cargando solicitudes...</p>}
 
-          {!loading && requests.length === 0 && (
+          {!loading && filteredRequests.length === 0 && (
             <p className="panel-empty">No hay solicitudes pendientes de revisión.</p>
           )}
 
-          {!loading && requests.length > 0 && (
+          {!loading && filteredRequests.length > 0 && (
             <div style={{ overflowX: 'auto' }}>
               <table className="panel-table">
                 <thead>
@@ -97,7 +129,7 @@ export function AdminLocalRequests() {
                   </tr>
                 </thead>
                 <tbody>
-                  {requests.map((request) => (
+                  {filteredRequests.map((request) => (
                     <tr key={request.id}>
                       <td>{request.name}</td>
                       <td>{request.email}</td>
@@ -130,12 +162,6 @@ export function AdminLocalRequests() {
             </div>
           )}
         </section>
-
-        <p style={{ marginTop: '1rem' }}>
-          <button type="button" className="panel-btn panel-btn--outline" onClick={() => navigate(-1)}>
-            Volver
-          </button>
-        </p>
       </main>
     </div>
   )

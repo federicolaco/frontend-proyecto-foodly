@@ -7,8 +7,10 @@ const ROLE_LABELS = { cliente: 'Cliente', local: 'Local' }
 const STATUS_LABELS = { active: 'Activo', blocked: 'Bloqueado', pending: 'Pendiente' }
 
 const SORT_OPTIONS = [
-  { value: 'name', label: 'Nombre' },
-  { value: 'rating', label: 'Calificación' },
+  { value: 'name-asc', label: 'Nombre: A-Z' },
+  { value: 'name-desc', label: 'Nombre: Z-A' },
+  { value: 'rating-asc', label: 'Calificación: menor a mayor' },
+  { value: 'rating-desc', label: 'Calificación: mayor a menor' },
 ]
 
 export function AdminUsers() {
@@ -20,8 +22,7 @@ export function AdminUsers() {
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
   const [processingId, setProcessingId] = useState(null)
-  const [sortBy, setSortBy] = useState('name')
-  const [sortDir, setSortDir] = useState('asc')
+  const [sort, setSort] = useState('name-asc')
 
   const loadUsers = async () => {
     setLoading(true)
@@ -47,27 +48,26 @@ export function AdminUsers() {
 
   const sortedUsers = useMemo(() => {
     const list = [...users]
-    const dir = sortDir === 'asc' ? 1 : -1
+    const [field, dir] = sort.split('-')
+    const dirMultiplier = dir === 'asc' ? 1 : -1
 
     list.sort((a, b) => {
-      if (sortBy === 'rating') {
+      if (field === 'rating') {
         // Usuarios sin calificación quedan siempre al final, sin importar la dirección
         const aHasRating = typeof a.rating === 'number'
         const bHasRating = typeof b.rating === 'number'
         if (!aHasRating && !bHasRating) return 0
         if (!aHasRating) return 1
         if (!bHasRating) return -1
-        return (a.rating - b.rating) * dir
+        return (a.rating - b.rating) * dirMultiplier
       }
 
       // Orden alfabético por nombre, insensible a mayúsculas/acentos
-      return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }) * dir
+      return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }) * dirMultiplier
     })
 
     return list
-  }, [users, sortBy, sortDir])
-
-  const toggleSortDir = () => setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+  }, [users, sort])
 
   const handleToggleBlock = async (user) => {
     const block = user.status !== 'blocked'
@@ -121,25 +121,15 @@ export function AdminUsers() {
             </label>
             <label className="panel-field">
               <span className="panel-field__label">Ordenar por</span>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <select
-                  className="panel-field__select"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  {SORT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  className="panel-btn"
-                  onClick={toggleSortDir}
-                  title={sortDir === 'asc' ? 'Ascendente' : 'Descendente'}
-                >
-                  {sortDir === 'asc' ? '↑' : '↓'}
-                </button>
-              </div>
+              <select
+                className="panel-field__select"
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+              >
+                {SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
             </label>
           </div>
 
