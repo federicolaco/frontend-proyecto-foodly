@@ -23,8 +23,7 @@ function getOrderBadgeVariant(status) {
 export function LocalOrdersPage() {
   const [orders, setOrders] = useState([])
   const [statusFilter, setStatusFilter] = useState('pending')
-  const [sortBy, setSortBy] = useState('date')
-  const [sortDir, setSortDir] = useState('desc')
+  const [sort, setSort] = useState('date-desc')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
@@ -52,12 +51,13 @@ export function LocalOrdersPage() {
   }, [statusFilter])
 
   const sortedOrders = useMemo(() => {
+    const [field, dir] = sort.split('-')
     return [...orders].sort((a, b) => {
-      const aVal = sortBy === 'date' ? new Date(a.createdAt).getTime() : a.total
-      const bVal = sortBy === 'date' ? new Date(b.createdAt).getTime() : b.total
-      return sortDir === 'asc' ? aVal - bVal : bVal - aVal
+      const aVal = field === 'date' ? new Date(a.createdAt).getTime() : a.total
+      const bVal = field === 'date' ? new Date(b.createdAt).getTime() : b.total
+      return dir === 'asc' ? aVal - bVal : bVal - aVal
     })
-  }, [orders, sortBy, sortDir])
+  }, [orders, sort])
 
   const resetRejectState = () => {
     setRejectingId(null)
@@ -158,58 +158,20 @@ export function LocalOrdersPage() {
           </label>
 
           {/* Derecha */}
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
-            <label className="panel-field" style={{ minWidth: '160px' }}>
-              <span className="panel-field__label">Ordenar por</span>
-              <select
-                className="panel-field__select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="date">Fecha</option>
-                <option value="amount">Precio</option>
-              </select>
-            </label>
-
-            <div style={{ paddingTop: '22px' }}>
-              <span className="panel-field__label">​</span>
-              <div style={{ display: 'flex', height: '36px', border: '1px solid #ddd', borderRadius: '0.5rem', overflow: 'hidden' }}>
-                <button
-                  type="button"
-                  onClick={() => setSortDir('asc')}
-                  style={{
-                    flex: 1,
-                    border: 'none',
-                    borderRight: '1px solid #ddd',
-                    background: sortDir === 'asc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
-                    color: sortDir === 'asc' ? 'var(--text-accent, #1a56db)' : 'inherit',
-                    fontWeight: sortDir === 'asc' ? 500 : 400,
-                    cursor: 'pointer',
-                    padding: '0 14px',
-                    fontSize: '16px',
-                  }}
-                >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSortDir('desc')}
-                  style={{
-                    flex: 1,
-                    border: 'none',
-                    background: sortDir === 'desc' ? 'var(--bg-accent, #e8f0fe)' : 'transparent',
-                    color: sortDir === 'desc' ? 'var(--text-accent, #1a56db)' : 'inherit',
-                    fontWeight: sortDir === 'desc' ? 500 : 400,
-                    cursor: 'pointer',
-                    padding: '0 14px',
-                    fontSize: '16px',
-                  }}
-                >
-                  ↓
-                </button>
-              </div>
-            </div>
-          </div>
+          <label className="panel-field" style={{ minWidth: '220px' }}>
+            <span className="panel-field__label">Ordenar por</span>
+            <select
+              className="panel-field__select"
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              aria-label="Ordenar resultados"
+            >
+              <option value="date-desc">Fecha: más reciente primero</option>
+              <option value="date-asc">Fecha: más antigua primero</option>
+              <option value="amount-asc">Precio: menor a mayor</option>
+              <option value="amount-desc">Precio: mayor a menor</option>
+            </select>
+          </label>
 
         </div>
 
