@@ -245,7 +245,7 @@ export function LocalDishes() {
                 />
                 <button
                   type="button"
-                  className="panel-btn panel-btn--outline"
+                  className="panel-btn panel-btn--outline panel-btn--sm"
                   onClick={handleCancelCategoryCreation}
                   disabled={saving}
                 >
@@ -265,6 +265,13 @@ export function LocalDishes() {
               Imagen del plato{form.id ? ' (opcional, deje vacio para mantener la actual)' : ''}
             </span>
             <div className="dish-photo">
+              <button
+                type="button"
+                className="panel-btn panel-btn--outline panel-btn--sm"
+                onClick={() => imageInputRef.current?.click()}
+              >
+                {form.imagePreview ? 'Cambiar imagen' : 'Agregar imagen'}
+              </button>
               {form.imagePreview && (
                 <img
                   src={form.imagePreview}
@@ -272,13 +279,6 @@ export function LocalDishes() {
                   className="dish-photo__preview"
                 />
               )}
-              <button
-                type="button"
-                className="panel-btn panel-btn--outline"
-                onClick={() => imageInputRef.current?.click()}
-              >
-                {form.imagePreview ? 'Cambiar imagen' : 'Agregar imagen'}
-              </button>
             </div>
             <input
               ref={imageInputRef}

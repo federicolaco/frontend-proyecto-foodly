@@ -137,6 +137,12 @@
   background: transparent;
 }
 
+.panel-btn--sm {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
 .panel-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
