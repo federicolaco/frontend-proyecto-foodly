@@ -160,7 +160,7 @@ export function mapPlatoListItem(plato, index = 0) {
     restaurantId,
     name: plato.nombre,
     restaurant: restaurant?.nombre ?? 'Local',
-    image: plato.imagenes?.[0] ?? placeholder(index),
+    image: plato.imagen ?? placeholder(index),
     price: plato.precio ?? 0,
     categoryId: getDishCategoryId(plato),
     categoryName: getDishCategoryName(plato),
@@ -182,7 +182,7 @@ export function mapPromocionListItem(promo, index = 0) {
     restaurantId,
     name: promo.descripcion ?? plato?.nombre ?? 'Promoción',
     restaurant: restaurant?.nombre ?? 'Local',
-    image: plato?.imagenes?.[0] ?? placeholder(index),
+    image: plato?.imagen ?? placeholder(index),
     price: discountedPrice,
     originalPrice: basePrice,
     discountPercent,
@@ -206,7 +206,7 @@ function mapPromotedDishListItem(promo, index = 0) {
     restaurantId,
     name: plato?.nombre ?? promo.descripcion ?? 'Promoción',
     restaurant: restaurant?.nombre ?? 'Local',
-    image: plato?.imagenes?.[0] ?? placeholder(index),
+    image: plato?.imagen ?? placeholder(index),
     price: discountedPrice,
     originalPrice: basePrice,
     discountPercent,
@@ -296,7 +296,7 @@ export function mapRestaurantDetail(local, platos = []) {
         price: plato.precio ?? 0,
         precioFinal: plato.precioFinal ?? plato.precio ?? 0,
         tienePromocion: plato.tienePromocion ?? false,
-        image: plato.imagenes?.[0] ?? placeholder(index),
+        image: plato.imagen ?? placeholder(index),
       })),
   }
 }
@@ -320,7 +320,7 @@ export function mapLocalDish(plato, index = 0) {
     name: plato.nombre,
     description: plato.descripcion ?? '',
     price: plato.precio ?? 0,
-    image: plato.imagenes?.[0] ?? placeholder(index),
+    image: plato.imagen ?? placeholder(index),
     active: plato.disponible !== false,
   }
 }
@@ -518,7 +518,7 @@ export function mapLocalStats(data) {
   const mapAnalyticDish = (plato, index) => ({
     id: plato.id,
     name: plato.nombre ?? plato.name ?? 'Plato',
-    image: plato.imagenes?.[0] ?? plato.image ?? placeholder(index),
+    image: plato.imagen ?? placeholder(index),
     soldQuantity: Number(plato.cantidadVendida ?? 0),
     soldAmount: Number(plato.montoVendido ?? 0),
   })

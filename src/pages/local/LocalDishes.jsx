@@ -264,13 +264,22 @@ export function LocalDishes() {
             <span className="panel-field__label">
               Imagen del plato{form.id ? ' (opcional, deje vacio para mantener la actual)' : ''}
             </span>
-            <button
-              type="button"
-              className="panel-btn panel-btn--outline"
-              onClick={() => imageInputRef.current?.click()}
-            >
-              {form.imagePreview ? 'Cambiar imagen' : 'Agregar imagen'}
-            </button>
+            <div className="dish-photo">
+              {form.imagePreview && (
+                <img
+                  src={form.imagePreview}
+                  alt="Vista previa del plato"
+                  className="dish-photo__preview"
+                />
+              )}
+              <button
+                type="button"
+                className="panel-btn panel-btn--outline"
+                onClick={() => imageInputRef.current?.click()}
+              >
+                {form.imagePreview ? 'Cambiar imagen' : 'Agregar imagen'}
+              </button>
+            </div>
             <input
               ref={imageInputRef}
               type="file"

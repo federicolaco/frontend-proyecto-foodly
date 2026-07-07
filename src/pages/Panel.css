@@ -209,6 +209,21 @@
   color: var(--gris-intermedio);
 }
 
+.dish-photo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dish-photo__preview {
+  width: 3.25rem;
+  height: 3.25rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  border: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
 .dish-photo__file-input {
   display: none;
 }
