@@ -64,14 +64,6 @@ export function getProfileMenuItems(user) {
     })
   }
 
-  if (user.role === ROLES.LOCAL && user.localEnabled) {
-    items.push({
-      label: 'Panel del local',
-      to: '/local-panel',
-      action: 'navigate',
-    })
-  }
-
   items.push({ label: 'Cerrar sesión', action: 'logout' })
 
   return items
