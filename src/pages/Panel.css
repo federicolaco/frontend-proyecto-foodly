@@ -141,6 +141,15 @@
   box-sizing: border-box;
 }
 
+.panel-sort-select {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  font: inherit;
+  font-size: 0.85rem;
+  background: var(--blanco, #fff);
+}
+
 .panel-btn {
   padding: 0.75rem 1.25rem;
   border-radius: 999px;
