@@ -9,20 +9,6 @@ import {
 import { formatPrice } from '../../lib/cart'
 import '../Panel.css'
 
-function CameraIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M4 8h3l1.5-2h7L17 8h3a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2v-8a2 2 0 012-2z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="13" r="3.5" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  )
-}
-
 const EMPTY_FORM = {
   id: null,
   name: '',
@@ -274,34 +260,17 @@ export function LocalDishes() {
             )}
           </label>
 
-          <div className="dish-photo" style={{ gridColumn: '1 / -1' }}>
+          <label className="panel-field">
+            <span className="panel-field__label">
+              Imagen del plato{form.id ? ' (opcional, deje vacio para mantener la actual)' : ''}
+            </span>
             <button
               type="button"
-              className="dish-photo__avatar-btn"
+              className="panel-btn panel-btn--outline"
               onClick={() => imageInputRef.current?.click()}
-              aria-label="Subir imagen del plato"
             >
-              {form.imagePreview ? (
-                <img src={form.imagePreview} alt="" />
-              ) : (
-                <span className="dish-photo__placeholder">
-                  <CameraIcon />
-                  <span>Imagen</span>
-                </span>
-              )}
+              {form.imagePreview ? 'Cambiar imagen' : 'Agregar imagen'}
             </button>
-            <div className="dish-photo__actions">
-              <button
-                type="button"
-                className="panel-btn panel-btn--outline"
-                onClick={() => imageInputRef.current?.click()}
-              >
-                {form.imagePreview ? 'Cambiar imagen' : 'Agregar imagen'}
-              </button>
-              <p className="dish-photo__hint">
-                JPG o PNG{form.id ? ' (opcional, deje vacio para mantener la actual)' : ''}
-              </p>
-            </div>
             <input
               ref={imageInputRef}
               type="file"
@@ -309,7 +278,7 @@ export function LocalDishes() {
               className="dish-photo__file-input"
               onChange={handleImageChange}
             />
-          </div>
+          </label>
 
           <div className="panel-actions panel-actions--center">
             <button type="submit" className="panel-btn panel-btn--primary" disabled={saving}>
