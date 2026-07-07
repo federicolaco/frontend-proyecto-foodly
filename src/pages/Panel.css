@@ -72,6 +72,10 @@
   gap: 1rem;
 }
 
+.panel-form--grid {
+  align-items: start;
+}
+
 .panel-form--profile {
   max-width: none;
   gap: 1.5rem;
