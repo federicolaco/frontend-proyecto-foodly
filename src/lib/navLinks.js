@@ -38,7 +38,11 @@ export function getAppNavLinks(user) {
 }
 
 export function getProfileMenuItems(user) {
-  const items = [{ label: 'Mi perfil', to: '/cuenta', action: 'navigate' }]
+  const items = []
+
+  if (user.role !== ROLES.ADMIN) {
+    items.push({ label: 'Mi perfil', to: '/cuenta', action: 'navigate' })
+  }
 
   if (user.role === ROLES.LOCAL && !user.localEnabled) {
     items.unshift({
@@ -52,22 +56,6 @@ export function getProfileMenuItems(user) {
     items.push({
       label: 'Mis pedidos',
       to: '/mis-pedidos',
-      action: 'navigate',
-    })
-  }
-
-  if (user.role === ROLES.ADMIN) {
-    items.push({
-      label: 'Panel de administración',
-      to: '/admin/solicitudes',
-      action: 'navigate',
-    })
-  }
-
-  if (user.role === ROLES.LOCAL && user.localEnabled) {
-    items.push({
-      label: 'Panel del local',
-      to: '/local-panel',
       action: 'navigate',
     })
   }
