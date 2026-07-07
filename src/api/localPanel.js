@@ -279,10 +279,10 @@ export async function saveDish(payload) {
     formData.append('datos', new Blob([JSON.stringify(datos)], { type: 'application/json' }))
 
     if (payload.imageFile) {
-      formData.append('imagenes', payload.imageFile)
+      formData.append('imagen', payload.imageFile)
     } else if (!payload.id) {
       // Solo en alta (POST) es obligatorio: si no hay archivo, mandamos placeholder
-      formData.append('imagenes', createPlaceholderImage('plato.png'))
+      formData.append('imagen', createPlaceholderImage('plato.png'))
     }
     // En edición (PUT) sin archivo nuevo: no mandamos 'imagenes', el backend mantiene las URLs existentes
 
