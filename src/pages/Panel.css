@@ -67,6 +67,24 @@
   color: var(--blanco);
 }
 
+.panel-home-grid {
+  display: grid;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.panel-home-box {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+@media (min-width: 768px) {
+  .panel-home-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .panel-form {
   display: grid;
   gap: 1rem;

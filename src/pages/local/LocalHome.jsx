@@ -92,79 +92,83 @@ export function LocalHome() {
 
       {restaurant && (
         <>
-          <h2 style={{ marginBottom: '0.5rem', color: 'var(--gris-oscuro)' }}>{restaurant.name}</h2>
-          <p style={{ marginBottom: '1rem' }}>
-            Estado:{' '}
-            <span className={`panel-badge ${restaurant.isOpen ? 'panel-badge--open' : 'panel-badge--closed'}`}>
-              {restaurant.isOpen ? 'Abierto' : 'Cerrado'}
-            </span>
-          </p>
+          <div className="panel-home-grid">
+            <div className="panel-home-box">
+              <h2 style={{ marginBottom: '0.5rem', color: 'var(--gris-oscuro)' }}>{restaurant.name}</h2>
+              <p style={{ marginBottom: '1rem' }}>
+                Estado:{' '}
+                <span className={`panel-badge ${restaurant.isOpen ? 'panel-badge--open' : 'panel-badge--closed'}`}>
+                  {restaurant.isOpen ? 'Abierto' : 'Cerrado'}
+                </span>
+              </p>
 
-          <div className="panel-actions">
-            <button
-              type="button"
-              className="panel-btn panel-btn--primary"
-              disabled={busy || restaurant.isOpen}
-              onClick={handleOpen}
-            >
-              Abrir local
-            </button>
-            <button
-              type="button"
-              className="panel-btn panel-btn--danger"
-              disabled={busy || !restaurant.isOpen}
-              onClick={handleClose}
-            >
-              Cerrar local
-            </button>
-          </div>
+              <div className="panel-actions">
+                <button
+                  type="button"
+                  className="panel-btn panel-btn--primary"
+                  disabled={busy || restaurant.isOpen}
+                  onClick={handleOpen}
+                >
+                  Abrir local
+                </button>
+                <button
+                  type="button"
+                  className="panel-btn panel-btn--danger"
+                  disabled={busy || !restaurant.isOpen}
+                  onClick={handleClose}
+                >
+                  Cerrar local
+                </button>
+              </div>
+            </div>
 
-          <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
-            <h3 style={{ marginBottom: '0.5rem', color: 'var(--gris-oscuro)' }}>Mi calificación</h3>
-            {rating?.total === 0 ? (
-              <p className="panel-empty" style={{ padding: 0 }}>Su local todavía no ha recibido calificaciones de los clientes.</p>
-            ) : (
-              <>
-                <p><strong>{rating.average}</strong> / 5 · {rating.total} valoraciones</p>
-                <div className="rating-summary">
-                  {[5, 4, 3, 2, 1].map((star) => (
-                    <div key={star} className="rating-summary__row">
-                      <span>{star}★</span>
-                      <div className="rating-summary__bar">
-                        <div
-                          className="rating-summary__fill"
-                          style={{ width: `${rating.total ? (rating.breakdown[star] / rating.total) * 100 : 0}%` }}
-                        />
+            <div className="panel-home-box">
+              <h3 style={{ marginBottom: '0.5rem', color: 'var(--gris-oscuro)' }}>Mi calificación</h3>
+              {rating?.total === 0 ? (
+                <p className="panel-empty" style={{ padding: 0 }}>Su local todavía no ha recibido calificaciones de los clientes.</p>
+              ) : (
+                <>
+                  <p><strong>{rating.average}</strong> / 5 · {rating.total} valoraciones</p>
+                  <div className="rating-summary">
+                    {[5, 4, 3, 2, 1].map((star) => (
+                      <div key={star} className="rating-summary__row">
+                        <span>{star}★</span>
+                        <div className="rating-summary__bar">
+                          <div
+                            className="rating-summary__fill"
+                            style={{ width: `${rating.total ? (rating.breakdown[star] / rating.total) * 100 : 0}%` }}
+                          />
+                        </div>
+                        <span>{rating.breakdown[star] ?? 0}</span>
                       </div>
-                      <span>{rating.breakdown[star] ?? 0}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {ratingDetails.length > 0 && (
-                  <div className="rating-comments">
-                    <h3 className="panel-page__subtitle">Comentarios de los clientes</h3>
-                    <div className="rating-comments__list">
-                      {ratingDetails.map((r, i) => (
-                        <article key={`${r.clientId}-${i}`} className="rating-comments__item">
-                          <div className="panel-actions">
-                            <strong>{r.clientName}</strong>
-                            <span className="panel-badge">{r.score} ★</span>
-                          </div>
-                          {r.comment && <p className="rating-comments__text">{r.comment}</p>}
-                          {r.createdAt && (
-                            <p className="rating-comments__date">
-                              {formatDate(r.createdAt)}
-                            </p>
-                          )}
-                        </article>
-                      ))}
-                    </div>
+                    ))}
                   </div>
-                )}
-              </>
-            )}
+                </>
+              )}
+            </div>
           </div>
+
+          {ratingDetails.length > 0 && (
+            <div className="rating-comments" style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
+              <h3 className="panel-page__subtitle">Comentarios de los clientes</h3>
+              <div className="rating-comments__list">
+                {ratingDetails.map((r, i) => (
+                  <article key={`${r.clientId}-${i}`} className="rating-comments__item">
+                    <div className="panel-actions">
+                      <strong>{r.clientName}</strong>
+                      <span className="panel-badge">{r.score} ★</span>
+                    </div>
+                    {r.comment && <p className="rating-comments__text">{r.comment}</p>}
+                    {r.createdAt && (
+                      <p className="rating-comments__date">
+                        {formatDate(r.createdAt)}
+                      </p>
+                    )}
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </section>
