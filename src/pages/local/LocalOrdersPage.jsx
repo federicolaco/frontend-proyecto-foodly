@@ -158,6 +158,7 @@ export function LocalOrdersPage() {
           </label>
 
           {/* Derecha */}
+<<<<<<< HEAD
           <label className="panel-field" style={{ minWidth: '220px' }}>
             <span className="panel-field__label">Ordenar por</span>
             <select
@@ -172,6 +173,19 @@ export function LocalOrdersPage() {
               <option value="amount-desc">Precio: mayor a menor</option>
             </select>
           </label>
+=======
+          <select
+            className="panel-sort-select"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            aria-label="Ordenar resultados"
+          >
+            <option value="date-desc">Fecha: más reciente primero</option>
+            <option value="date-asc">Fecha: más antigua primero</option>
+            <option value="amount-asc">Precio: menor a mayor</option>
+            <option value="amount-desc">Precio: mayor a menor</option>
+          </select>
+>>>>>>> 2fb86513f0ad95696c5ad22dee55da177114140f
 
         </div>
 
