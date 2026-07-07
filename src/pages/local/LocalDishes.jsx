@@ -235,7 +235,7 @@ export function LocalDishes() {
                 <option value="__new__">+ Crear nueva categoria</option>
               </select>
             ) : (
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div className="panel-category-inline">
                 <input
                   className="panel-field__input"
                   placeholder="Nombre de la categoria"
