@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { ApiError } from '../api/client'
 import { getClaimForOrder, submitClaim } from '../api/claims'
 import { cancelOrder, getMyOrders, retryOrderPayment } from '../api/orders'
 import { hasRatedLocal } from '../api/ratings'
 import { OrdersNavbar } from '../components/OrdersNavbar'
+import { clearSessionToken } from '../lib/auth'
 import { formatPrice } from '../lib/cart'
 import { formatDateTime } from '../lib/format'
 import { ORDER_STATUS_LABELS } from '../lib/roles'
@@ -71,6 +73,12 @@ function getClaimLookupErrorMessage(error) {
   return error?.message ?? 'No pudimos verificar el estado del reclamo.'
 }
 
+function getErrorStatus(error) {
+  if (typeof error?.status === 'number') return error.status
+  if (error instanceof ApiError && typeof error.status === 'number') return error.status
+  return null
+}
+
 export function MyOrders() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
@@ -86,6 +94,14 @@ export function MyOrders() {
   const [hasAnyOrders, setHasAnyOrders] = useState(true)
   const [retryingId, setRetryingId] = useState(null)
   const [cancellingId, setCancellingId] = useState(null)
+
+  const redirectToLogin = () => {
+    clearSessionToken()
+    navigate('/iniciar-sesion', {
+      replace: true,
+      state: { message: 'Tu sesión expiró. Por favor iniciá sesión nuevamente.' },
+    })
+  }
 
   const loadOrders = async () => {
     setLoading(true)
@@ -193,7 +209,28 @@ export function MyOrders() {
       setClaimReason('')
       await loadOrders()
     } catch (err) {
-      setError(err.message)
+      const status = getErrorStatus(err)
+
+      if (status === 401) {
+        redirectToLogin()
+        return
+      }
+
+      if (status === 409) {
+        setError(null)
+        setMessage(err.message ?? 'Ya existe un reclamo para este pedido.')
+        setClaimingId(null)
+        setClaimReason('')
+        await loadOrders()
+        return
+      }
+
+      if (status === 403) {
+        setError(err.message ?? 'No puede realizar reclamos sobre pedidos que no le pertenecen.')
+        return
+      }
+
+      setError(err.message ?? 'No pudimos registrar el reclamo.')
     }
   }
 

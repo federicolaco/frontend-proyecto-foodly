@@ -14,19 +14,19 @@ export function mockSubmitClaim(token, payload) {
   const user = requireUser(token)
   if (user.role !== 'cliente') throw new MockApiError(403, 'Solo clientes pueden realizar reclamos.')
   if (!payload.reason?.trim()) {
-    throw new MockApiError(400, 'Debe describir el motivo del reclamo antes de enviarlo.')
+    throw new MockApiError(400, 'Debe ingresar un motivo.')
   }
 
   const result = updateDb((db) => {
     const order = db.orders.find((o) => o.id === Number(payload.orderId) && o.clientId === user.id)
     if (!order) throw new MockApiError(404, 'Pedido no encontrado')
-    if (order.status !== 'confirmed') {
-      throw new MockApiError(400, 'Solo puede reclamar pedidos confirmados.')
+    if (!['confirmed', 'delivered'].includes(order.status)) {
+      throw new MockApiError(400, 'Solo se pueden realizar reclamos sobre pedidos confirmados o entregados.')
     }
 
     const existing = db.claims.find((c) => c.orderId === order.id)
     if (existing) {
-      throw new MockApiError(400, 'Ya ha presentado un reclamo para este pedido.')
+      throw new MockApiError(409, 'Ya existe un reclamo para este pedido.')
     }
 
     const claim = {
