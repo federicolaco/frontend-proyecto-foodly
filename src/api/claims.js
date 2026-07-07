@@ -59,7 +59,10 @@ export async function resolveClaim(claimId, resolution) {
 
 export async function getClaimForOrder(orderId) {
   if (isApiConfigured()) {
-    const data = await apiFetchSafe(`/reclamos/mi-reclamo/${Number(orderId)}`, { method: 'GET' })
+    const data = await apiFetchSafe(`/reclamos/mi-reclamo/${Number(orderId)}`, {
+      method: 'GET',
+      acceptStatuses: [404],
+    })
     return data ? mapClaim(data) : null
   }
 
