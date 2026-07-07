@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { getLocalClaims, resolveClaim } from '../../api/claims'
 import { formatPrice } from '../../lib/cart'
 import { getStoredUser } from '../../lib/auth'
@@ -12,6 +12,7 @@ const RESOLUTION_TYPES = [
 export function LocalClaims() {
   const [claims, setClaims] = useState([])
   const [statusFilter, setStatusFilter] = useState('pending')
+  const [sort, setSort] = useState('name-asc')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
@@ -37,6 +38,19 @@ export function LocalClaims() {
   }
 
   useEffect(() => { load() }, [statusFilter])
+
+  const sortedClaims = useMemo(() => {
+    const [field, dir] = sort.split('-')
+    return [...claims].sort((a, b) => {
+      if (field === 'name') {
+        const cmp = (a.clientName ?? '').localeCompare(b.clientName ?? '')
+        return dir === 'asc' ? cmp : -cmp
+      }
+      const aVal = a.amount
+      const bVal = b.amount
+      return dir === 'asc' ? aVal - bVal : bVal - aVal
+    })
+  }, [claims, sort])
 
   const handleResolve = async (claimId) => {
     if (!resolutionType) {
@@ -64,23 +78,35 @@ export function LocalClaims() {
       {message && <p className="panel-page__success">{message}</p>}
 
       <section className="panel-card">
-        <label className="panel-field" style={{ maxWidth: '220px', marginBottom: '1rem' }}>
-          <span className="panel-field__label">Estado</span>
-          <select className="panel-field__select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="pending">Pendiente</option>
-            <option value="resolved">Atendido</option>
-            <option value="">Todos</option>
-          </select>
-        </label>
+        <div className="panel-actions" style={{ marginBottom: '1rem', justifyContent: 'space-between' }}>
+          <label className="panel-field" style={{ maxWidth: '220px' }}>
+            <span className="panel-field__label">Estado</span>
+            <select className="panel-field__select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="pending">Pendiente</option>
+              <option value="resolved">Atendido</option>
+              <option value="">Todos</option>
+            </select>
+          </label>
+
+          <label className="panel-field" style={{ minWidth: '220px' }}>
+            <span className="panel-field__label">Ordenar por</span>
+            <select className="panel-field__select" value={sort} onChange={(e) => setSort(e.target.value)}>
+              <option value="name-asc">Nombre: A-Z</option>
+              <option value="name-desc">Nombre: Z-A</option>
+              <option value="amount-asc">Monto: menor a mayor</option>
+              <option value="amount-desc">Monto: mayor a menor</option>
+            </select>
+          </label>
+        </div>
 
         {loading && <p className="panel-empty">Cargando reclamos...</p>}
-        {!loading && claims.length === 0 && (
+        {!loading && sortedClaims.length === 0 && (
           <p className="panel-empty">No se encontraron reclamos que coincidan con los criterios seleccionados.</p>
         )}
 
-        {!loading && claims.length > 0 && (
+        {!loading && sortedClaims.length > 0 && (
           <div style={{ display: 'grid', gap: '1rem' }}>
-            {claims.map((claim) => (
+            {sortedClaims.map((claim) => (
               <article key={claim.id} style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}>
                 <div className="panel-actions" style={{ justifyContent: 'space-between' }}>
                   <strong>Reclamo (ID {claim.id}) — Pedido (ID {claim.orderId})</strong>
