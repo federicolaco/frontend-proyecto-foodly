@@ -288,6 +288,17 @@
   margin-bottom: 1rem;
 }
 
+.auth-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--gris-oscuro);
+}
+
+.auth-checkbox input {
+  width: auto;
+}
+
 .auth-demo-accounts {
   margin-top: 1rem;
   font-size: 0.85rem;

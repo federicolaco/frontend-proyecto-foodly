@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 
-import { getHomePathForRole, login, validateSession, registerWithGoogle } from '../api/auth'
+import { getHomePathForRole, login, loginWithGoogle, validateSession } from '../api/auth'
 import { useGoogleLogin } from '@react-oauth/google'
 import { isMockMode } from '../api/client'
 import { DEMO_ACCOUNTS } from '../lib/roles'
@@ -47,11 +47,7 @@ export function Login() {
       setError(null)
       setLoading(true)
       try {
-        const { user } = await registerWithGoogle({
-          idToken: tokenResponse.access_token,
-          address: null,
-          document: null,
-        })
+        const { user } = await loginWithGoogle(tokenResponse.access_token)
         navigate(redirectTo ?? getHomePathForRole(user.role), { replace: true })
       } catch (err) {
         setError(err.message ?? 'No fue posible iniciar sesión con Google.')
