@@ -9,8 +9,6 @@ import { getStoredUser } from '../lib/auth'
 
 import { PasswordField } from '../components/PasswordField'
 
-import foodlyLogo from '../../img/foodly-logo.png'
-
 import './RegisterLocal.css'
 
 function CameraIcon() {
@@ -122,7 +120,7 @@ export function RegisterLocal() {
   return (
     <div className="register-local-page">
       <header className="register-local-page__header">
-        <img src={foodlyLogo} alt="Foodly" className="register-local-page__logo" />
+        <span className="register-local-page__logo">Foodly</span>
       </header>
 
       <main className="register-local-page__main contenedor">
