@@ -40,6 +40,17 @@
   width: auto;
 }
 
+.register-local-page__logo::after {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--ember);
+  transform: translateY(-10px);
+}
+
 /* ---------- Main / intro ---------- */
 .register-local-page__main.contenedor {
   max-width: 1040px;
