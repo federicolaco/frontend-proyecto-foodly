@@ -523,12 +523,24 @@ export function mapLocalStats(data) {
     soldAmount: Number(plato.montoVendido ?? 0),
   })
 
+  const monthlySales = (data.ventasMensuales ?? [])
+    .map((sale) => ({
+      year: Number(sale.anio ?? 0),
+      month: Number(sale.mes ?? 0),
+      soldAmount: Number(sale.montoVendido ?? 0),
+    }))
+    .sort((left, right) => {
+      if (left.year !== right.year) return left.year - right.year
+      return left.month - right.month
+    })
+
   return {
     fromDate: data.fechaDesde ?? null,
     untilDate: data.fechaHasta ?? null,
     confirmedSales: data.ventasConfirmadas ?? 0,
     topDishes: (data.platosMasPedido ?? []).map(mapAnalyticDish),
     salesByDish: (data.ventasPorPlato ?? []).map(mapAnalyticDish),
+    monthlySales,
   }
 }
 

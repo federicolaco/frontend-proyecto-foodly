@@ -104,6 +104,10 @@ function getOrderDateOnly(order) {
   return typeof rawDate === 'string' ? rawDate.split('T')[0] : null
 }
 
+function getYearMonthKey(isoDate) {
+  return typeof isoDate === 'string' ? isoDate.slice(0, 7) : null
+}
+
 function normalizeCategoryName(value = '') {
   return String(value).trim().replace(/\s+/g, ' ')
 }
@@ -631,7 +635,7 @@ export function mockGetLocalStats(token, filters = {}) {
   const orders = db.orders.filter(
     (o) =>
       o.restaurantId === user.restaurantId &&
-      o.status === 'confirmed' &&
+      ['confirmed', 'delivered'].includes(o.status) &&
       (() => {
         const orderDate = getOrderDateOnly(o)
         return orderDate && orderDate >= fechaDesde && orderDate <= fechaHasta
@@ -639,7 +643,14 @@ export function mockGetLocalStats(token, filters = {}) {
   )
 
   const dishStats = {}
+  const monthlySalesMap = {}
   orders.forEach((order) => {
+    const orderDate = getOrderDateOnly(order)
+    const yearMonthKey = getYearMonthKey(orderDate)
+    if (yearMonthKey) {
+      monthlySalesMap[yearMonthKey] = (monthlySalesMap[yearMonthKey] ?? 0) + Number(order.total ?? 0)
+    }
+
     order.items?.forEach((item) => {
       const dishId = Number(item.id)
       if (!dishId) return
@@ -652,7 +663,7 @@ export function mockGetLocalStats(token, filters = {}) {
         dishStats[dishId] = {
           id: dishId,
           nombre: dish?.name ?? item.name ?? `Plato #${dishId}`,
-          imagenes: dish?.image ? [dish.image] : [],
+          imagen: dish?.image ?? null,
           cantidadVendida: 0,
           montoVendido: 0,
         }
@@ -669,6 +680,19 @@ export function mockGetLocalStats(token, filters = {}) {
     if (b.montoVendido !== a.montoVendido) return b.montoVendido - a.montoVendido
     return a.id - b.id
   })
+  const ventasMensuales = Object.entries(monthlySalesMap)
+    .map(([yearMonth, amount]) => {
+      const [year, month] = yearMonth.split('-')
+      return {
+        anio: Number(year),
+        mes: Number(month),
+        montoVendido: Number(amount),
+      }
+    })
+    .sort((left, right) => {
+      if (left.anio !== right.anio) return left.anio - right.anio
+      return left.mes - right.mes
+    })
 
   if (ventasPorPlato.length === 0) {
     throw new MockApiError(400, STATS_EMPTY_MESSAGE)
@@ -680,5 +704,6 @@ export function mockGetLocalStats(token, filters = {}) {
     ventasConfirmadas,
     platosMasPedido: ventasPorPlato.slice(0, LOCAL_STATS_LIMIT),
     ventasPorPlato,
+    ventasMensuales,
   })
 }

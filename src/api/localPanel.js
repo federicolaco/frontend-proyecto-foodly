@@ -389,6 +389,7 @@ export async function getLocalStats(filters = {}) {
       fechaHasta: null,
       platosMasPedido: [],
       ventasPorPlato: [],
+      ventasMensuales: [],
       ventasConfirmadas: 0,
     })
   }
