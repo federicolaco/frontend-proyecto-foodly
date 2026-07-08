@@ -11,52 +11,30 @@ import { PasswordField } from '../components/PasswordField'
 
 import './RegisterLocal.css'
 
-
-
 function CameraIcon() {
-
   return (
-
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
-
         d="M4 8h3l1.5-2h7L17 8h3a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2v-8a2 2 0 012-2z"
-
         stroke="currentColor"
-
         strokeWidth="2"
-
         strokeLinejoin="round"
-
       />
-
       <circle cx="12" cy="13" r="3.5" stroke="currentColor" strokeWidth="2" />
-
     </svg>
-
   )
-
 }
 
-
-
 export function RegisterLocal() {
-
   const navigate = useNavigate()
-
   const user = getStoredUser()
-
   const logoInputRef = useRef(null)
-
   const imagesInputRef = useRef(null)
 
   const [logoPreview, setLogoPreview] = useState(null)
-
   const [selectedImages, setSelectedImages] = useState([])
 
   const [name, setName] = useState('')
-
   const [email, setEmail] = useState(user.email ?? '')
 
   const [street, setStreet] = useState('')
@@ -72,42 +50,24 @@ export function RegisterLocal() {
   const [success, setSuccess] = useState(null)
   const [loading, setLoading] = useState(false)
 
-
-
   const handleLogoChange = (event) => {
-
     const file = event.target.files?.[0]
-
     if (!file) return
 
     setLogoPreview(URL.createObjectURL(file))
     setLogoFile(file)
-
   }
-
-
 
   const handleImagesChange = (event) => {
-
     const files = Array.from(event.target.files ?? [])
-
     setSelectedImages(files)
-
   }
 
-
-
   const handleSubmit = async (event) => {
-
     event.preventDefault()
-
     setError(null)
-
     setSuccess(null)
-
     setLoading(true)
-
-
 
     if (!name.trim() || !email.trim() || !street.trim() || !streetNumber.trim() || !city.trim() || !postalCode.trim() || !description.trim()) {
       setError('Los campos nombre, correo, dirección y descripción son requeridos.')
@@ -147,172 +107,108 @@ export function RegisterLocal() {
         imageCount: selectedImages.length,
       })
 
-
-      setSuccess(
-
-        'Solicitud enviada con estado «Pendiente». Un administrador la revisará pronto.',
-
-      )
+      setSuccess('Solicitud enviada con estado «Pendiente». Un administrador la revisará pronto.')
 
       setTimeout(() => navigate('/iniciar-sesion', { replace: true }), 2500)
-
     } catch (err) {
-
       setError(err.message ?? 'No pudimos enviar la solicitud.')
-
     } finally {
-
       setLoading(false)
-
     }
-
   }
 
-
-
   return (
-
     <div className="register-local-page">
-
-
       <header className="register-local-page__header">
         <span className="register-local-page__logo">Foodly</span>
       </header>
 
-
       <main className="register-local-page__main contenedor">
-
+        <p className="register-local-page__eyebrow">Únete a Foodly</p>
         <h1 className="register-local-page__title">Registro de Local</h1>
-
-
+        <p className="register-local-page__subtitle">
+          Contanos sobre tu local y tu menú. Revisamos cada solicitud a mano antes de publicarla.
+        </p>
 
         {error && (
-
           <p className="register-local-page__alert register-local-page__alert--error" role="alert">
-
             {error}
-
           </p>
-
         )}
-
         {success && (
-
           <p className="register-local-page__alert register-local-page__alert--success">{success}</p>
-
         )}
-
-
 
         <form className="register-local-form" onSubmit={handleSubmit}>
-
           <div className="register-local-form__grid">
-
             <div className="register-local-form__column">
-
-              <div className="register-local-form__logo-wrap">
-
-                <button
-
-                  type="button"
-
-                  className="register-local-form__logo-btn"
-
-                  onClick={() => logoInputRef.current?.click()}
-
-                  aria-label="Subir logo del local"
-
-                >
-
-                  {logoPreview ? (
-
-                    <img src={logoPreview} alt="" className="register-local-form__logo-image" />
-
-                  ) : (
-
-                    <span className="register-local-form__logo-placeholder" aria-hidden="true">
-
-                      <CameraIcon />
-
-                      <span>Logo</span>
-
-                    </span>
-
-                  )}
-
-                </button>
-
-                <input
-
-                  ref={logoInputRef}
-
-                  type="file"
-
-                  accept="image/jpeg,image/png"
-
-                  className="register-local-form__file-input"
-
-                  onChange={handleLogoChange}
-
-                />
-
+              <div className="register-local-form__step">
+                <span className="register-local-form__step-index">01</span>
+                <span className="register-local-form__step-label">Identidad del local</span>
               </div>
 
-
+              <div className="register-local-form__logo-wrap">
+                <button
+                  type="button"
+                  className="register-local-form__logo-btn"
+                  onClick={() => logoInputRef.current?.click()}
+                  aria-label="Subir logo del local"
+                >
+                  {logoPreview ? (
+                    <img src={logoPreview} alt="" className="register-local-form__logo-image" />
+                  ) : (
+                    <span className="register-local-form__logo-placeholder" aria-hidden="true">
+                      <CameraIcon />
+                      <span>Logo</span>
+                    </span>
+                  )}
+                </button>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  className="register-local-form__file-input"
+                  onChange={handleLogoChange}
+                />
+                <p className="register-local-form__logo-hint">
+                  Se muestra en tu perfil y en cada pedido. Usá un JPG o PNG cuadrado.
+                </p>
+              </div>
 
               <label className="register-local-field">
-
-                <span className="register-local-field__label">Nombre del Local</span>
-
+                <span className="register-local-field__label">Nombre del local</span>
                 <input
-
                   type="text"
-
                   placeholder="Ej. TrapBurger"
-
                   className="register-local-field__input"
-
                   value={name}
-
                   onChange={(e) => setName(e.target.value)}
-
                   required
-
                 />
-
               </label>
 
-
-
               <label className="register-local-field">
-
                 <span className="register-local-field__label">Correo electrónico</span>
-
                 <input
-
                   type="email"
-
                   placeholder="ejemplo@gmail.com"
-
                   className="register-local-field__input"
-
                   autoComplete="email"
-
                   value={email}
-
                   onChange={(e) => setEmail(e.target.value)}
-
                   required
-
                 />
-
               </label>
 
               {isApiConfigured() && (
                 <>
+                  <div className="register-local-form__step">
+                    <span className="register-local-form__step-index">02</span>
+                    <span className="register-local-form__step-label">Cuenta del local</span>
+                  </div>
                   <PasswordField
                     id="register-local-password"
-                    label="Contraseña de la cuenta del local"
+                    label="Contraseña"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="new-password"
@@ -329,173 +225,128 @@ export function RegisterLocal() {
                 </>
               )}
 
-              <label className="register-local-field">
-                <input
-                  type="text"
-                  placeholder="Calle"
-                  className="register-local-field__input"
-                  value={street}
-                  onChange={(e) => setStreet(e.target.value)}
-                  required
-                />
-              </label>
+              <div className="register-local-form__step">
+                <span className="register-local-form__step-index">03</span>
+                <span className="register-local-form__step-label">Ubicación</span>
+              </div>
+
+              <div className="register-local-field__row">
+                <label className="register-local-field">
+                  <span className="register-local-field__label">Calle</span>
+                  <input
+                    type="text"
+                    placeholder="Calle"
+                    className="register-local-field__input"
+                    value={street}
+                    onChange={(e) => setStreet(e.target.value)}
+                    required
+                  />
+                </label>
+
+                <label className="register-local-field">
+                  <span className="register-local-field__label">Número</span>
+                  <input
+                    type="text"
+                    placeholder="Número"
+                    inputMode="numeric"
+                    className="register-local-field__input"
+                    value={streetNumber}
+                    onChange={(e) => setStreetNumber(e.target.value)}
+                    required
+                  />
+                </label>
+              </div>
+
+              <div className="register-local-field__row">
+                <label className="register-local-field">
+                  <span className="register-local-field__label">Ciudad</span>
+                  <input
+                    type="text"
+                    placeholder="Ciudad"
+                    className="register-local-field__input"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
+                  />
+                </label>
+
+                <label className="register-local-field">
+                  <span className="register-local-field__label">Código postal</span>
+                  <input
+                    type="text"
+                    placeholder="Código postal"
+                    className="register-local-field__input"
+                    value={postalCode}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                    required
+                  />
+                </label>
+              </div>
 
               <label className="register-local-field">
-                <input
-                  type="text"
-                  placeholder="Número"
-                  inputMode="numeric"
-                  className="register-local-field__input"
-                  value={streetNumber}
-                  onChange={(e) => setStreetNumber(e.target.value)}
-                  required
-                />
-              </label>
-
-              <label className="register-local-field">
-                <input
-                  type="text"
-                  placeholder="Ciudad"
-                  className="register-local-field__input"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                />
-              </label>
-
-              <label className="register-local-field">
-                <input
-                  type="text"
-                  placeholder="Código postal"
-                  className="register-local-field__input"
-                  value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value)}
-                  required
-                />
-              </label>
-
-              <label className="register-local-field">
-
                 <span className="register-local-field__label">Descripción del menú</span>
-
                 <textarea
-
                   rows={6}
-
-                  placeholder="Ofrecemos hamburguesas smash con diferente opciones de papas como acompañamiento."
-
+                  placeholder="Ofrecemos hamburguesas smash con diferentes opciones de papas como acompañamiento."
                   className="register-local-field__textarea"
-
                   value={description}
-
                   onChange={(e) => setDescription(e.target.value)}
-
                   required
-
                 />
-
               </label>
-
             </div>
-
-
 
             <div className="register-local-form__column register-local-form__column--right">
+              <div className="register-local-form__step">
+                <span className="register-local-form__step-index">04</span>
+                <span className="register-local-form__step-label">Fotos del local</span>
+              </div>
 
               <div className="register-local-field register-local-field--images">
-
                 <span className="register-local-field__label">Imágenes</span>
-
                 <button
-
                   type="button"
-
                   className="register-local-form__images-zone"
-
                   onClick={() => imagesInputRef.current?.click()}
-
                 >
-
                   <span className="register-local-form__images-placeholder">
-
                     {selectedImages.length > 0 ? (
-
                       `${selectedImages.length} imagen${selectedImages.length > 1 ? 'es' : ''} seleccionada${selectedImages.length > 1 ? 's' : ''}`
-
                     ) : (
-
                       <>
-
                         <CameraIcon />
-
-                        <span>Adjunta tus imágenes aquí...</span>
-
+                        <span>Adjuntá tus imágenes aquí...</span>
                       </>
-
                     )}
-
                   </span>
-
                 </button>
-
                 <input
-
                   ref={imagesInputRef}
-
                   type="file"
-
                   accept="image/jpeg,image/png"
-
                   multiple
-
                   className="register-local-form__file-input"
-
                   onChange={handleImagesChange}
-
                 />
-
               </div>
-
-
 
               <div className="register-local-form__notice-group">
-
                 <span className="register-local-field__label">Importante:</span>
-
                 <p className="register-local-form__notice" role="note">
-
                   Antes de procesar la solicitud para registrar tu local, por favor asegúrate de
-
                   que todos los datos sean correctos y las imágenes cumplan los requisitos.
-
                 </p>
-
               </div>
-
-
 
               <div className="register-local-form__submit-wrap">
-
                 <button type="submit" className="register-local-form__submit" disabled={loading}>
-
-                  {loading ? 'ENVIANDO...' : 'SOLICITAR REGISTRO'}
-
+                  {loading ? 'Enviando...' : 'Solicitar registro'}
                 </button>
-
               </div>
-
             </div>
-
           </div>
-
         </form>
-
       </main>
-
     </div>
-
   )
-
 }
-
-
