@@ -4,10 +4,11 @@ import { formatPrice } from '../../lib/cart'
 import { formatDate } from '../../lib/format'
 import '../Panel.css'
 
-const DEFAULT_PRESET = 'MES_ACTUAL'
+const DEFAULT_PRESET = ''
 const EMPTY_RANGE = { fechaDesde: '', fechaHasta: '' }
 const MONTH_LABELS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 const PRESET_OPTIONS = [
+  { value: '', label: 'Seleccionar preset' },
   { value: 'HOY', label: 'Hoy' },
   { value: 'ULTIMOS_7_DIAS', label: 'Ultimos 7 dias' },
   { value: 'ULTIMOS_30_DIAS', label: 'Ultimos 30 dias' },
@@ -217,6 +218,10 @@ export function LocalStats() {
     try {
       const data = await getLocalStats(filters)
       setStats(data)
+      setRange({
+        fechaDesde: data?.fromDate ?? '',
+        fechaHasta: data?.untilDate ?? '',
+      })
     } catch (err) {
       setStats(null)
       setError(err.message ?? 'No pudimos cargar las estadisticas del local.')
@@ -225,8 +230,19 @@ export function LocalStats() {
     }
   }
 
-  const handleApplyPreset = () => {
-    loadStats({ preset: selectedPreset })
+  const handlePresetChange = (event) => {
+    const nextPreset = event.target.value
+    setSelectedPreset(nextPreset)
+
+    if (!nextPreset) {
+      setRange(EMPTY_RANGE)
+      setStats(null)
+      setError(null)
+      setHasSearched(false)
+      return
+    }
+
+    loadStats({ preset: nextPreset })
   }
 
   const handleApplyRange = () => {
@@ -246,7 +262,13 @@ export function LocalStats() {
       return
     }
 
+    setSelectedPreset(DEFAULT_PRESET)
     loadStats({ fechaDesde, fechaHasta })
+  }
+
+  const handleRangeChange = (field, value) => {
+    setSelectedPreset(DEFAULT_PRESET)
+    setRange((current) => ({ ...current, [field]: value }))
   }
 
   const handleClearFilters = () => {
@@ -269,13 +291,13 @@ export function LocalStats() {
 
       <section className="panel-card">
         <div className="panel-form" style={{ marginBottom: '1.5rem' }}>
-          <div className="panel-form__row panel-form__row--2">
+          <div className="panel-form__row">
             <label className="panel-field">
               <span className="panel-field__label">Preset rapido</span>
               <select
                 className="panel-field__select"
                 value={selectedPreset}
-                onChange={(e) => setSelectedPreset(e.target.value)}
+                onChange={handlePresetChange}
                 disabled={loading}
               >
                 {PRESET_OPTIONS.map((option) => (
@@ -285,18 +307,6 @@ export function LocalStats() {
                 ))}
               </select>
             </label>
-
-            <div className="panel-field">
-              <span className="panel-field__label">Aplicar preset</span>
-              <button
-                type="button"
-                className="panel-btn panel-btn--primary"
-                onClick={handleApplyPreset}
-                disabled={loading}
-              >
-                {loading ? 'Actualizando...' : 'Aplicar preset'}
-              </button>
-            </div>
           </div>
 
           <div style={{ margin: '0.5rem 0 0.25rem', color: 'var(--gris-intermedio)', fontSize: '0.9rem' }}>
@@ -310,7 +320,7 @@ export function LocalStats() {
                 type="date"
                 className="panel-field__input"
                 value={range.fechaDesde}
-                onChange={(e) => setRange((current) => ({ ...current, fechaDesde: e.target.value }))}
+                onChange={(e) => handleRangeChange('fechaDesde', e.target.value)}
                 disabled={loading}
               />
             </label>
@@ -321,7 +331,7 @@ export function LocalStats() {
                 type="date"
                 className="panel-field__input"
                 value={range.fechaHasta}
-                onChange={(e) => setRange((current) => ({ ...current, fechaHasta: e.target.value }))}
+                onChange={(e) => handleRangeChange('fechaHasta', e.target.value)}
                 disabled={loading}
               />
             </label>
@@ -350,7 +360,7 @@ export function LocalStats() {
         {loading ? (
           <p className="panel-empty">Cargando estadisticas...</p>
         ) : !hasSearched ? (
-          <p className="panel-empty">Selecciona un periodo y aplica la busqueda para ver estadisticas.</p>
+          <p className="panel-empty">Selecciona un preset o define un rango para ver estadisticas.</p>
         ) : stats ? (
           <>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
