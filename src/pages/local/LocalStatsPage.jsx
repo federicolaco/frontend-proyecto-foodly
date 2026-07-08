@@ -40,6 +40,7 @@ function MonthlySalesChart({ sales }) {
   const amounts = sales.map((sale) => Number(sale.soldAmount ?? 0))
   const maxAmount = Math.max(...amounts, 0)
   const hasMultipleYears = new Set(sales.map((sale) => sale.year)).size > 1
+  const shouldCenterBars = sales.length <= 4
 
   return (
     <section
@@ -53,11 +54,13 @@ function MonthlySalesChart({ sales }) {
     >
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${sales.length}, minmax(0, 1fr))`,
-          gap: '0.75rem',
+          display: 'flex',
+          justifyContent: shouldCenterBars ? 'center' : 'flex-start',
+          gap: '0.5rem',
           alignItems: 'end',
           minHeight: '18rem',
+          overflowX: 'auto',
+          padding: '0 0.25rem',
         }}
       >
         {sales.map((sale) => {
@@ -73,8 +76,9 @@ function MonthlySalesChart({ sales }) {
                 flexDirection: 'column',
                 justifyContent: 'flex-end',
                 alignItems: 'center',
+                flex: '0 0 4.75rem',
                 minWidth: 0,
-                gap: '0.5rem',
+                gap: '0.4rem',
               }}
             >
               <strong
@@ -91,7 +95,7 @@ function MonthlySalesChart({ sales }) {
               <div
                 style={{
                   width: '100%',
-                  maxWidth: '3.25rem',
+                  maxWidth: '3.75rem',
                   height: '12rem',
                   display: 'flex',
                   alignItems: 'flex-end',
@@ -394,9 +398,6 @@ export function LocalStats() {
               Estas metricas consideran pedidos en estado confirmado y entregado.
             </p>
 
-            <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Grafico de ventas mensuales</h2>
-            <MonthlySalesChart sales={monthlySales} />
-
             <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Platos mas pedidos</h2>
             {topDishes.length === 0 ? (
               <p className="panel-empty">No hay informacion disponible para el periodo seleccionado.</p>
@@ -418,6 +419,9 @@ export function LocalStats() {
                 ))}
               </div>
             )}
+
+            <h2 style={{ margin: '1.5rem 0 1rem', color: 'var(--gris-oscuro)' }}>Grafico de ventas mensuales</h2>
+            <MonthlySalesChart sales={monthlySales} />
           </>
         ) : null}
       </section>
