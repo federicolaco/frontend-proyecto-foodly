@@ -16,7 +16,7 @@ const PRESET_OPTIONS = [
 ]
 
 function formatPeriodDate(value) {
-  if (!value) return '—'
+  if (!value) return '\u2014'
   return formatDate(value)
 }
 
@@ -102,8 +102,8 @@ function MonthlySalesChart({ sales }) {
                     width: '100%',
                     height: barHeight,
                     borderRadius: '0.75rem 0.75rem 0.35rem 0.35rem',
-                    background: 'linear-gradient(180deg, var(--naranja-claro) 0%, var(--naranja) 100%)',
-                    boxShadow: '0 10px 18px rgba(255, 122, 0, 0.18)',
+                    background: 'linear-gradient(180deg, var(--celeste-oscuro) 0%, var(--celeste) 100%)',
+                    boxShadow: '0 10px 18px rgba(4, 144, 209, 0.22)',
                     minHeight: amount > 0 ? '1rem' : '0.4rem',
                   }}
                 />
