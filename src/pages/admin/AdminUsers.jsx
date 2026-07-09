@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { getUsers, setUserBlocked } from '../../api/admin'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import '../Panel.css'
 
 const ROLE_LABELS = { cliente: 'Cliente', local: 'Local' }
@@ -23,6 +24,7 @@ export function AdminUsers() {
   const [processingId, setProcessingId] = useState(null)
   const [sort, setSort] = useState('name-asc')
   const toast = useToast()
+  const confirm = useConfirm()
 
   const loadUsers = async () => {
     setLoading(true)
@@ -71,7 +73,13 @@ export function AdminUsers() {
   const handleToggleBlock = async (user) => {
     const block = user.status !== 'blocked'
     const label = block ? 'bloquear' : 'desbloquear'
-    if (!window.confirm(`¿Confirma que desea ${label} a ${user.name}?`)) return
+    const confirmed = await confirm({
+      title: block ? 'Bloquear usuario' : 'Desbloquear usuario',
+      message: `¿Confirma que desea ${label} a ${user.name}?`,
+      confirmText: block ? 'Bloquear' : 'Desbloquear',
+      variant: block ? 'danger' : 'default',
+    })
+    if (!confirmed) return
 
     setProcessingId(user.id)
     try {

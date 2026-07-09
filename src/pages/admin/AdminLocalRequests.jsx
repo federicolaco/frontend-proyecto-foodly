@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { approveLocalRequest, getPendingLocalRequests, rejectLocalRequest } from '../../api/admin'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import '../Panel.css'
 
 export function AdminLocalRequests() {
@@ -11,6 +12,7 @@ export function AdminLocalRequests() {
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState(null)
   const toast = useToast()
+  const confirm = useConfirm()
 
   const loadRequests = async () => {
     setLoading(true)
@@ -48,7 +50,13 @@ export function AdminLocalRequests() {
 
   const handleResolve = async (requestId, action) => {
     const label = action === 'approve' ? 'aprobar' : 'rechazar'
-    if (!window.confirm(`¿Confirma que desea ${label} esta solicitud?`)) return
+    const confirmed = await confirm({
+      title: action === 'approve' ? 'Aprobar solicitud' : 'Rechazar solicitud',
+      message: `¿Confirma que desea ${label} esta solicitud?`,
+      confirmText: action === 'approve' ? 'Aprobar' : 'Rechazar',
+      variant: action === 'approve' ? 'default' : 'danger',
+    })
+    if (!confirmed) return
 
     setProcessingId(requestId)
 

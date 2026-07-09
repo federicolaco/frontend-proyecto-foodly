@@ -18,6 +18,7 @@ import { getStoredUser } from '../../lib/auth'
 import { formatDate } from '../../lib/format'
 import { ROLES } from '../../lib/roles'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import '../Account.css'
 import '../Panel.css'
 
@@ -76,6 +77,7 @@ export function AccountSettings() {
   const [tab, setTab] = useState('profile')
   const [loading, setLoading] = useState(false)
   const toast = useToast()
+  const confirm = useConfirm()
   const [email, setEmail] = useState(user.email ?? '')
   const [newEmail, setNewEmail] = useState('')
   const [emailChangeLoading, setEmailChangeLoading] = useState(false)
@@ -205,7 +207,13 @@ export function AccountSettings() {
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('¿Confirma la eliminación de su cuenta? Esta acción no se puede deshacer.')) return
+    const confirmed = await confirm({
+      title: 'Eliminar cuenta',
+      message: 'Esta acción no se puede deshacer. ¿Confirma la eliminación de su cuenta?',
+      confirmText: 'Eliminar cuenta',
+      variant: 'danger',
+    })
+    if (!confirmed) return
     setLoading(true)
     try {
       await deleteAccount()

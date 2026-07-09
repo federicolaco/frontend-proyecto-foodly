@@ -3,6 +3,7 @@ import { getLocalClaims, resolveClaim } from '../../api/claims'
 import { formatPrice } from '../../lib/cart'
 import { getStoredUser } from '../../lib/auth'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import '../Panel.css'
 
 const RESOLUTION_TYPES = [
@@ -17,6 +18,7 @@ export function LocalClaims() {
   const [loading, setLoading] = useState(true)
   const [resolvingId, setResolvingId] = useState(null)
   const toast = useToast()
+  const confirm = useConfirm()
   const [resolutionType, setResolutionType] = useState(RESOLUTION_TYPES[0].id)
   const [resolutionNote, setResolutionNote] = useState('')
 
@@ -56,7 +58,12 @@ export function LocalClaims() {
       toast.error('Debe seleccionar el tipo de resolución antes de confirmar.')
       return
     }
-    if (!window.confirm('¿Confirma la resolución del reclamo?')) return
+    const confirmed = await confirm({
+      title: 'Resolver reclamo',
+      message: '¿Confirma la resolución del reclamo?',
+      confirmText: 'Confirmar',
+    })
+    if (!confirmed) return
 
     try {
       await resolveClaim(claimId, { type: resolutionType, note: resolutionNote })

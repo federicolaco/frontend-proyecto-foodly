@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { deletePromotion, getLocalDishes, getLocalPromotions, savePromotion } from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import '../Panel.css'
 
 const EMPTY_FORM = {
@@ -44,6 +45,7 @@ export function LocalPromotions() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const toast = useToast()
+  const confirm = useConfirm()
 
   const selectedDish = dishes.find((dish) => String(dish.id) === String(form.dishId))
   const discount = Number(form.discountPercent)
@@ -121,7 +123,13 @@ export function LocalPromotions() {
   }
 
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Desea eliminar esta promoción?')) return
+    const confirmed = await confirm({
+      title: 'Eliminar promoción',
+      message: '¿Desea eliminar esta promoción?',
+      confirmText: 'Eliminar',
+      variant: 'danger',
+    })
+    if (!confirmed) return
     try {
       await deletePromotion(id)
       toast.success('Promoción eliminada.')

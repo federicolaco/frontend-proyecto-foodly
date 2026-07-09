@@ -10,6 +10,7 @@ import { formatPrice } from '../lib/cart'
 import { formatDateTime } from '../lib/format'
 import { ORDER_STATUS_LABELS } from '../lib/roles'
 import { useToast } from '../context/ToastContext'
+import { useConfirm } from '../context/ConfirmContext'
 import './Panel.css'
 
 const COMPENSATION_TYPES = [
@@ -94,6 +95,7 @@ export function MyOrders() {
   const [retryingId, setRetryingId] = useState(null)
   const [cancellingId, setCancellingId] = useState(null)
   const toast = useToast()
+  const confirm = useConfirm()
 
   const redirectToLogin = () => {
     clearSessionToken()
@@ -155,7 +157,13 @@ export function MyOrders() {
   const sortedOrders = useMemo(() => sortOrders(orders, sortBy), [orders, sortBy])
 
   const handleCancel = async (orderId) => {
-    if (!window.confirm('Confirma la cancelacion del pedido?')) return
+    const confirmed = await confirm({
+      title: 'Cancelar pedido',
+      message: '¿Confirma la cancelación del pedido?',
+      confirmText: 'Cancelar pedido',
+      variant: 'danger',
+    })
+    if (!confirmed) return
 
     setCancellingId(orderId)
 

@@ -3,6 +3,7 @@ import { closeLocal, getMyLocal, openLocal } from '../../api/localPanel'
 import { getLocalRatingDetails, getLocalRatingSummary } from '../../api/ratings'
 import { formatDate } from '../../lib/format'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import '../Account.css'
 import '../Panel.css'
 
@@ -13,6 +14,7 @@ export function LocalHome() {
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const toast = useToast()
+  const confirm = useConfirm()
 
   const load = async () => {
     setLoading(true)
@@ -38,7 +40,12 @@ export function LocalHome() {
   }, [])
 
   const handleOpen = async () => {
-    if (!window.confirm('¿Confirma que desea abrir el local?')) return
+    const confirmed = await confirm({
+      title: 'Abrir local',
+      message: '¿Confirma que desea abrir el local?',
+      confirmText: 'Abrir local',
+    })
+    if (!confirmed) return
     setBusy(true)
 
     try {
@@ -59,7 +66,13 @@ export function LocalHome() {
         ? `Tiene ${pending} pedido(s) pendiente(s) de confirmación. ¿Desea cerrar el local de todas formas?`
         : '¿Confirma que desea cerrar el local?'
 
-    if (!window.confirm(warning)) return
+    const confirmed = await confirm({
+      title: 'Cerrar local',
+      message: warning,
+      confirmText: 'Cerrar local',
+      variant: 'danger',
+    })
+    if (!confirmed) return
 
     setBusy(true)
 

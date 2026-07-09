@@ -4,6 +4,7 @@ import { formatPrice } from '../../lib/cart'
 import { formatDateTime } from '../../lib/format'
 import { ORDER_STATUS_LABELS } from '../../lib/roles'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import '../Panel.css'
 
 const REJECTION_REASONS = [
@@ -32,6 +33,7 @@ export function LocalOrdersPage() {
   const [rejectReason, setRejectReason] = useState('')
   const [customRejectReason, setCustomRejectReason] = useState('')
   const toast = useToast()
+  const confirmDialog = useConfirm()
 
   const loadOrders = async () => {
     setLoading(true)
@@ -92,7 +94,12 @@ export function LocalOrdersPage() {
       toast.error('Debe ingresar el tiempo estimado de entrega para confirmar el pedido.')
       return
     }
-    if (!window.confirm('¿Confirma el pedido? Se simulará el pago y se generará la factura.')) return
+    const confirmed = await confirmDialog({
+      title: 'Confirmar pedido',
+      message: 'Se simulará el pago y se generará la factura. ¿Confirma el pedido?',
+      confirmText: 'Confirmar',
+    })
+    if (!confirmed) return
     try {
       await confirmOrder(orderId, deliveryMinutes)
       toast.success('Pedido confirmado. Factura generada y cliente notificado.')
@@ -110,7 +117,13 @@ export function LocalOrdersPage() {
       toast.error('Debe seleccionar o escribir un motivo de rechazo antes de continuar.')
       return
     }
-    if (!window.confirm('¿Confirma el rechazo del pedido?')) return
+    const confirmedReject = await confirmDialog({
+      title: 'Rechazar pedido',
+      message: '¿Confirma el rechazo del pedido?',
+      confirmText: 'Rechazar',
+      variant: 'danger',
+    })
+    if (!confirmedReject) return
     try {
       await rejectOrder(orderId, effectiveRejectReason)
       toast.success('Pedido rechazado. Cliente notificado.')

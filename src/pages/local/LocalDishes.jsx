@@ -8,6 +8,7 @@ import {
 } from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
 import { useToast } from '../../context/ToastContext'
+import { useConfirm } from '../../context/ConfirmContext'
 import '../Panel.css'
 
 const EMPTY_FORM = {
@@ -29,6 +30,7 @@ export function LocalDishes() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const toast = useToast()
+  const confirm = useConfirm()
   const imageInputRef = useRef(null)
 
   const loadCategories = async () => {
@@ -154,7 +156,13 @@ export function LocalDishes() {
   }
 
   const handleDelete = async (dishId) => {
-    if (!window.confirm('Desea eliminar este plato del catalogo?')) return
+    const confirmed = await confirm({
+      title: 'Eliminar plato',
+      message: '¿Desea eliminar este plato del catálogo?',
+      confirmText: 'Eliminar',
+      variant: 'danger',
+    })
+    if (!confirmed) return
 
     try {
       await deleteDish(dishId)
