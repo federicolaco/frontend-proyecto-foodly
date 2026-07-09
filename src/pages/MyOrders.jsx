@@ -9,6 +9,7 @@ import { clearSessionToken } from '../lib/auth'
 import { formatPrice } from '../lib/cart'
 import { formatDateTime } from '../lib/format'
 import { ORDER_STATUS_LABELS } from '../lib/roles'
+import { useToast } from '../context/ToastContext'
 import './Panel.css'
 
 const COMPENSATION_TYPES = [
@@ -85,8 +86,6 @@ export function MyOrders() {
   const [statusFilter, setStatusFilter] = useState('')
   const [sortBy, setSortBy] = useState('date_desc')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [message, setMessage] = useState(null)
   const [claimingId, setClaimingId] = useState(null)
   const [claimReason, setClaimReason] = useState('')
   const [claimCompensation, setClaimCompensation] = useState(COMPENSATION_TYPES[0].id)
@@ -94,18 +93,18 @@ export function MyOrders() {
   const [hasAnyOrders, setHasAnyOrders] = useState(true)
   const [retryingId, setRetryingId] = useState(null)
   const [cancellingId, setCancellingId] = useState(null)
+  const toast = useToast()
 
   const redirectToLogin = () => {
     clearSessionToken()
     navigate('/iniciar-sesion', {
       replace: true,
-      state: { message: 'Tu sesión expiró. Por favor iniciá sesión nuevamente.' },
+      state: { message: 'Tu sesiÃ³n expirÃ³. Por favor iniciÃ¡ sesiÃ³n nuevamente.' },
     })
   }
 
   const loadOrders = async () => {
     setLoading(true)
-    setError(null)
 
     try {
       const data = await getMyOrders(statusFilter ? { status: statusFilter } : {})
@@ -143,7 +142,7 @@ export function MyOrders() {
 
       setOrderMeta(meta)
     } catch (err) {
-      setError(err.message ?? 'No pudimos cargar tus pedidos.')
+      toast.error(err.message ?? 'No pudimos cargar tus pedidos.')
     } finally {
       setLoading(false)
     }
@@ -158,24 +157,20 @@ export function MyOrders() {
   const handleCancel = async (orderId) => {
     if (!window.confirm('Confirma la cancelacion del pedido?')) return
 
-    setMessage(null)
-    setError(null)
     setCancellingId(orderId)
 
     try {
       await cancelOrder(orderId)
-      setMessage('Pedido cancelado.')
+      toast.success('Pedido cancelado.')
       await loadOrders()
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setCancellingId(null)
     }
   }
 
   const handleRetryPayment = async (orderId) => {
-    setMessage(null)
-    setError(null)
     setRetryingId(orderId)
 
     try {
@@ -187,7 +182,7 @@ export function MyOrders() {
 
       window.location.href = order.mpInitPoint
     } catch (err) {
-      setError(err.message ?? 'No pudimos reintentar el pago.')
+      toast.error(err.message ?? 'No pudimos reintentar el pago.')
     } finally {
       setRetryingId(null)
     }
@@ -195,16 +190,13 @@ export function MyOrders() {
 
   const handleClaim = async (orderId) => {
     if (!claimReason.trim()) {
-      setError('Debe describir el motivo del reclamo antes de enviarlo.')
+      toast.error('Debe describir el motivo del reclamo antes de enviarlo.')
       return
     }
 
-    setError(null)
-    setMessage(null)
-
     try {
       await submitClaim({ orderId, reason: claimReason, compensationType: claimCompensation })
-      setMessage('Reclamo registrado. El local fue notificado.')
+      toast.success('Reclamo registrado. El local fue notificado.')
       setClaimingId(null)
       setClaimReason('')
       await loadOrders()
@@ -217,8 +209,7 @@ export function MyOrders() {
       }
 
       if (status === 409) {
-        setError(null)
-        setMessage(err.message ?? 'Ya existe un reclamo para este pedido.')
+        toast.info(err.message ?? 'Ya existe un reclamo para este pedido.')
         setClaimingId(null)
         setClaimReason('')
         await loadOrders()
@@ -226,17 +217,17 @@ export function MyOrders() {
       }
 
       if (status === 403) {
-        setError(err.message ?? 'No puede realizar reclamos sobre pedidos que no le pertenecen.')
+        toast.error(err.message ?? 'No puede realizar reclamos sobre pedidos que no le pertenecen.')
         return
       }
 
-      setError(err.message ?? 'No pudimos registrar el reclamo.')
+      toast.error(err.message ?? 'No pudimos registrar el reclamo.')
     }
   }
 
   const handleOpenRating = (order) => {
     if (!order.restaurantId) {
-      setError('No pudimos identificar el local asociado a este pedido.')
+      toast.error('No pudimos identificar el local asociado a este pedido.')
       return
     }
 
@@ -255,9 +246,6 @@ export function MyOrders() {
 
       <main className="panel-page__main contenedor">
         <h1 className="panel-page__title">Mis Pedidos</h1>
-
-        {error && <p className="panel-page__error" role="alert">{error}</p>}
-        {message && <p className="panel-page__success">{message}</p>}
 
         <section className="panel-card">
           <div

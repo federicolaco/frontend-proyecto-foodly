@@ -1,6 +1,7 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { deletePromotion, getLocalDishes, getLocalPromotions, savePromotion } from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
+import { useToast } from '../../context/ToastContext'
 import '../Panel.css'
 
 const EMPTY_FORM = {
@@ -41,9 +42,8 @@ export function LocalPromotions() {
   const [dishes, setDishes] = useState([])
   const [form, setForm] = useState(EMPTY_FORM)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [message, setMessage] = useState(null)
   const [saving, setSaving] = useState(false)
+  const toast = useToast()
 
   const selectedDish = dishes.find((dish) => String(dish.id) === String(form.dishId))
   const discount = Number(form.discountPercent)
@@ -78,13 +78,12 @@ export function LocalPromotions() {
 
   const load = async () => {
     setLoading(true)
-    setError(null)
     try {
       const [promos, dishList] = await Promise.all([getLocalPromotions(), getLocalDishes()])
       setPromotionGroups(promos)
       setDishes(dishList.filter((d) => d.active))
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
@@ -96,28 +95,26 @@ export function LocalPromotions() {
     event.preventDefault()
     const discount = Number(form.discountPercent)
     if (discount < 1 || discount > 100) {
-      setError('El porcentaje de descuento debe estar entre 1% y 100%.')
+      toast.error('El porcentaje de descuento debe estar entre 1% y 100%.')
       return
     }
     if (!form.dishId) {
-      setError('Debe seleccionar al menos un plato para aplicar la promoción.')
+      toast.error('Debe seleccionar al menos un plato para aplicar la promoción.')
       return
     }
     if (form.endDate && form.startDate && form.endDate < form.startDate) {
-      setError('La fecha de fin debe ser posterior a la fecha de inicio.')
+      toast.error('La fecha de fin debe ser posterior a la fecha de inicio.')
       return
     }
 
     setSaving(true)
-    setError(null)
-    setMessage(null)
     try {
       await savePromotion(form)
       setForm(EMPTY_FORM)
-      setMessage(form.id ? 'Promoción actualizada.' : 'Promoción creada.')
+      toast.success(form.id ? 'Promoción actualizada.' : 'Promoción creada.')
       await load()
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setSaving(false)
     }
@@ -125,14 +122,12 @@ export function LocalPromotions() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('¿Desea eliminar esta promoción?')) return
-    setError(null)
-    setMessage(null)
     try {
       await deletePromotion(id)
-      setMessage('Promoción eliminada.')
+      toast.success('Promoción eliminada.')
       await load()
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     }
   }
 
@@ -174,9 +169,6 @@ export function LocalPromotions() {
 
   return (
     <>
-      {error && <p className="panel-page__error" role="alert">{error}</p>}
-      {message && <p className="panel-page__success">{message}</p>}
-
       <section className="panel-card" style={{ marginBottom: '1rem' }}>
         <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>
           {form.id ? 'Editar promoción' : 'Nueva promoción'}

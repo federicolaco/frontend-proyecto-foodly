@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { approveLocalRequest, getPendingLocalRequests, rejectLocalRequest } from '../../api/admin'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
+import { useToast } from '../../context/ToastContext'
 import '../Panel.css'
 
 export function AdminLocalRequests() {
@@ -8,19 +9,17 @@ export function AdminLocalRequests() {
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState('name-asc')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [message, setMessage] = useState(null)
   const [processingId, setProcessingId] = useState(null)
+  const toast = useToast()
 
   const loadRequests = async () => {
     setLoading(true)
-    setError(null)
 
     try {
       const data = await getPendingLocalRequests()
       setRequests(data)
     } catch (err) {
-      setError(err.message ?? 'No pudimos cargar las solicitudes.')
+      toast.error(err.message ?? 'No pudimos cargar las solicitudes.')
     } finally {
       setLoading(false)
     }
@@ -52,20 +51,18 @@ export function AdminLocalRequests() {
     if (!window.confirm(`¿Confirma que desea ${label} esta solicitud?`)) return
 
     setProcessingId(requestId)
-    setMessage(null)
-    setError(null)
 
     try {
       if (action === 'approve') {
         await approveLocalRequest(requestId)
-        setMessage('Solicitud aprobada. El local fue habilitado.')
+        toast.success('Solicitud aprobada. El local fue habilitado.')
       } else {
         await rejectLocalRequest(requestId)
-        setMessage('Solicitud rechazada.')
+        toast.success('Solicitud rechazada.')
       }
       await loadRequests()
     } catch (err) {
-      setError(err.message ?? 'No se pudo resolver la solicitud.')
+      toast.error(err.message ?? 'No se pudo resolver la solicitud.')
     } finally {
       setProcessingId(null)
     }
@@ -80,13 +77,6 @@ export function AdminLocalRequests() {
         <p className="panel-page__subtitle">
           Revisá y resolvé las solicitudes de habilitación pendientes.
         </p>
-
-        {error && (
-          <p className="panel-page__error" role="alert">
-            {error}
-          </p>
-        )}
-        {message && <p className="panel-page__success">{message}</p>}
 
         <div className="panel-actions" style={{ marginBottom: '1rem', justifyContent: 'space-between' }}>
           <label className="panel-field" style={{ minWidth: '260px' }}>

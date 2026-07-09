@@ -8,6 +8,7 @@ import { isApiConfigured } from '../api/client'
 import { getStoredUser } from '../lib/auth'
 
 import { PasswordField } from '../components/PasswordField'
+import { useToast } from '../context/ToastContext'
 
 import './RegisterLocal.css'
 
@@ -46,9 +47,8 @@ export function RegisterLocal() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [logoFile, setLogoFile] = useState(null)
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
 
   const handleLogoChange = (event) => {
     const file = event.target.files?.[0]
@@ -65,31 +65,29 @@ export function RegisterLocal() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    setError(null)
-    setSuccess(null)
     setLoading(true)
 
     if (!name.trim() || !email.trim() || !street.trim() || !streetNumber.trim() || !city.trim() || !postalCode.trim() || !description.trim()) {
-      setError('Los campos nombre, correo, dirección y descripción son requeridos.')
+      toast.error('Los campos nombre, correo, dirección y descripción son requeridos.')
       setLoading(false)
       return
     }
 
     if (!logoFile) {
-      setError('Debe subir un logo para el local.')
+      toast.error('Debe subir un logo para el local.')
       setLoading(false)
       return
     }
 
     if (isApiConfigured()) {
       if (!password || password.length < 8) {
-        setError('Debe indicar una contraseña de al menos 8 caracteres para la cuenta del local.')
+        toast.error('Debe indicar una contraseña de al menos 8 caracteres para la cuenta del local.')
         setLoading(false)
         return
       }
 
       if (password !== confirmPassword) {
-        setError('Las contraseñas ingresadas no coinciden.')
+        toast.error('Las contraseñas ingresadas no coinciden.')
         setLoading(false)
         return
       }
@@ -107,11 +105,11 @@ export function RegisterLocal() {
         imageCount: selectedImages.length,
       })
 
-      setSuccess('Solicitud enviada con estado «Pendiente». Un administrador la revisará pronto.')
+      toast.success('Solicitud enviada con estado «Pendiente». Un administrador la revisará pronto.')
 
       setTimeout(() => navigate('/iniciar-sesion', { replace: true }), 2500)
     } catch (err) {
-      setError(err.message ?? 'No pudimos enviar la solicitud.')
+      toast.error(err.message ?? 'No pudimos enviar la solicitud.')
     } finally {
       setLoading(false)
     }
@@ -129,15 +127,6 @@ export function RegisterLocal() {
         <p className="register-local-page__subtitle">
           Contanos sobre tu local y tu menú. Revisamos cada solicitud a mano antes de publicarla.
         </p>
-
-        {error && (
-          <p className="register-local-page__alert register-local-page__alert--error" role="alert">
-            {error}
-          </p>
-        )}
-        {success && (
-          <p className="register-local-page__alert register-local-page__alert--success">{success}</p>
-        )}
 
         <form className="register-local-form" onSubmit={handleSubmit}>
           <div className="register-local-form__grid">

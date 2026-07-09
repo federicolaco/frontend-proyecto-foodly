@@ -10,6 +10,7 @@ import { clearGoogleRegistrationDraft, getGoogleRegistrationDraft, setGoogleRegi
 import { AuthLayout } from '../components/AuthLayout'
 import { PasswordField } from '../components/PasswordField'
 import { useGoogleLogin } from '@react-oauth/google'
+import { useToast } from '../context/ToastContext'
 import './AuthPages.css'
 
 const PASSWORD_HINT = {
@@ -71,8 +72,8 @@ export function Register() {
   const [photoFile, setPhotoFile] = useState(null)
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [googleRegistration, setGoogleRegistration] = useState(null)
-  const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
 
   const address = {
     calle: street,
@@ -100,7 +101,6 @@ export function Register() {
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      setError(null)
       setLoading(true)
       try {
         const response = await startGoogleRegistration(tokenResponse.access_token)
@@ -118,25 +118,23 @@ export function Register() {
         setLastName(response.apellido ?? '')
         setEmail(response.email ?? '')
       } catch (err) {
-        setError(err.message ?? 'No fue posible iniciar el registro con Google.')
+        toast.error(err.message ?? 'No fue posible iniciar el registro con Google.')
       } finally {
         setLoading(false)
       }
     },
-    onError: () => setError('No se pudo autenticar con Google.'),
+    onError: () => toast.error('No se pudo autenticar con Google.'),
   })
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    setError(null)
-
     if (!isPasswordValid(password)) {
-      setError('La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.')
+      toast.error('La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.')
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas ingresadas no coinciden. Por favor, verifique e inténtelo de nuevo.')
+      toast.error('Las contraseñas ingresadas no coinciden. Por favor, verifique e inténtelo de nuevo.')
       return
     }
 
@@ -151,7 +149,7 @@ export function Register() {
         state: { message: '¡Registro exitoso! Revisá tu correo para activar tu cuenta.' },
       })
     } catch (err) {
-      setError(err.message ?? 'No pudimos crear la cuenta.')
+      toast.error(err.message ?? 'No pudimos crear la cuenta.')
     } finally {
       setLoading(false)
     }
@@ -159,20 +157,19 @@ export function Register() {
 
   const handleGoogleRegistrationSubmit = async (event) => {
     event.preventDefault()
-    setError(null)
 
     if (!googleRegistration?.tokenRegistro) {
-      setError('No encontramos el token temporal de registro. Inicie el flujo con Google nuevamente.')
+      toast.error('No encontramos el token temporal de registro. Inicie el flujo con Google nuevamente.')
       return
     }
 
     if (!photoFile) {
-      setError('La foto de perfil es obligatoria para completar el registro con Google.')
+      toast.error('La foto de perfil es obligatoria para completar el registro con Google.')
       return
     }
 
     if (!acceptTerms) {
-      setError('Debe aceptar los términos para completar el registro.')
+      toast.error('Debe aceptar los términos para completar el registro.')
       return
     }
 
@@ -189,7 +186,7 @@ export function Register() {
       resetGoogleRegistration()
       navigate(getHomePathForRole(user.role), { replace: true })
     } catch (err) {
-      setError(err.message ?? 'No fue posible completar el registro con Google.')
+      toast.error(err.message ?? 'No fue posible completar el registro con Google.')
     } finally {
       setLoading(false)
     }
@@ -200,12 +197,6 @@ export function Register() {
   return (
     <AuthLayout>
       <h1 className="auth-page__title auth-page__title--register">Registrate en Foodly</h1>
-
-      {error && (
-        <p className="auth-page__error" role="alert">
-          {error}
-        </p>
-      )}
 
       {!isGoogleFlow && (
         <div className="auth-account-type">

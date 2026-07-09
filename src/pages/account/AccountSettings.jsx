@@ -17,6 +17,7 @@ import { StarRating } from '../../components/StarRating'
 import { getStoredUser } from '../../lib/auth'
 import { formatDate } from '../../lib/format'
 import { ROLES } from '../../lib/roles'
+import { useToast } from '../../context/ToastContext'
 import '../Account.css'
 import '../Panel.css'
 
@@ -73,14 +74,11 @@ export function AccountSettings() {
   const user = getStoredUser()
   const photoInputRef = useRef(null)
   const [tab, setTab] = useState('profile')
-  const [error, setError] = useState(null)
-  const [message, setMessage] = useState(null)
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
   const [email, setEmail] = useState(user.email ?? '')
   const [newEmail, setNewEmail] = useState('')
   const [emailChangeLoading, setEmailChangeLoading] = useState(false)
-  const [emailChangeMessage, setEmailChangeMessage] = useState(null)
-  const [emailChangeError, setEmailChangeError] = useState(null)
   const [photoFile, setPhotoFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(user.photo ?? null)
 
@@ -128,8 +126,6 @@ export function AccountSettings() {
   const handleProfileSave = async (event) => {
     event.preventDefault()
     setLoading(true)
-    setError(null)
-    setMessage(null)
     try {
       await updateProfile({
         firstName,
@@ -140,9 +136,9 @@ export function AccountSettings() {
         ...(photoFile ? { photo: photoFile } : {}),
       })
       setPhotoFile(null)
-      setMessage('Datos actualizados correctamente.')
+      toast.success('Datos actualizados correctamente.')
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
@@ -151,14 +147,12 @@ export function AccountSettings() {
   const handleStartEmailChange = async (event) => {
     event.preventDefault()
     setEmailChangeLoading(true)
-    setEmailChangeError(null)
-    setEmailChangeMessage(null)
     try {
       const res = await startEmailChange(newEmail)
-      setEmailChangeMessage(res.message)
+      toast.success(res.message)
       setNewEmail('')
     } catch (err) {
-      setEmailChangeError(err.message)
+      toast.error(err.message)
     } finally {
       setEmailChangeLoading(false)
     }
@@ -167,13 +161,12 @@ export function AccountSettings() {
   const handlePassStep1 = async (event) => {
     event.preventDefault()
     setLoading(true)
-    setError(null)
     try {
       const res = await startPasswordChange(currentPassword)
-      setMessage(res.message)
+      toast.success(res.message)
       setPassStep(2)
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
@@ -182,13 +175,12 @@ export function AccountSettings() {
   const handlePassStep2 = async (event) => {
     event.preventDefault()
     setLoading(true)
-    setError(null)
     try {
       await verifyPasswordChangeCode(code)
-      setMessage('Código verificado. Ingrese su nueva contraseña.')
+      toast.success('Código verificado. Ingrese su nueva contraseña.')
       setPassStep(3)
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
@@ -197,17 +189,16 @@ export function AccountSettings() {
   const handlePassStep3 = async (event) => {
     event.preventDefault()
     setLoading(true)
-    setError(null)
     try {
       const res = await confirmPasswordChange(newPassword, confirmPassword)
-      setMessage(res.message)
+      toast.success(res.message)
       setPassStep(1)
       setCurrentPassword('')
       setCode('')
       setNewPassword('')
       setConfirmPassword('')
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
@@ -216,12 +207,11 @@ export function AccountSettings() {
   const handleDelete = async () => {
     if (!window.confirm('¿Confirma la eliminación de su cuenta? Esta acción no se puede deshacer.')) return
     setLoading(true)
-    setError(null)
     try {
       await deleteAccount()
       navigate('/iniciar-sesion', { replace: true })
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
       setLoading(false)
     }
   }
@@ -232,16 +222,13 @@ export function AccountSettings() {
       <main className="panel-page__main contenedor">
         <h1 className="panel-page__title">Configuración de cuenta</h1>
 
-        {error && <p className="panel-page__error" role="alert">{error}</p>}
-        {message && <p className="panel-page__success">{message}</p>}
-
         <nav className="account-tabs">
           {visibleTabs.map((t) => (
             <button
               key={t.id}
               type="button"
               className={`account-tabs__btn${tab === t.id ? ' account-tabs__btn--active' : ''}`}
-              onClick={() => { setTab(t.id); setError(null); setMessage(null) }}
+              onClick={() => setTab(t.id)}
             >
               {t.label}
             </button>
@@ -359,8 +346,6 @@ export function AccountSettings() {
                 Por seguridad, te enviaremos un enlace de confirmaci&oacute;n a tu correo actual
                 (<strong>{user.email}</strong>). El correo no cambia hasta que confirmes desde ese enlace.
               </p>
-              {emailChangeError && <p className="auth-page__error" role="alert">{emailChangeError}</p>}
-              {emailChangeMessage && <p className="panel-page__subtitle">{emailChangeMessage}</p>}
               <label className="panel-field">
                 <span className="panel-field__label">Nuevo correo electr&oacute;nico</span>
                 <input

@@ -7,6 +7,7 @@ import {
   saveDish,
 } from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
+import { useToast } from '../../context/ToastContext'
 import '../Panel.css'
 
 const EMPTY_FORM = {
@@ -26,9 +27,8 @@ export function LocalDishes() {
   const [newCategoryName, setNewCategoryName] = useState('')
   const [form, setForm] = useState(EMPTY_FORM)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [message, setMessage] = useState(null)
   const [saving, setSaving] = useState(false)
+  const toast = useToast()
   const imageInputRef = useRef(null)
 
   const loadCategories = async () => {
@@ -42,13 +42,12 @@ export function LocalDishes() {
 
   const loadDishes = async () => {
     setLoading(true)
-    setError(null)
 
     try {
       const data = await getLocalDishes()
       setDishes(data.filter((dish) => dish.active))
     } catch (err) {
-      setError(err.message ?? 'No pudimos cargar los platos.')
+      toast.error(err.message ?? 'No pudimos cargar los platos.')
     } finally {
       setLoading(false)
     }
@@ -90,18 +89,16 @@ export function LocalDishes() {
     event.preventDefault()
 
     if (!form.id && !form.imageFile) {
-      setError('Debe seleccionar una imagen para el plato.')
+      toast.error('Debe seleccionar una imagen para el plato.')
       return
     }
 
     if (creatingCategory && !newCategoryName.trim()) {
-      setError('Ingrese un nombre para la nueva categoria o cancele su creacion.')
+      toast.error('Ingrese un nombre para la nueva categoria o cancele su creacion.')
       return
     }
 
     setSaving(true)
-    setError(null)
-    setMessage(null)
 
     try {
       let categoryId = form.categoryId
@@ -119,7 +116,7 @@ export function LocalDishes() {
       setCreatingCategory(false)
       setNewCategoryName('')
       if (imageInputRef.current) imageInputRef.current.value = ''
-      setMessage(
+      toast.success(
         nuevaCategoriaNombre
           ? `Plato agregado con la nueva categoria "${nuevaCategoriaNombre}".`
           : form.id
@@ -128,7 +125,7 @@ export function LocalDishes() {
       )
       await loadDishes()
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setSaving(false)
     }
@@ -159,27 +156,17 @@ export function LocalDishes() {
   const handleDelete = async (dishId) => {
     if (!window.confirm('Desea eliminar este plato del catalogo?')) return
 
-    setError(null)
-    setMessage(null)
-
     try {
       await deleteDish(dishId)
-      setMessage('Plato eliminado.')
+      toast.success('Plato eliminado.')
       await loadDishes()
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     }
   }
 
   return (
     <>
-      {error && (
-        <p className="panel-page__error" role="alert">
-          {error}
-        </p>
-      )}
-      {message && <p className="panel-page__success">{message}</p>}
-
       <section className="panel-card" style={{ marginBottom: '1rem' }}>
         <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>
           {form.id ? 'Editar plato' : 'Agregar plato'}

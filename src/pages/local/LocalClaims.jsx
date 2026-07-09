@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { getLocalClaims, resolveClaim } from '../../api/claims'
 import { formatPrice } from '../../lib/cart'
 import { getStoredUser } from '../../lib/auth'
+import { useToast } from '../../context/ToastContext'
 import '../Panel.css'
 
 const RESOLUTION_TYPES = [
@@ -14,15 +15,13 @@ export function LocalClaims() {
   const [statusFilter, setStatusFilter] = useState('pending')
   const [sort, setSort] = useState('name-asc')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [message, setMessage] = useState(null)
   const [resolvingId, setResolvingId] = useState(null)
+  const toast = useToast()
   const [resolutionType, setResolutionType] = useState(RESOLUTION_TYPES[0].id)
   const [resolutionNote, setResolutionNote] = useState('')
 
   const load = async () => {
     setLoading(true)
-    setError(null)
     try {
       const user = getStoredUser()
       const data = await getLocalClaims({
@@ -31,7 +30,7 @@ export function LocalClaims() {
       })
       setClaims(data)
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
@@ -54,29 +53,24 @@ export function LocalClaims() {
 
   const handleResolve = async (claimId) => {
     if (!resolutionType) {
-      setError('Debe seleccionar el tipo de resolución antes de confirmar.')
+      toast.error('Debe seleccionar el tipo de resolución antes de confirmar.')
       return
     }
     if (!window.confirm('¿Confirma la resolución del reclamo?')) return
 
-    setError(null)
-    setMessage(null)
     try {
       await resolveClaim(claimId, { type: resolutionType, note: resolutionNote })
-      setMessage('Reclamo atendido. Cliente notificado.')
+      toast.success('Reclamo atendido. Cliente notificado.')
       setResolvingId(null)
       setResolutionNote('')
       await load()
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     }
   }
 
   return (
     <>
-      {error && <p className="panel-page__error" role="alert">{error}</p>}
-      {message && <p className="panel-page__success">{message}</p>}
-
       <section className="panel-card">
         <div className="panel-actions" style={{ marginBottom: '1rem', justifyContent: 'space-between' }}>
           <label className="panel-field" style={{ maxWidth: '220px' }}>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getLocalClients, rateClient } from '../../api/ratings'
 import { StarRating } from '../../components/StarRating'
+import { useToast } from '../../context/ToastContext'
 import '../Panel.css'
 
 export function LocalClients() {
@@ -9,20 +10,18 @@ export function LocalClients() {
   const [minRating, setMinRating] = useState(0)
   const [sortBy, setSortBy] = useState('name-asc')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [message, setMessage] = useState(null)
   const [ratingClientId, setRatingClientId] = useState(null)
+  const toast = useToast()
   const [score, setScore] = useState(5)
   const [comment, setComment] = useState('')
 
   const load = async () => {
     setLoading(true)
-    setError(null)
     try {
       const data = await getLocalClients(search ? { search } : {})
       setClients(data)
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
@@ -39,25 +38,21 @@ export function LocalClients() {
     Boolean(client.alreadyRated) || client.myScore != null || (client.myComment && client.myComment.length > 0)
 
   const handleOpenRating = (client) => {
-    setError(null)
-    setMessage(null)
     setScore(client.myScore ?? 5)
     setComment(client.myComment ?? '')
     setRatingClientId(client.id)
   }
 
   const handleRate = async (clientId) => {
-    setError(null)
-    setMessage(null)
     try {
       await rateClient({ clientId, score, comment })
-      setMessage('Calificación registrada.')
+      toast.success('Calificación registrada.')
       setRatingClientId(null)
       setComment('')
       setScore(5)
       await load()
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     }
   }
 
@@ -79,8 +74,6 @@ export function LocalClients() {
 
   return (
     <>
-      {error && <p className="panel-page__error" role="alert">{error}</p>}
-      {message && <p className="panel-page__success">{message}</p>}
       <section className="panel-card">
         <div
           style={{

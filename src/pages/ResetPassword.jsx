@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { resetPassword } from '../api/account'
 import { AuthLayout } from '../components/AuthLayout'
 import { PasswordField } from '../components/PasswordField'
+import { useToast } from '../context/ToastContext'
 import './AuthPages.css'
 
 export function ResetPassword() {
@@ -12,27 +13,26 @@ export function ResetPassword() {
 
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (password !== confirmPassword) {
-      setError('Las contraseñas ingresadas no coinciden.')
+      toast.error('Las contraseñas ingresadas no coinciden.')
       return
     }
     if (!token) {
-      setError('El enlace de recuperación no es válido.')
+      toast.error('El enlace de recuperación no es válido.')
       return
     }
 
     setLoading(true)
-    setError(null)
     try {
       await resetPassword(token, password, confirmPassword)
       navigate('/iniciar-sesion', { replace: true, state: { message: 'Contraseña restablecida. Inicie sesión.' } })
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
@@ -42,8 +42,6 @@ export function ResetPassword() {
     <AuthLayout>
       <h1 className="auth-page__title">Nueva contraseña</h1>
       <p className="auth-page__section-title">Ingresá y confirmá tu nueva contraseña.</p>
-
-      {error && <p className="auth-page__error" role="alert">{error}</p>}
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <PasswordField id="new-pass" label="Nueva contraseña" value={password} onChange={(e) => setPassword(e.target.value)} />

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { getLocalStats } from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
 import { formatDate } from '../../lib/format'
+import { useToast } from '../../context/ToastContext'
 import '../Panel.css'
 
 const DEFAULT_PRESET = ''
@@ -209,14 +210,13 @@ function AnalyticDishCard({ dish }) {
 export function LocalStats() {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
   const [selectedPreset, setSelectedPreset] = useState(DEFAULT_PRESET)
   const [range, setRange] = useState(EMPTY_RANGE)
   const [hasSearched, setHasSearched] = useState(false)
+  const toast = useToast()
 
   const loadStats = async (filters) => {
     setLoading(true)
-    setError(null)
     setHasSearched(true)
 
     try {
@@ -228,7 +228,7 @@ export function LocalStats() {
       })
     } catch (err) {
       setStats(null)
-      setError(err.message ?? 'No pudimos cargar las estadisticas del local.')
+      toast.error(err.message ?? 'No pudimos cargar las estadisticas del local.')
     } finally {
       setLoading(false)
     }
@@ -241,7 +241,6 @@ export function LocalStats() {
     if (!nextPreset) {
       setRange(EMPTY_RANGE)
       setStats(null)
-      setError(null)
       setHasSearched(false)
       return
     }
@@ -255,14 +254,14 @@ export function LocalStats() {
     if (!fechaDesde || !fechaHasta) {
       setStats(null)
       setHasSearched(true)
-      setError('Para usar rango libre debe indicar fechaDesde y fechaHasta.')
+      toast.error('Para usar rango libre debe indicar fechaDesde y fechaHasta.')
       return
     }
 
     if (fechaDesde > fechaHasta) {
       setStats(null)
       setHasSearched(true)
-      setError('La fechaDesde no puede ser posterior a fechaHasta.')
+      toast.error('La fechaDesde no puede ser posterior a fechaHasta.')
       return
     }
 
@@ -279,7 +278,6 @@ export function LocalStats() {
     setSelectedPreset(DEFAULT_PRESET)
     setRange(EMPTY_RANGE)
     setStats(null)
-    setError(null)
     setHasSearched(false)
     setLoading(false)
   }
@@ -291,8 +289,6 @@ export function LocalStats() {
 
   return (
     <>
-      {error && <p className="panel-page__error" role="alert">{error}</p>}
-
       <section className="panel-card">
         <div className="panel-form" style={{ marginBottom: '1.5rem' }}>
           <div className="panel-form__row">

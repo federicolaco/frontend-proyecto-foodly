@@ -3,28 +3,26 @@ import { Link } from 'react-router-dom'
 import { requestPasswordRecovery } from '../api/account'
 import { isMockMode } from '../api/client'
 import { AuthLayout } from '../components/AuthLayout'
+import { useToast } from '../context/ToastContext'
 import './AuthPages.css'
 
 export function ForgotPassword() {
   const [email, setEmail] = useState('')
-  const [message, setMessage] = useState(null)
   const [mockToken, setMockToken] = useState(null)
-  const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     setLoading(true)
-    setError(null)
-    setMessage(null)
     setMockToken(null)
 
     try {
       const res = await requestPasswordRecovery(email)
-      setMessage(res.message)
+      toast.success(res.message)
       if (res.mockToken) setMockToken(res.mockToken)
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
@@ -34,9 +32,6 @@ export function ForgotPassword() {
     <AuthLayout>
       <h1 className="auth-page__title">Recuperar contraseña</h1>
       <p className="auth-page__section-title">Ingresá tu correo y te enviaremos un enlace de recuperación.</p>
-
-      {error && <p className="auth-page__error" role="alert">{error}</p>}
-      {message && <p className="panel-page__success" style={{ marginBottom: '1rem' }}>{message}</p>}
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <label className="auth-field" htmlFor="recovery-email">

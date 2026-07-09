@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { activateAccount } from '../api/account'
 import { AuthLayout } from '../components/AuthLayout'
+import { useToast } from '../context/ToastContext'
 import './AuthPages.css'
 
 export function ActivarCuenta() {
@@ -11,16 +12,15 @@ export function ActivarCuenta() {
   const [estado, setEstado] = useState(token ? 'pendiente' : 'error')
   const [loading, setLoading] = useState(false)
   const [mensaje, setMensaje] = useState(token ? null : 'El enlace de activación no es válido.')
+  const toast = useToast()
 
   const handleActivar = async () => {
     setLoading(true)
-    setMensaje(null)
     try {
       await activateAccount(token)
       setEstado('activado')
     } catch (err) {
-      setEstado('error')
-      setMensaje(err.message ?? 'No se pudo activar la cuenta.')
+      toast.error(err.message ?? 'No se pudo activar la cuenta.')
     } finally {
       setLoading(false)
     }
@@ -35,7 +35,6 @@ export function ActivarCuenta() {
           <p className="auth-pagesection-title">
             Hacé clic en el botón para activar tu cuenta.
           </p>
-          {mensaje && <p className="auth-pageerror" role="alert">{mensaje}</p>}
           <button
             className="auth-btn auth-btn--primary"
             onClick={handleActivar}

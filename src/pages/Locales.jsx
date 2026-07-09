@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getPopularRestaurants } from '../api/orders'
 import { buildRestaurantPath } from '../api/restaurant'
 import { OrdersNavbar } from '../components/OrdersNavbar'
+import { useToast } from '../context/ToastContext'
 import './Locales.css'
 import './Orders.css'
 import './Panel.css'
@@ -34,13 +35,12 @@ export function Locales() {
   const [minRating, setMinRating] = useState('')
   const [sort, setSort] = useState('name')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const toast = useToast()
 
   useEffect(() => {
     let cancelled = false
     const timer = setTimeout(async () => {
       setLoading(true)
-      setError(null)
       try {
         const data = await getPopularRestaurants({
           search: search || undefined,
@@ -50,7 +50,7 @@ export function Locales() {
         })
         if (!cancelled) setRestaurants(data)
       } catch {
-        if (!cancelled) setError('No pudimos cargar los locales.')
+        if (!cancelled) toast.error('No pudimos cargar los locales.')
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -60,6 +60,7 @@ export function Locales() {
       cancelled = true
       clearTimeout(timer)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, openOnly, minRating, sort])
 
   return (
@@ -67,7 +68,6 @@ export function Locales() {
       <OrdersNavbar />
       <main className="panel-page__main contenedor" style={{ paddingTop: '5.5rem' }}>
         <h1 className="panel-page__title">Locales</h1>
-        {error && <p className="panel-page__error" role="alert">{error}</p>}
 
         <section className="panel-card" style={{ marginBottom: '1rem' }}>
           <div className="panel-form panel-form--grid">

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { closeLocal, getMyLocal, openLocal } from '../../api/localPanel'
 import { getLocalRatingDetails, getLocalRatingSummary } from '../../api/ratings'
 import { formatDate } from '../../lib/format'
+import { useToast } from '../../context/ToastContext'
 import '../Account.css'
 import '../Panel.css'
 
@@ -10,13 +11,11 @@ export function LocalHome() {
   const [rating, setRating] = useState(null)
   const [ratingDetails, setRatingDetails] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [message, setMessage] = useState(null)
   const [busy, setBusy] = useState(false)
+  const toast = useToast()
 
   const load = async () => {
     setLoading(true)
-    setError(null)
 
     try {
       const [data, ratingData, ratingDetailsData] = await Promise.all([
@@ -28,7 +27,7 @@ export function LocalHome() {
       setRating(ratingData)
       setRatingDetails(ratingDetailsData)
     } catch (err) {
-      setError(err.message ?? 'No pudimos cargar la información del local.')
+      toast.error(err.message ?? 'No pudimos cargar la información del local.')
     } finally {
       setLoading(false)
     }
@@ -41,15 +40,13 @@ export function LocalHome() {
   const handleOpen = async () => {
     if (!window.confirm('¿Confirma que desea abrir el local?')) return
     setBusy(true)
-    setMessage(null)
-    setError(null)
 
     try {
       const data = await openLocal()
       setRestaurant(data)
-      setMessage('El local está abierto y visible para recibir pedidos.')
+      toast.success('El local está abierto y visible para recibir pedidos.')
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setBusy(false)
     }
@@ -65,15 +62,13 @@ export function LocalHome() {
     if (!window.confirm(warning)) return
 
     setBusy(true)
-    setMessage(null)
-    setError(null)
 
     try {
       const data = await closeLocal()
       setRestaurant(data)
-      setMessage('El local fue cerrado. No aceptará nuevos pedidos.')
+      toast.success('El local fue cerrado. No aceptará nuevos pedidos.')
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setBusy(false)
     }
@@ -83,13 +78,6 @@ export function LocalHome() {
 
   return (
     <section className="panel-card">
-      {error && (
-        <p className="panel-page__error" role="alert">
-          {error}
-        </p>
-      )}
-      {message && <p className="panel-page__success">{message}</p>}
-
       {restaurant && (
         <>
           <div className="panel-home-grid">

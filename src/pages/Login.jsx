@@ -10,6 +10,7 @@ import { DEMO_ACCOUNTS } from '../lib/roles'
 import { AuthLayout } from '../components/AuthLayout'
 
 import { PasswordField } from '../components/PasswordField'
+import { useToast } from '../context/ToastContext'
 
 import './AuthPages.css'
 
@@ -38,25 +39,28 @@ export function Login() {
 
   const [password, setPassword] = useState('')
 
-  const [error, setError] = useState(null)
-
   const [loading, setLoading] = useState(false)
+  const toast = useToast()
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      setError(null)
       setLoading(true)
       try {
         const { user } = await loginWithGoogle(tokenResponse.access_token)
         navigate(redirectTo ?? getHomePathForRole(user.role), { replace: true })
       } catch (err) {
-        setError(err.message ?? 'No fue posible iniciar sesión con Google.')
+        toast.error(err.message ?? 'No fue posible iniciar sesión con Google.')
       } finally {
         setLoading(false)
       }
     },
-    onError: () => setError('No se pudo autenticar con Google.')
+    onError: () => toast.error('No se pudo autenticar con Google.')
   })
+
+  useEffect(() => {
+    if (successMessage) toast.success(successMessage)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
 
@@ -94,8 +98,6 @@ export function Login() {
 
     event.preventDefault()
 
-    setError(null)
-
     setLoading(true)
 
 
@@ -108,7 +110,7 @@ export function Login() {
 
     } catch (err) {
 
-      setError(err.message ?? 'No pudimos iniciar sesión.')
+      toast.error(err.message ?? 'No pudimos iniciar sesión.')
 
     } finally {
 
@@ -146,15 +148,6 @@ export function Login() {
         Inicia sesión y pedí en segundos
 
       </h2>
-
-      {successMessage && (
-        <p className="auth-page__success" role="status">{successMessage}</p>
-      )}
-      {error && (
-        <p className="auth-page__error" role="alert">{error}</p>
-      )}
-
-
 
       <form className="auth-form" onSubmit={handleSubmit}>
 

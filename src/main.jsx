@@ -5,6 +5,7 @@ import App from './App.jsx'
 import { ensureMockDb } from './api/mock/seed'
 import { isApiConfigured } from './api/client'
 import { CartProvider } from './context/CartContext.jsx'
+import { ToastProvider } from './context/ToastContext.jsx'
 import './index.css'
 
 if (!isApiConfigured()) {
@@ -14,9 +15,11 @@ if (!isApiConfigured()) {
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <CartProvider>
-        <App />
-      </CartProvider>
+      <ToastProvider>
+        <CartProvider>
+          <App />
+        </CartProvider>
+      </ToastProvider>
     </GoogleOAuthProvider>
   </StrictMode>,
 )

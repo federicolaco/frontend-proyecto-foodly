@@ -3,6 +3,7 @@ import { confirmOrder, getLocalOrders, rejectOrder } from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
 import { formatDateTime } from '../../lib/format'
 import { ORDER_STATUS_LABELS } from '../../lib/roles'
+import { useToast } from '../../context/ToastContext'
 import '../Panel.css'
 
 const REJECTION_REASONS = [
@@ -25,22 +26,20 @@ export function LocalOrdersPage() {
   const [statusFilter, setStatusFilter] = useState('pending')
   const [sort, setSort] = useState('date-desc')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [message, setMessage] = useState(null)
   const [confirmingId, setConfirmingId] = useState(null)
   const [deliveryMinutes, setDeliveryMinutes] = useState('')
   const [rejectingId, setRejectingId] = useState(null)
   const [rejectReason, setRejectReason] = useState('')
   const [customRejectReason, setCustomRejectReason] = useState('')
+  const toast = useToast()
 
   const loadOrders = async () => {
     setLoading(true)
-    setError(null)
     try {
       const data = await getLocalOrders(statusFilter ? { status: statusFilter } : {})
       setOrders(data)
     } catch (err) {
-      setError(err.message ?? 'No pudimos cargar los pedidos.')
+      toast.error(err.message ?? 'No pudimos cargar los pedidos.')
     } finally {
       setLoading(false)
     }
@@ -78,8 +77,6 @@ export function LocalOrdersPage() {
     setRejectingId(orderId)
     setRejectReason('')
     setCustomRejectReason('')
-    setError(null)
-    setMessage(null)
   }
 
   const handleRejectReasonChange = (value) => {
@@ -92,51 +89,40 @@ export function LocalOrdersPage() {
 
   const handleConfirm = async (orderId) => {
     if (!deliveryMinutes || Number(deliveryMinutes) <= 0) {
-      setError('Debe ingresar el tiempo estimado de entrega para confirmar el pedido.')
+      toast.error('Debe ingresar el tiempo estimado de entrega para confirmar el pedido.')
       return
     }
     if (!window.confirm('¿Confirma el pedido? Se simulará el pago y se generará la factura.')) return
-    setError(null)
-    setMessage(null)
     try {
       await confirmOrder(orderId, deliveryMinutes)
-      setMessage('Pedido confirmado. Factura generada y cliente notificado.')
+      toast.success('Pedido confirmado. Factura generada y cliente notificado.')
       setConfirmingId(null)
       setDeliveryMinutes('')
       await loadOrders()
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     }
   }
 
   const handleReject = async (orderId) => {
     const effectiveRejectReason = getEffectiveRejectReason()
     if (!effectiveRejectReason) {
-      setError('Debe seleccionar o escribir un motivo de rechazo antes de continuar.')
+      toast.error('Debe seleccionar o escribir un motivo de rechazo antes de continuar.')
       return
     }
     if (!window.confirm('¿Confirma el rechazo del pedido?')) return
-    setError(null)
-    setMessage(null)
     try {
       await rejectOrder(orderId, effectiveRejectReason)
-      setMessage('Pedido rechazado. Cliente notificado.')
+      toast.success('Pedido rechazado. Cliente notificado.')
       resetRejectState()
       await loadOrders()
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     }
   }
 
   return (
     <>
-      {error && (
-        <p className="panel-page__error" role="alert">
-          {error}
-        </p>
-      )}
-      {message && <p className="panel-page__success">{message}</p>}
-
       <section className="panel-card">
         <div className="panel-actions" style={{ marginBottom: '1rem', justifyContent: 'space-between' }}>
 

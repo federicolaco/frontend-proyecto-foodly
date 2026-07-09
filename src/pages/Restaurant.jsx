@@ -11,6 +11,7 @@ import { RestaurantBanner } from '../components/restaurant/RestaurantBanner'
 import { RestaurantDeliveryBar } from '../components/restaurant/RestaurantDeliveryBar'
 import { RestaurantInfoModal } from '../components/restaurant/RestaurantInfoModal'
 import { useCart } from '../context/CartContext'
+import { useToast } from '../context/ToastContext'
 import { getStoredUser } from '../lib/auth'
 import { formatDateTime } from '../lib/format'
 import './Restaurant.css'
@@ -34,14 +35,12 @@ export function Restaurant() {
   const [ratingScore, setRatingScore] = useState(5)
   const [ratingComment, setRatingComment] = useState('')
   const [ratingSaving, setRatingSaving] = useState(false)
-  const [ratingError, setRatingError] = useState(null)
-  const [ratingMessage, setRatingMessage] = useState(null)
 
   const [commentsOpen, setCommentsOpen] = useState(false)
   const [comments, setComments] = useState([])
   const [commentsLoading, setCommentsLoading] = useState(false)
-  const [commentsError, setCommentsError] = useState(null)
   const [photosOpen, setPhotosOpen] = useState(false)
+  const toast = useToast()
 
   useEffect(() => {
     let cancelled = false
@@ -50,7 +49,6 @@ export function Restaurant() {
       setLoading(true)
       setError(null)
       setRatingLoading(true)
-      setRatingError(null)
 
       try {
         const [restaurantData, ratingData] = await Promise.all([
@@ -100,15 +98,12 @@ export function Restaurant() {
   }
 
   const handleOpenRatingForm = () => {
-    setRatingError(null)
-    setRatingMessage(null)
     setRatingScore(currentRating?.score ?? 5)
     setRatingComment(currentRating?.comment ?? '')
     setRatingFormOpen(true)
   }
 
   const handleCancelRating = () => {
-    setRatingError(null)
     setRatingScore(currentRating?.score ?? 5)
     setRatingComment(currentRating?.comment ?? '')
     setRatingFormOpen(false)
@@ -120,8 +115,6 @@ export function Restaurant() {
     const wasEditing = Boolean(currentRating)
 
     setRatingSaving(true)
-    setRatingError(null)
-    setRatingMessage(null)
 
     try {
       await rateLocal({
@@ -142,9 +135,9 @@ export function Restaurant() {
       setRatingScore(nextRating.score)
       setRatingComment(nextRating.comment)
       setRatingFormOpen(false)
-      setRatingMessage(wasEditing ? 'Calificación actualizada.' : 'Calificación registrada.')
+      toast.success(wasEditing ? 'Calificación actualizada.' : 'Calificación registrada.')
     } catch (err) {
-      setRatingError(err.message ?? 'No pudimos guardar tu calificación.')
+      toast.error(err.message ?? 'No pudimos guardar tu calificación.')
     } finally {
       setRatingSaving(false)
     }
@@ -152,14 +145,13 @@ export function Restaurant() {
 
   const handleShowComments = async () => {
     setCommentsOpen(true)
-    setCommentsError(null)
     setCommentsLoading(true)
 
     try {
       const data = await getLocalPublicComments(restaurant.id)
       setComments(data)
     } catch {
-      setCommentsError('No pudimos cargar los comentarios de este local.')
+      toast.error('No pudimos cargar los comentarios de este local.')
     } finally {
       setCommentsLoading(false)
     }
@@ -249,9 +241,6 @@ export function Restaurant() {
                 </button>
               </div>
 
-              {ratingMessage && <p className="restaurant-page__rating-success">{ratingMessage}</p>}
-              {ratingError && <p className="restaurant-page__rating-error" role="alert">{ratingError}</p>}
-
               {ratingFormOpen && (
                 <div className="restaurant-page__rating-form">
                   <StarRating value={ratingScore} onChange={setRatingScore} />
@@ -313,17 +302,11 @@ export function Restaurant() {
       >
         {commentsLoading && <p className="restaurant-info-modal__empty">Cargando comentarios...</p>}
 
-        {!commentsLoading && commentsError && (
-          <p className="restaurant-info-modal__error" role="alert">
-            {commentsError}
-          </p>
-        )}
-
-        {!commentsLoading && !commentsError && comments.length === 0 && (
+        {!commentsLoading && comments.length === 0 && (
           <p className="restaurant-info-modal__empty">Este local todavía no tiene comentarios.</p>
         )}
 
-        {!commentsLoading && !commentsError && comments.length > 0 && (
+        {!commentsLoading && comments.length > 0 && (
           <div className="restaurant-comments">
             {comments.map((comment, index) => (
               <div key={comment.clientId ?? index} className="restaurant-comments__item">

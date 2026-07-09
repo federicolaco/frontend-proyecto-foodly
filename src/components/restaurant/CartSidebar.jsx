@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { createOrder } from '../../api/orders'
 import { formatPrice } from '../../lib/cart'
 import { useCart } from '../../context/CartContext'
+import { useToast } from '../../context/ToastContext'
 import './CartSidebar.css'
 
 const PAYMENT_METHODS = [
@@ -49,13 +50,12 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
   const { cart, subtotal, total, updateQuantity, removeFromCart, clearCart } = useCart()
   const hasItems = cart.items.length > 0
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
   const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHODS[0].id)
+  const toast = useToast()
 
   const handleCheckout = async () => {
     if (!hasItems) return
 
-    setError(null)
     setLoading(true)
 
     try {
@@ -92,7 +92,7 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
 
       navigate(`/pago/exito?${successParams.toString()}`)
     } catch (err) {
-      setError(err.message ?? 'No pudimos registrar el pedido.')
+      toast.error(err.message ?? 'No pudimos registrar el pedido.')
       setLoading(false)
     }
   }
@@ -108,12 +108,6 @@ export function CartSidebar({ restaurantOpen = true, deliveryAddress }) {
         {!restaurantOpen && (
           <p className="cart-sidebar__closed" role="alert">
             Este local está cerrado y no acepta pedidos por el momento.
-          </p>
-        )}
-
-        {error && (
-          <p className="cart-sidebar__error" role="alert">
-            {error}
           </p>
         )}
 

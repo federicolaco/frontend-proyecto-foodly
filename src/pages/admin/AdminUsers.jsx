@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getUsers, setUserBlocked } from '../../api/admin'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
+import { useToast } from '../../context/ToastContext'
 import '../Panel.css'
 
 const ROLE_LABELS = { cliente: 'Cliente', local: 'Local' }
@@ -19,14 +20,12 @@ export function AdminUsers() {
   const [roleFilter, setRoleFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [message, setMessage] = useState(null)
   const [processingId, setProcessingId] = useState(null)
   const [sort, setSort] = useState('name-asc')
+  const toast = useToast()
 
   const loadUsers = async () => {
     setLoading(true)
-    setError(null)
     try {
       const data = await getUsers({
         search: search || undefined,
@@ -35,7 +34,7 @@ export function AdminUsers() {
       })
       setUsers(data)
     } catch (err) {
-      setError(err.message ?? 'No pudimos cargar los usuarios.')
+      toast.error(err.message ?? 'No pudimos cargar los usuarios.')
     } finally {
       setLoading(false)
     }
@@ -75,14 +74,12 @@ export function AdminUsers() {
     if (!window.confirm(`¿Confirma que desea ${label} a ${user.name}?`)) return
 
     setProcessingId(user.id)
-    setMessage(null)
-    setError(null)
     try {
       await setUserBlocked(user.id, block)
-      setMessage(`Usuario ${block ? 'bloqueado' : 'desbloqueado'} correctamente.`)
+      toast.success(`Usuario ${block ? 'bloqueado' : 'desbloqueado'} correctamente.`)
       await loadUsers()
     } catch (err) {
-      setError(err.message)
+      toast.error(err.message)
     } finally {
       setProcessingId(null)
     }
@@ -93,9 +90,6 @@ export function AdminUsers() {
       <OrdersNavbar />
       <main className="panel-page__main contenedor">
         <h1 className="panel-page__title">Gestión de usuarios</h1>
-
-        {error && <p className="panel-page__error" role="alert">{error}</p>}
-        {message && <p className="panel-page__success">{message}</p>}
 
         <section className="panel-card">
           <div className="panel-form panel-form--grid" style={{ marginBottom: '1rem' }}>
