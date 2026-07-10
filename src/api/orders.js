@@ -75,20 +75,29 @@ export async function searchDishes(query = '', options = {}) {
   if (isApiConfigured()) {
     const params = buildSearchParams(query, options)
     const qs = params.toString()
-    const response = await apiFetch(`/clientes/busqueda${qs ? `?${qs}` : ''}`)
-    const items = mapSearchResults(response, options)
-    return {
-      items,
-      page: response?.paginaActual ?? 0,
-      totalPages: response?.totalPaginas ?? 1,
-      totalElements: response?.totalElementos ?? items.length,
+    try {
+      const response = await apiFetch(`/clientes/busqueda${qs ? `?${qs}` : ''}`)
+      const items = mapSearchResults(response, options)
+      return {
+        items,
+        page: response?.paginaActual ?? 0,
+        totalPages: response?.totalPaginas ?? 1,
+        totalElements: response?.totalElementos ?? items.length,
+      }
+    } catch (err) {
+      // El backend responde 400 cuando la búsqueda no encuentra ningún plato
+      // ni promoción; para el usuario eso es simplemente "sin resultados",
+      // no una falla real.
+      if (err.status === 400) {
+        return { items: [], page: 0, totalPages: 1, totalElements: 0 }
+      }
+      throw err
     }
   }
 
   const mockItems = await mockSearchDishesAndPromotions(query, options)
   return { items: mockItems, page: 0, totalPages: 1, totalElements: mockItems.length }
 }
-
 export async function createOrder(payload) {
   const paymentMethod = payload.paymentMethod ?? 'mercadopago'
 
