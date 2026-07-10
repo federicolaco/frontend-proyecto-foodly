@@ -59,9 +59,6 @@ export function ConfirmDialog({
         </h2>
         <p className="confirm-dialog__message">{message}</p>
         <div className="confirm-dialog__actions">
-          <button type="button" className="confirm-dialog__btn confirm-dialog__btn--cancel" onClick={onCancel}>
-            {cancelText}
-          </button>
           <button
             type="button"
             ref={confirmBtnRef}
@@ -69,6 +66,9 @@ export function ConfirmDialog({
             onClick={onConfirm}
           >
             {confirmText}
+          </button>
+          <button type="button" className="confirm-dialog__btn confirm-dialog__btn--cancel" onClick={onCancel}>
+            {cancelText}
           </button>
         </div>
       </div>
