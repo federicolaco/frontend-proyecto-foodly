@@ -20,22 +20,26 @@ const EMPTY_PROMOTION_GROUPS = {
   proximas: [],
 }
 
-const PROMOTION_SECTIONS = [
-  {
-    key: 'vigentes',
-    title: 'Promociones vigentes',
-    emptyMessage: 'No hay promociones vigentes.',
-  },
-  {
-    key: 'proximas',
-    title: 'Próximas promociones',
-    emptyMessage: 'No hay promociones próximas.',
-  },
-  {
-    key: 'vencidas',
-    title: 'Promociones vencidas',
-    emptyMessage: 'No hay promociones vencidas.',
-  },
+const STATUS_OPTIONS = [
+  { key: 'todas', label: 'Todos los estados' },
+  { key: 'vigentes', label: 'Vigentes' },
+  { key: 'proximas', label: 'Próximas' },
+  { key: 'vencidas', label: 'Vencidas' },
+]
+
+const STATUS_LABELS = {
+  vigentes: 'Vigente',
+  proximas: 'Próxima',
+  vencidas: 'Vencida',
+}
+
+const SORT_OPTIONS = [
+  { key: 'nombre-asc', label: 'Nombre (A-Z)' },
+  { key: 'nombre-desc', label: 'Nombre (Z-A)' },
+  { key: 'descuento-desc', label: 'Mayor descuento' },
+  { key: 'descuento-asc', label: 'Menor descuento' },
+  { key: 'inicio-asc', label: 'Fecha de inicio (más próxima)' },
+  { key: 'inicio-desc', label: 'Fecha de inicio (más lejana)' },
 ]
 
 export function LocalPromotions() {
@@ -44,6 +48,9 @@ export function LocalPromotions() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('todas')
+  const [sortBy, setSortBy] = useState('nombre-asc')
   const toast = useToast()
   const confirm = useConfirm()
 
@@ -77,6 +84,40 @@ export function LocalPromotions() {
       finalPrice,
     }
   }
+
+  const allPromotions = STATUS_OPTIONS
+    .filter((option) => option.key !== 'todas')
+    .flatMap((option) => (promotionGroups[option.key] ?? []).map((promo) => ({ ...promo, status: option.key })))
+
+  const normalizedSearch = searchTerm.trim().toLowerCase()
+
+  const filteredPromotions = allPromotions
+    .filter((promo) => statusFilter === 'todas' || promo.status === statusFilter)
+    .filter((promo) => {
+      if (!normalizedSearch) return true
+      const dishName = getPromotionPricing(promo).dishName
+      return (
+        promo.title.toLowerCase().includes(normalizedSearch) ||
+        dishName.toLowerCase().includes(normalizedSearch)
+      )
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'nombre-desc':
+          return b.title.localeCompare(a.title)
+        case 'descuento-desc':
+          return Number(b.discountPercent) - Number(a.discountPercent)
+        case 'descuento-asc':
+          return Number(a.discountPercent) - Number(b.discountPercent)
+        case 'inicio-asc':
+          return a.startDate.localeCompare(b.startDate)
+        case 'inicio-desc':
+          return b.startDate.localeCompare(a.startDate)
+        case 'nombre-asc':
+        default:
+          return a.title.localeCompare(b.title)
+      }
+    })
 
   const load = async () => {
     setLoading(true)
@@ -144,7 +185,22 @@ export function LocalPromotions() {
 
     return (
       <article key={promo.id} style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}>
-        <strong>{promo.title}</strong>
+        <div className="panel-actions" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+          <strong>{promo.title}</strong>
+          {promo.status && (
+            <span
+              className={`panel-badge ${
+                promo.status === 'vigentes'
+                  ? 'panel-badge--open'
+                  : promo.status === 'proximas'
+                  ? 'panel-badge--pending'
+                  : 'panel-badge--closed'
+              }`}
+            >
+              {STATUS_LABELS[promo.status]}
+            </span>
+          )}
+        </div>
         <p style={{ marginTop: '0.35rem' }}>
           Descuento: {promo.discountPercent}% · {pricing.dishName}
         </p>
@@ -247,24 +303,59 @@ export function LocalPromotions() {
       </section>
 
       <section className="panel-card">
-        <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Promociones por estado</h2>
-        {loading && <p className="panel-empty">Cargando...</p>}
-        {!loading && PROMOTION_SECTIONS.map((section, index) => {
-          const promotions = promotionGroups[section.key] ?? []
+        <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Buscar promoción</h2>
 
-          return (
-            <section key={section.key} style={{ marginTop: index === 0 ? 0 : '1.5rem' }}>
-              <h3 style={{ marginBottom: '0.75rem', color: 'var(--gris-oscuro)' }}>{section.title}</h3>
-              {promotions.length === 0 ? (
-                <p className="panel-empty">{section.emptyMessage}</p>
-              ) : (
-                <div style={{ display: 'grid', gap: '0.75rem' }}>
-                  {promotions.map(renderPromotionCard)}
-                </div>
-              )}
-            </section>
-          )
-        })}
+        <div
+          className="panel-form__row panel-form__row--2"
+          style={{ marginBottom: '1.25rem', gap: '0.75rem' }}
+        >
+          <label className="panel-field">
+            <span className="panel-field__label">Nombre</span>
+            <input
+              className="panel-field__input"
+              placeholder="Buscar por nombre de promoción o plato..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </label>
+          <label className="panel-field">
+            <span className="panel-field__label">Estado</span>
+            <select
+              className="panel-field__select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option.key} value={option.key}>{option.label}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div className="panel-actions" style={{ justifyContent: 'flex-end', marginBottom: '1rem' }}>
+          <label className="panel-field" style={{ gap: '0.25rem' }}>
+            <span className="panel-field__label">Ordenar por</span>
+            <select
+              className="panel-sort-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              {SORT_OPTIONS.map((option) => (
+                <option key={option.key} value={option.key}>{option.label}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {loading && <p className="panel-empty">Cargando...</p>}
+        {!loading && filteredPromotions.length === 0 && (
+          <p className="panel-empty">No se encontraron promociones con esos filtros.</p>
+        )}
+        {!loading && filteredPromotions.length > 0 && (
+          <div style={{ display: 'grid', gap: '0.75rem' }}>
+            {filteredPromotions.map(renderPromotionCard)}
+          </div>
+        )}
       </section>
     </>
   )
