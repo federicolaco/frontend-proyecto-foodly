@@ -214,18 +214,29 @@ export function LocalPromotions() {
             No se pudo resolver el precio actual del plato.
           </p>
         )}
-        <p style={{ marginTop: '0.35rem' }}>Vigencia: {promo.startDate} — {promo.endDate}</p>
-        <div className="panel-actions" style={{ marginTop: '0.5rem', justifyContent: 'flex-end' }}>
-          <button
-            type="button"
-            className="panel-btn panel-btn--outline"
-            onClick={() => setForm({ ...promo, dishId: String(promo.dishId) })}
-          >
-            Editar
-          </button>
-          <button type="button" className="panel-btn panel-btn--danger" onClick={() => handleDelete(promo.id)}>
-            Eliminar
-          </button>
+        <div
+          style={{
+            marginTop: '0.35rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '0.5rem',
+          }}
+        >
+          <p style={{ margin: 0 }}>Vigencia: {promo.startDate} — {promo.endDate}</p>
+          <div className="panel-actions" style={{ justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              className="panel-btn panel-btn--outline"
+              onClick={() => setForm({ ...promo, dishId: String(promo.dishId) })}
+            >
+              Editar
+            </button>
+            <button type="button" className="panel-btn panel-btn--danger" onClick={() => handleDelete(promo.id)}>
+              Eliminar
+            </button>
+          </div>
         </div>
       </article>
     )
