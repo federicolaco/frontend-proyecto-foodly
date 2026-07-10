@@ -302,13 +302,16 @@ export function LocalPromotions() {
             <span className="panel-field__label">Fin</span>
             <input type="date" className="panel-field__input" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} required />
           </label>
-          <div className="panel-actions" style={{ alignItems: 'end' }}>
-            <button type="submit" className="panel-btn panel-btn--primary" disabled={saving}>
-              {form.id ? 'Guardar' : 'Crear promoción'}
-            </button>
-            {form.id && (
-              <button type="button" className="panel-btn panel-btn--outline" onClick={() => setForm(EMPTY_FORM)}>Cancelar</button>
-            )}
+          <div className="panel-field">
+            <span className="panel-field__label" style={{ visibility: 'hidden' }}>Acciones</span>
+            <div className="panel-actions">
+              <button type="submit" className="panel-btn panel-btn--primary" disabled={saving}>
+                {form.id ? 'Guardar' : 'Crear promoción'}
+              </button>
+              {form.id && (
+                <button type="button" className="panel-btn panel-btn--outline" onClick={() => setForm(EMPTY_FORM)}>Cancelar</button>
+              )}
+            </div>
           </div>
         </form>
       </section>
