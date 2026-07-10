@@ -20,6 +20,7 @@ const EMPTY_FORM = {
   categoryId: '',
   imageFile: null,
   imagePreview: null,
+  active: true,
 }
 
 export function LocalDishes() {
@@ -146,6 +147,7 @@ const loadDishes = async (silent = false) => {
       categoryId: String(dish.categoryId ?? ''),
       imageFile: null,
       imagePreview: dish.image ?? null,
+      active: dish.active,
     })
     setCreatingCategory(false)
     setNewCategoryName('')
