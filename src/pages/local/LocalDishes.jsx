@@ -50,7 +50,7 @@ const loadDishes = async (silent = false) => {
 
     try {
       const data = await getLocalDishes()
-      setDishes(data.filter((dish) => dish.active))
+      setDishes(data)
     } catch (err) {
       if (!silent) toast.error(err.message ?? 'No pudimos cargar los platos.')
     } finally {
@@ -157,6 +157,24 @@ const loadDishes = async (silent = false) => {
     setCreatingCategory(false)
     setNewCategoryName('')
     if (imageInputRef.current) imageInputRef.current.value = ''
+  }
+
+  const handleToggleActive = async (dish, nextActive) => {
+    try {
+      await saveDish({
+        id: dish.id,
+        name: dish.name,
+        description: dish.description,
+        price: String(dish.price),
+        categoryId: String(dish.categoryId ?? ''),
+        imageFile: null,
+        active: nextActive,
+      })
+      toast.success(nextActive ? 'Plato activado.' : 'Plato desactivado.')
+      await loadDishes()
+    } catch (err) {
+      toast.error(err.message)
+    }
   }
 
   const handleDelete = async (dishId) => {
@@ -323,6 +341,7 @@ const loadDishes = async (silent = false) => {
                   <th>Nombre</th>
                   <th>Precio</th>
                   <th>Categoria</th>
+                  <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -341,6 +360,16 @@ const loadDishes = async (silent = false) => {
                     <td>{dish.name}</td>
                     <td>{formatPrice(dish.price)}</td>
                     <td>{dish.categoryName ?? 'Sin categoria'}</td>
+                    <td>
+                      <select
+                        className="panel-field__input"
+                        value={dish.active ? 'true' : 'false'}
+                        onChange={(e) => handleToggleActive(dish, e.target.value === 'true')}
+                      >
+                        <option value="true">Disponible</option>
+                        <option value="false">No disponible</option>
+                      </select>
+                    </td>
                     <td>
                       <div className="panel-actions">
                         <button
