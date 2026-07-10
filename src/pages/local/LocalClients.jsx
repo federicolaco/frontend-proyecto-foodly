@@ -32,8 +32,7 @@ export function LocalClients() {
     return () => clearTimeout(timer)
   }, [search])
 
-  // Determina si el cliente ya fue calificado por el usuario actual,
-  // sin depender únicamente del flag `alreadyRated` que puede venir vacío del backend.
+
   const hasExistingRating = (client) =>
     Boolean(client.alreadyRated) || client.myScore != null || (client.myComment && client.myComment.length > 0)
 

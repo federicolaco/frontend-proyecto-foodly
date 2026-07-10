@@ -1,6 +1,7 @@
 import { getSessionToken, getStoredUser, setStoredUser } from '../lib/auth'
 import { apiFetch, apiFetchMultipart, apiFetchSafe, isApiConfigured } from './client'
 import {
+  mapPagedResponse ,
   createPlaceholderImage,
   normalizeAddress,
   buildOrderListParams,
@@ -281,10 +282,10 @@ export async function saveDish(payload) {
     if (payload.imageFile) {
       formData.append('imagen', payload.imageFile)
     } else if (!payload.id) {
-      // Solo en alta (POST) es obligatorio: si no hay archivo, mandamos placeholder
+      
       formData.append('imagen', createPlaceholderImage('plato.png'))
     }
-    // En edición (PUT) sin archivo nuevo: no mandamos 'imagenes', el backend mantiene las URLs existentes
+  
 
     const response = payload.id
       ? await apiFetchMultipart(`/locales/platos/${payload.id}`, formData, { method: 'PUT' })
@@ -311,9 +312,11 @@ export async function getLocalOrders(filters = {}) {
     const params = buildOrderListParams(filters)
     const qs = params.toString()
     const data = await apiFetch(`/pedidos/listar-pedido-local/${localId}${qs ? `?${qs}` : ''}`)
-    return (data ?? []).map(mapOrderListItem)
+    if (!data) return { items: [], page: 0, totalPages: 1, totalElements: 0 }
+    return mapPagedResponse(data, mapOrderListItem)
   }
-  return mockGetLocalOrders(getSessionToken(), filters)
+  const mockItems = await mockGetLocalOrders(getSessionToken(), filters)
+  return { items: mockItems, page: 0, totalPages: 1, totalElements: mockItems.length }
 }
 
 export async function confirmOrder(orderId, deliveryMinutes) {

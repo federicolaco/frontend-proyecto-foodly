@@ -179,7 +179,7 @@ export async function logout() {
     try {
       await apiFetch('/usuarios/logout', { method: 'POST' })
     } catch {
-      // Ignorar error de logout remoto
+     
     }
   } else if (token) {
     await mockLogout(token)

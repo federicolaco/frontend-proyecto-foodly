@@ -9,7 +9,7 @@ export function ConfirmEmailChange() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') ?? ''
 
-  const [status, setStatus] = useState('loading') // 'loading' | 'success' | 'error'
+  const [status, setStatus] = useState('loading') 
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -23,8 +23,6 @@ export function ConfirmEmailChange() {
       .then((res) => {
         setStatus('success')
         setMessage(res.message)
-        // El backend invalida las sesiones activas al cambiar el correo;
-        // forzamos también el cierre de sesión local para evitar un estado inconsistente.
         clearSessionToken()
       })
       .catch((err) => {

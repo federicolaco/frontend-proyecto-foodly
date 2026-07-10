@@ -44,7 +44,7 @@ export function LocalDishes() {
   }
 
 const loadDishes = async (silent = false) => {
-    if (silent && saving) return // no pisar la lista mientras el local está guardando un plato
+    if (silent && saving) return 
 
     if (!silent) setLoading(true)
 

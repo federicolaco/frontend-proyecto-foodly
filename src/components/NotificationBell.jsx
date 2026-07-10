@@ -32,7 +32,7 @@ export function NotificationBell() {
       const data = await getMyNotifications()
       setNotifications(data)
     } catch {
-      // Si falla, simplemente no actualizamos la lista; no bloquea el resto de la app.
+     
     }
   }
 
@@ -81,7 +81,7 @@ export function NotificationBell() {
       setLoading(true)
       await markNotificationAsRead(notification.id)
     } catch {
-      // Si falla, la dejamos marcada como leída igual en pantalla; se resincroniza en el próximo poll.
+      
     } finally {
       setLoading(false)
     }

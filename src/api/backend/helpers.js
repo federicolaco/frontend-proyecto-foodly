@@ -208,8 +208,11 @@ function mapClaimStatus(status) {
 export function buildOrderListParams(filters = {}) {
   const params = new URLSearchParams()
   if (filters.status) params.set('estado', mapFrontendStatusToBackend(filters.status))
+  if (filters.page !== undefined) params.set('pagina', String(filters.page))
+  if (filters.pageSize !== undefined) params.set('tamanio', String(filters.pageSize))
   return params
 }
+
 export function buildSearchParams(query = '', options = {}) {
   const params = new URLSearchParams()
   if (query.trim()) params.set('nombre', query.trim())
@@ -218,6 +221,8 @@ export function buildSearchParams(query = '', options = {}) {
   if (options.sort === 'price-desc') params.set('precioMasAlto', 'true')
   if (options.sort === 'name') params.set('alfabetico', 'true')
   if (options.localId) params.set('localId', String(Number(options.localId)))
+  if (options.page !== undefined) params.set('pagina', String(options.page))
+  if (options.pageSize !== undefined) params.set('tamanio', String(options.pageSize))
   return params
 }
 
@@ -233,6 +238,8 @@ export function buildLocalListParams(filters = {}) {
     params.set('ordenarPor', 'nombre')
     params.set('direccion', 'asc')
   }
+  if (filters.page !== undefined) params.set('pagina', String(filters.page))
+  if (filters.pageSize !== undefined) params.set('tamanio', String(filters.pageSize))
   return params
 }
 
@@ -251,10 +258,12 @@ export function buildAdminUserFilterParams(filters = {}) {
   if (filters.status === 'active') params.set('estado', 'Activo')
   if (filters.status === 'pending') params.set('estado', 'Pendiente')
   if (filters.sort) params.set('ordenarPor', filters.sort)
+  if (filters.page !== undefined) params.set('pagina', String(filters.page))
+  if (filters.pageSize !== undefined) params.set('tamanio', String(filters.pageSize))
   return params
 }
 
-export function buildClaimSearchParams(filters = {}) {
+export function buildClaimSearchParams(filters = {}, pagination = {}) {
   const params = new URLSearchParams()
   if (filters.clientId) params.set('idCliente', String(Number(filters.clientId)))
   if (filters.localId) params.set('idLocal', String(Number(filters.localId)))
@@ -262,5 +271,17 @@ export function buildClaimSearchParams(filters = {}) {
   if (filters.orderStatus) params.set('estadoPedido', filters.orderStatus)
   if (filters.claimStatus === 'pending') params.set('estadoReclamo', 'Pendiente')
   if (filters.claimStatus === 'resolved') params.set('estadoReclamo', 'Atendido')
+  if (pagination.page !== undefined) params.set('pagina', String(pagination.page))
+  if (pagination.pageSize !== undefined) params.set('tamanio', String(pagination.pageSize))
   return params
+}
+
+export function mapPagedResponse(raw, itemMapper = (x) => x) {
+  const contenido = raw?.contenido ?? []
+  return {
+    items: contenido.map(itemMapper),
+    page: raw?.paginaActual ?? 0,
+    totalPages: raw?.totalPaginas ?? 1,
+    totalElements: raw?.totalElementos ?? contenido.length,
+  }
 }

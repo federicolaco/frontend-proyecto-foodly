@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { confirmOrder, getLocalOrders, rejectOrder } from '../../api/localPanel'
 import { usePolling } from '../../hooks/usePolling'
 import { formatPrice } from '../../lib/cart'
@@ -6,6 +6,7 @@ import { formatDateTime } from '../../lib/format'
 import { ORDER_STATUS_LABELS } from '../../lib/roles'
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
+import { Pagination } from '../../components/Pagination'
 import '../Panel.css'
 
 const REJECTION_REASONS = [
@@ -24,8 +25,10 @@ function getOrderBadgeVariant(status) {
 }
 
 export function LocalOrdersPage() {
-  const [orders, setOrders] = useState([])
+ const [orders, setOrders] = useState([])
   const [statusFilter, setStatusFilter] = useState('pending')
+  const [page, setPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
   const [sort, setSort] = useState('date-desc')
   const [loading, setLoading] = useState(true)
   const [confirmingId, setConfirmingId] = useState(null)
@@ -36,11 +39,15 @@ export function LocalOrdersPage() {
   const toast = useToast()
   const confirmDialog = useConfirm()
 
-  const loadOrders = async (silent = false) => {
+const loadOrders = async (silent = false) => {
     if (!silent) setLoading(true)
     try {
-      const data = await getLocalOrders(statusFilter ? { status: statusFilter } : {})
-      setOrders(data)
+      const { items, totalPages: tp } = await getLocalOrders({
+        ...(statusFilter ? { status: statusFilter } : {}),
+        page,
+      })
+      setOrders(items)
+      setTotalPages(tp)
     } catch (err) {
       if (!silent) toast.error(err.message ?? 'No pudimos cargar los pedidos.')
     } finally {
@@ -48,7 +55,11 @@ export function LocalOrdersPage() {
     }
   }
 
-  usePolling(loadOrders, 3000, [statusFilter])
+  useEffect(() => {
+    setPage(0)
+  }, [statusFilter])
+
+  usePolling(loadOrders, 3000, [statusFilter, page])
 
   const sortedOrders = useMemo(() => {
     const [field, dir] = sort.split('-')
@@ -287,6 +298,7 @@ export function LocalOrdersPage() {
                 )}
               </article>
             ))}
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}
       </section>

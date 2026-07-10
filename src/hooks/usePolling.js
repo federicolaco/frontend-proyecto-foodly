@@ -23,6 +23,6 @@ export function usePolling(callback, intervalMs, deps = []) {
     tick()
     const id = setInterval(tick, intervalMs)
     return () => clearInterval(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, deps)
 }

@@ -3,6 +3,7 @@ import { getUsers, setUserBlocked } from '../../api/admin'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
+import { Pagination } from '../../components/Pagination'
 import '../Panel.css'
 
 const ROLE_LABELS = { cliente: 'Cliente', local: 'Local' }
@@ -16,25 +17,29 @@ const SORT_OPTIONS = [
 ]
 
 export function AdminUsers() {
-  const [users, setUsers] = useState([])
+ const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState(null)
   const [sort, setSort] = useState('name-asc')
+  const [page, setPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
   const toast = useToast()
   const confirm = useConfirm()
 
   const loadUsers = async () => {
     setLoading(true)
     try {
-      const data = await getUsers({
+      const { items, totalPages: tp } = await getUsers({
         search: search || undefined,
         role: roleFilter || undefined,
         status: statusFilter || undefined,
+        page,
       })
-      setUsers(data)
+      setUsers(items)
+      setTotalPages(tp)
     } catch (err) {
       toast.error(err.message ?? 'No pudimos cargar los usuarios.')
     } finally {
@@ -43,10 +48,13 @@ export function AdminUsers() {
   }
 
   useEffect(() => {
-    const timer = setTimeout(loadUsers, 300)
-    return () => clearTimeout(timer)
+    setPage(0)
   }, [search, roleFilter, statusFilter])
 
+  useEffect(() => {
+    const timer = setTimeout(loadUsers, 300)
+    return () => clearTimeout(timer)
+  }, [search, roleFilter, statusFilter, page])
   const sortedUsers = useMemo(() => {
     const list = [...users]
     const [field, dir] = sort.split('-')
@@ -54,7 +62,7 @@ export function AdminUsers() {
 
     list.sort((a, b) => {
       if (field === 'rating') {
-        // Usuarios sin calificación quedan siempre al final, sin importar la dirección
+      
         const aHasRating = typeof a.rating === 'number'
         const bHasRating = typeof b.rating === 'number'
         if (!aHasRating && !bHasRating) return 0
@@ -63,7 +71,6 @@ export function AdminUsers() {
         return (a.rating - b.rating) * dirMultiplier
       }
 
-      // Orden alfabético por nombre, insensible a mayúsculas/acentos
       return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }) * dirMultiplier
     })
 
@@ -175,6 +182,7 @@ export function AdminUsers() {
                   ))}
                 </tbody>
               </table>
+              <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
             </div>
           )}
         </section>

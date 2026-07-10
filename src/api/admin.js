@@ -1,6 +1,6 @@
 import { getSessionToken } from '../lib/auth'
 import { apiFetch, isApiConfigured } from './client'
-import { buildAdminUserFilterParams } from './backend/helpers'
+import { buildAdminUserFilterParams, mapPagedResponse } from './backend/helpers'
 import { mapPendingLocalRequest, mapUserListItem } from './backend/mappers'
 import {
   mockGetPendingLocalRequests,
@@ -52,10 +52,11 @@ export async function getUsers(filters = {}) {
     const params = buildAdminUserFilterParams(filters)
     const qs = params.toString()
     const data = await apiFetch(`/admins/usuarios${qs ? `?${qs}` : ''}`)
-    return (data ?? []).map(mapUserListItem)
+    return mapPagedResponse(data, mapUserListItem)
   }
 
-  return mockGetUsers(getSessionToken(), filters)
+  const mockItems = await mockGetUsers(getSessionToken(), filters)
+  return { items: mockItems, page: 0, totalPages: 1, totalElements: mockItems.length }
 }
 
 export async function setUserBlocked(userId, blocked) {

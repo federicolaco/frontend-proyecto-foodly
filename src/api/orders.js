@@ -6,7 +6,7 @@ import milanesaCardImg from '../../img/milanesa-card.png'
 import iceCreamCardImg from '../../img/ice-cream-card.png'
 import { getSessionToken, getStoredUser } from '../lib/auth'
 import { apiFetch, apiFetchSafe, isApiConfigured } from './client'
-import { buildLocalListParams, buildOrderListParams, buildSearchParams, getUserDeliveryAddress } from './backend/helpers'
+import { buildLocalListParams, buildOrderListParams, buildSearchParams, mapPagedResponse, getUserDeliveryAddress } from './backend/helpers'
 import {
   buildOrderPayload,
   mapLocalListItem,
@@ -41,11 +41,12 @@ export async function getPopularRestaurants(filters = {}) {
     const params = buildLocalListParams(filters)
     const qs = params.toString()
     const data = await apiFetchSafe(`/clientes/listar_locales${qs ? `?${qs}` : ''}`)
-    if (!data) return []
-    return data.map((local) => mapLocalListItem(local))
+    if (!data) return { items: [], page: 0, totalPages: 1, totalElements: 0 }
+    return mapPagedResponse(data, mapLocalListItem)
   }
 
-  return mockGetEnabledRestaurants(filters)
+  const mockItems = await mockGetEnabledRestaurants(filters)
+  return { items: mockItems, page: 0, totalPages: 1, totalElements: mockItems.length }
 }
 
 export async function getMostOrderedDishes(limit = 4) {
@@ -62,10 +63,17 @@ export async function searchDishes(query = '', options = {}) {
     const params = buildSearchParams(query, options)
     const qs = params.toString()
     const response = await apiFetch(`/clientes/busqueda${qs ? `?${qs}` : ''}`)
-    return mapSearchResults(response, options)
+    const items = mapSearchResults(response, options)
+    return {
+      items,
+      page: response?.paginaActual ?? 0,
+      totalPages: response?.totalPaginas ?? 1,
+      totalElements: response?.totalElementos ?? items.length,
+    }
   }
 
-  return mockSearchDishesAndPromotions(query, options)
+  const mockItems = await mockSearchDishesAndPromotions(query, options)
+  return { items: mockItems, page: 0, totalPages: 1, totalElements: mockItems.length }
 }
 
 export async function createOrder(payload) {
@@ -99,10 +107,12 @@ export async function getMyOrders(filters = {}) {
     const params = buildOrderListParams(filters)
     const qs = params.toString()
     const data = await apiFetchSafe(`/pedidos/mi-historial${qs ? `?${qs}` : ''}`)
-    return (data ?? []).map(mapOrderListItem)
+    if (!data) return { items: [], page: 0, totalPages: 1, totalElements: 0 }
+    return mapPagedResponse(data, mapOrderListItem)
   }
 
-  return mockGetClientOrders(getSessionToken(), filters)
+  const mockItems = await mockGetClientOrders(getSessionToken(), filters)
+  return { items: mockItems, page: 0, totalPages: 1, totalElements: mockItems.length }
 }
 
 export async function cancelOrder(orderId) {

@@ -4,6 +4,7 @@ import { formatPrice } from '../../lib/cart'
 import { getStoredUser } from '../../lib/auth'
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
+import { Pagination } from '../../components/Pagination'
 import '../Panel.css'
 
 const RESOLUTION_TYPES = [
@@ -12,8 +13,10 @@ const RESOLUTION_TYPES = [
 ]
 
 export function LocalClaims() {
-  const [claims, setClaims] = useState([])
+ const [claims, setClaims] = useState([])
   const [statusFilter, setStatusFilter] = useState('pending')
+  const [page, setPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
   const [sort, setSort] = useState('name-asc')
   const [loading, setLoading] = useState(true)
   const [resolvingId, setResolvingId] = useState(null)
@@ -22,15 +25,17 @@ export function LocalClaims() {
   const [resolutionType, setResolutionType] = useState(RESOLUTION_TYPES[0].id)
   const [resolutionNote, setResolutionNote] = useState('')
 
-  const load = async () => {
+const load = async () => {
     setLoading(true)
     try {
       const user = getStoredUser()
-      const data = await getLocalClaims({
+      const { items, totalPages: tp } = await getLocalClaims({
         status: statusFilter || undefined,   
-        localId: user?.localId ?? user?.restaurantId ?? user?.id
+        localId: user?.localId ?? user?.restaurantId ?? user?.id,
+        page,
       })
-      setClaims(data)
+      setClaims(items)
+      setTotalPages(tp)
     } catch (err) {
       toast.error(err.message)
     } finally {
@@ -38,7 +43,11 @@ export function LocalClaims() {
     }
   }
 
-  useEffect(() => { load() }, [statusFilter])
+  useEffect(() => {
+    setPage(0)
+  }, [statusFilter])
+
+  useEffect(() => { load() }, [statusFilter, page])
 
   const sortedClaims = useMemo(() => {
     const [field, dir] = sort.split('-')
@@ -146,6 +155,7 @@ export function LocalClaims() {
                 )}
               </article>
             ))}
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}
       </section>

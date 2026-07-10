@@ -4,6 +4,7 @@ import { getPopularRestaurants } from '../api/orders'
 import { buildRestaurantPath } from '../api/restaurant'
 import { OrdersNavbar } from '../components/OrdersNavbar'
 import { useToast } from '../context/ToastContext'
+import { Pagination } from '../components/Pagination'
 import './Locales.css'
 import './Orders.css'
 import './Panel.css'
@@ -28,27 +29,36 @@ function RestaurantLogo({ name, logo }) {
 }
 
 export function Locales() {
-  const navigate = useNavigate()
-  const [restaurants, setRestaurants] = useState([])
+ const [restaurants, setRestaurants] = useState([])
   const [search, setSearch] = useState('')
   const [openOnly, setOpenOnly] = useState(false)
   const [minRating, setMinRating] = useState('')
   const [sort, setSort] = useState('name')
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
   const toast = useToast()
+
+  useEffect(() => {
+    setPage(0)
+  }, [search, openOnly, minRating, sort])
 
   useEffect(() => {
     let cancelled = false
     const timer = setTimeout(async () => {
       setLoading(true)
       try {
-        const data = await getPopularRestaurants({
+        const { items, totalPages: tp } = await getPopularRestaurants({
           search: search || undefined,
           openOnly,
           minRating: minRating || undefined,
           sort,
+          page,
         })
-        if (!cancelled) setRestaurants(data)
+        if (!cancelled) {
+          setRestaurants(items)
+          setTotalPages(tp)
+        }
       } catch {
         if (!cancelled) toast.error('No pudimos cargar los locales.')
       } finally {
@@ -60,8 +70,7 @@ export function Locales() {
       cancelled = true
       clearTimeout(timer)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, openOnly, minRating, sort])
+  }, [search, openOnly, minRating, sort, page])
 
   return (
     <div className="orders-page">
@@ -140,6 +149,7 @@ export function Locales() {
             </div>
           )}
         </section>
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </main>
     </div>
   )

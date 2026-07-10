@@ -59,7 +59,7 @@ export function Toast({ id, type = 'info', message, duration = 4000, onDismiss }
         remainingRef.current = Math.max(remainingRef.current - (Date.now() - startRef.current), 0)
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [paused])
 
   return (

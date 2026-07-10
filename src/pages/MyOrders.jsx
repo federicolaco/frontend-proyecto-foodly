@@ -12,6 +12,7 @@ import { formatDateTime } from '../lib/format'
 import { ORDER_STATUS_LABELS } from '../lib/roles'
 import { useToast } from '../context/ToastContext'
 import { useConfirm } from '../context/ConfirmContext'
+import { Pagination } from '../components/Pagination'
 import './Panel.css'
 
 const COMPENSATION_TYPES = [
@@ -86,6 +87,8 @@ export function MyOrders() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
   const [statusFilter, setStatusFilter] = useState('')
+  const [page, setPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
   const [sortBy, setSortBy] = useState('date_desc')
   const [loading, setLoading] = useState(true)
   const [claimingId, setClaimingId] = useState(null)
@@ -106,12 +109,16 @@ export function MyOrders() {
     })
   }
 
-const loadOrders = async (silent = false) => {
+ const loadOrders = async (silent = false) => {
     if (!silent) setLoading(true)
 
     try {
-      const data = await getMyOrders(statusFilter ? { status: statusFilter } : {})
+      const { items: data, totalPages: tp } = await getMyOrders({
+        ...(statusFilter ? { status: statusFilter } : {}),
+        page,
+      })
       setOrders(data)
+      setTotalPages(tp)
 
       if (!statusFilter) {
         setHasAnyOrders(data.length > 0)
@@ -151,7 +158,11 @@ const loadOrders = async (silent = false) => {
     }
   }
 
-  usePolling(loadOrders, 3000, [statusFilter])
+  useEffect(() => {
+    setPage(0)
+  }, [statusFilter])
+
+  usePolling(loadOrders, 3000, [statusFilter, page])
 
   const sortedOrders = useMemo(() => sortOrders(orders, sortBy), [orders, sortBy])
 
@@ -413,46 +424,47 @@ const loadOrders = async (silent = false) => {
                       claimingId === order.id &&
                       !meta.claim &&
                       !meta.claimLookupError && (
-                      <div className="my-orders__claim-form">
-                        <textarea
-                          className="panel-field__textarea"
-                          rows={3}
-                          placeholder="Motivo del reclamo"
-                          value={claimReason}
-                          onChange={(e) => setClaimReason(e.target.value)}
-                        />
-                        <select
-                          className="panel-field__select"
-                          value={claimCompensation}
-                          onChange={(e) => setClaimCompensation(e.target.value)}
-                        >
-                          {COMPENSATION_TYPES.map((type) => (
-                            <option key={type.id} value={type.id}>
-                              {type.label}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="panel-actions">
-                          <button
-                            type="button"
-                            className="panel-btn panel-btn--primary"
-                            onClick={() => handleClaim(order.id)}
+                        <div className="my-orders__claim-form">
+                          <textarea
+                            className="panel-field__textarea"
+                            rows={3}
+                            placeholder="Motivo del reclamo"
+                            value={claimReason}
+                            onChange={(e) => setClaimReason(e.target.value)}
+                          />
+                          <select
+                            className="panel-field__select"
+                            value={claimCompensation}
+                            onChange={(e) => setClaimCompensation(e.target.value)}
                           >
-                            Enviar reclamo
-                          </button>
-                          <button
-                            type="button"
-                            className="panel-btn panel-btn--outline"
-                            onClick={() => setClaimingId(null)}
-                          >
-                            Cancelar
-                          </button>
+                            {COMPENSATION_TYPES.map((type) => (
+                              <option key={type.id} value={type.id}>
+                                {type.label}
+                              </option>
+                            ))}
+                          </select>
+                          <div className="panel-actions">
+                            <button
+                              type="button"
+                              className="panel-btn panel-btn--primary"
+                              onClick={() => handleClaim(order.id)}
+                            >
+                              Enviar reclamo
+                            </button>
+                            <button
+                              type="button"
+                              className="panel-btn panel-btn--outline"
+                              onClick={() => setClaimingId(null)}
+                            >
+                              Cancelar
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </article>
                 )
               })}
+              <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
             </div>
           )}
         </section>

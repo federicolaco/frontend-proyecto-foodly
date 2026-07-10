@@ -110,7 +110,7 @@ export function mapLoginResponse(data, extras = {}) {
       restaurantId: role === 'local' ? data.id : undefined,
       localEnabled: extras.localEnabled ?? role !== 'local',
       isOpen: role === 'local' ? Boolean(data.estaAbierto) : undefined,
-      photo: data.foto ?? null, // 👈 nuevo
+      photo: data.foto ?? null,
     },
   }
 }

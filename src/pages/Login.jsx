@@ -59,7 +59,7 @@ export function Login() {
 
   useEffect(() => {
     if (successMessage) toast.success(successMessage)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, [])
 
   useEffect(() => {

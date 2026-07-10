@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { buildRestaurantPath } from '../api/restaurant'
 import { searchDishes } from '../api/orders'
 import { DishCard } from './DishCard'
+import { Pagination } from './Pagination'
 import './OrdersCatalog.css'
 
 function SearchIcon() {
@@ -15,65 +16,74 @@ function SearchIcon() {
 }
 
 export function OrdersCatalog() {
-  const navigate = useNavigate()
-  const [query, setQuery] = useState('')
-  const [view, setView] = useState('all')
-  const [sort, setSort] = useState('')
-  const [maxPrice, setMaxPrice] = useState('')
-  const [category, setCategory] = useState('')
-  const [categories, setCategories] = useState([])
-  const [dishes, setDishes] = useState([])
+const [dishes, setDishes] = useState([])
+
   const [loading, setLoading] = useState(true)
+
   const [error, setError] = useState(null)
 
+  const [page, setPage] = useState(0)
+
+  const [totalPages, setTotalPages] = useState(1)
+
   useEffect(() => {
+    setPage(0)
+  }, [query, view, sort, maxPrice])
+
+  useEffect(() => {
+
     let cancelled = false
 
     const timer = setTimeout(async () => {
+
       setLoading(true)
+
       setError(null)
 
+
+
       try {
-        const options = {}
+
+        const options = { page }
 
         if (view === 'promotions') options.promotionsOnly = true
+
         if (sort) options.sort = sort
+
         if (maxPrice) options.maxPrice = maxPrice
 
-        const results = await searchDishes(query, options)
+
+
+        const { items, totalPages: tp } = await searchDishes(query, options)
 
         if (!cancelled) {
-          const availableCategories = Array.from(
-            new Set(
-              results
-                .map((dish) => dish.categoryName)
-                .filter((name) => name && name !== 'Sin categoria'),
-            ),
-          ).sort((a, b) => a.localeCompare(b))
-
-          setCategories(availableCategories)
-
-          const filtered = category
-            ? results.filter((dish) => dish.categoryName === category)
-            : results
-
-          setDishes(filtered)
+          setDishes(items)
+          setTotalPages(tp)
         }
+
       } catch {
+
         if (!cancelled) {
+
           setError('No pudimos cargar los platos. Intentá de nuevo.')
+
           setDishes([])
+
         }
+
       } finally {
+
         if (!cancelled) setLoading(false)
+
       }
+
     }, 300)
 
     return () => {
       cancelled = true
       clearTimeout(timer)
     }
-  }, [query, view, sort, maxPrice, category])
+  }, [query, view, sort, maxPrice, category, page])
 
   useEffect(() => {
     if (category && !categories.includes(category)) {
@@ -189,6 +199,7 @@ export function OrdersCatalog() {
           </div>
         )}
       </div>
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </section>
   )
 }

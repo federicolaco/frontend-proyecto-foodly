@@ -1,6 +1,6 @@
 import { getSessionToken } from '../lib/auth'
 import { apiFetch, apiFetchSafe, isApiConfigured } from './client'
-import { buildClaimSearchParams } from './backend/helpers'
+import { mapPagedResponse ,buildClaimSearchParams } from './backend/helpers'
 import { mapClaim } from './backend/mappers'
 import {
   mockGetClientClaimsForOrder,
@@ -27,16 +27,20 @@ export async function submitClaim(payload) {
 
 export async function getLocalClaims(filters = {}) {
   if (isApiConfigured()) {
-    const params = buildClaimSearchParams({
-      localId: filters.localId,
-      claimStatus: filters.status,
-      date: filters.date,
-    })
+    const params = buildClaimSearchParams(
+      {
+        localId: filters.localId,
+        claimStatus: filters.status,
+        date: filters.date,
+      },
+      { page: filters.page, pageSize: filters.pageSize },
+    )
     const qs = params.toString()
     const data = await apiFetch(`/reclamos/buscar_reclamo${qs ? `?${qs}` : ''}`)
-    return (data ?? []).map(mapClaim)
+    return mapPagedResponse(data, mapClaim)
   }
-  return mockGetLocalClaims(getSessionToken(), filters)
+  const mockItems = await mockGetLocalClaims(getSessionToken(), filters)
+  return { items: mockItems, page: 0, totalPages: 1, totalElements: mockItems.length }
 }
 
 export async function resolveClaim(claimId, resolution) {
