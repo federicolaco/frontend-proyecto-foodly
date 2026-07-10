@@ -48,7 +48,7 @@ export function LocalOrdersPage() {
     }
   }
 
-  usePolling(loadOrders, 5000, [statusFilter])
+  usePolling(loadOrders, 3000, [statusFilter])
 
   const sortedOrders = useMemo(() => {
     const [field, dir] = sort.split('-')

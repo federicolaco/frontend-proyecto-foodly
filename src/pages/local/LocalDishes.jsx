@@ -58,7 +58,7 @@ const loadDishes = async (silent = false) => {
     }
   }
 
-  usePolling(loadDishes, 5000, [])
+  usePolling(loadDishes, 3000, [])
 
   useEffect(() => {
     loadCategories()

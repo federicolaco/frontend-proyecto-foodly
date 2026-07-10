@@ -151,7 +151,7 @@ const loadOrders = async (silent = false) => {
     }
   }
 
-  usePolling(loadOrders, 5000, [statusFilter])
+  usePolling(loadOrders, 3000, [statusFilter])
 
   const sortedOrders = useMemo(() => sortOrders(orders, sortBy), [orders, sortBy])
 
