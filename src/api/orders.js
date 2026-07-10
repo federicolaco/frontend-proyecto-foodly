@@ -49,10 +49,22 @@ export async function getPopularRestaurants(filters = {}) {
   return { items: mockItems, page: 0, totalPages: 1, totalElements: mockItems.length }
 }
 
+export async function getPopularRestaurantsSidebar(limit = 4) {
+  if (isApiConfigured()) {
+    const params = new URLSearchParams({ limite: String(limit) })
+    const data = await apiFetchSafe(`/clientes/locales-populares?${params.toString()}`)
+    return (data ?? []).map(mapLocalListItem)
+  }
+
+  const mockItems = await mockGetEnabledRestaurants({})
+  return mockItems.slice(0, limit)
+}
+
 export async function getMostOrderedDishes(limit = 4) {
   if (isApiConfigured()) {
-    const { items } = await searchDishes('', {})
-    return items.slice(0, limit)
+    const params = new URLSearchParams({ limite: String(limit) })
+    const data = await apiFetch(`/clientes/platos-mas-pedidos?${params.toString()}`)
+    return (data ?? []).map((plato, index) => mapPlatoListItem(plato, index))
   }
 
   return mockGetMostOrdered(limit)

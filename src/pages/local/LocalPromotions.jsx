@@ -305,10 +305,7 @@ export function LocalPromotions() {
       <section className="panel-card">
         <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Buscar promoción</h2>
 
-        <div
-          className="panel-form__row panel-form__row--2"
-          style={{ marginBottom: '1.25rem', gap: '0.75rem' }}
-        >
+        <div className="panel-promo-filters">
           <label className="panel-field">
             <span className="panel-field__label">Nombre</span>
             <input
@@ -321,7 +318,8 @@ export function LocalPromotions() {
           <label className="panel-field">
             <span className="panel-field__label">Estado</span>
             <select
-              className="panel-field__select"
+              className="panel-sort-select"
+              style={{ width: '100%', height: '2.85rem', boxSizing: 'border-box' }}
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -330,13 +328,11 @@ export function LocalPromotions() {
               ))}
             </select>
           </label>
-        </div>
-
-        <div className="panel-actions" style={{ justifyContent: 'flex-end', marginBottom: '1rem' }}>
-          <label className="panel-field" style={{ gap: '0.25rem' }}>
+          <label className="panel-field">
             <span className="panel-field__label">Ordenar por</span>
             <select
               className="panel-sort-select"
+              style={{ width: '100%', height: '2.85rem', boxSizing: 'border-box' }}
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >

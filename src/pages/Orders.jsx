@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getMostOrderedDishes, getPopularRestaurants } from '../api/orders'
+import { getMostOrderedDishes, getPopularRestaurantsSidebar } from '../api/orders'
 import { OrdersCatalog } from '../components/OrdersCatalog'
 import { OrdersNavbar } from '../components/OrdersNavbar'
 import { OrdersSidebar } from '../components/OrdersSidebar'
@@ -19,13 +19,13 @@ export function Orders() {
       setSidebarLoading(true)
 
       try {
-        const [restaurantsData, mostOrderedData] = await Promise.all([
-          getPopularRestaurants(),
+       const [restaurantsData, mostOrderedData] = await Promise.all([
+          getPopularRestaurantsSidebar(),
           getMostOrderedDishes(),
         ])
 
         if (!cancelled) {
-          setRestaurants(restaurantsData.items)
+          setRestaurants(restaurantsData)
           setMostOrdered(mostOrderedData)
         }
       } catch {

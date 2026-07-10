@@ -284,6 +284,20 @@
   display: none;
 }
 
+.panel-promo-filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  align-items: end;
+}
+
+@media (min-width: 640px) {
+  .panel-promo-filters {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+}
+
 .panel-empty {
   text-align: center;
   color: var(--gris-intermedio);
