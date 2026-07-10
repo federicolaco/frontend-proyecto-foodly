@@ -245,8 +245,11 @@ function mergeDishWithPromotion(baseDish, promotedDish) {
 }
 
 export function mapSearchResults(response, options = {}, startIndex = 0) {
-  const platos = response?.platos ?? []
-  const promociones = response?.promociones ?? []
+  const platos = (response?.platos ?? []).filter((plato) => plato.disponible !== false)
+  const promociones = (response?.promociones ?? []).filter((promo) => {
+    const plato = promo.dtPlato ?? promo.plato
+    return plato?.disponible !== false
+  })
   const dishMap = new Map(
     platos.map((plato, index) => {
       const dishItem = mapPlatoListItem(plato, startIndex + index)
@@ -543,4 +546,3 @@ export function mapLocalStats(data) {
     monthlySales,
   }
 }
-

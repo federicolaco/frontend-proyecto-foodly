@@ -65,7 +65,9 @@ export async function getMostOrderedDishes(limit = 4) {
   if (isApiConfigured()) {
     const params = new URLSearchParams({ limite: String(limit) })
     const data = await apiFetch(`/clientes/platos-mas-pedidos?${params.toString()}`)
-    return (data ?? []).map((plato, index) => mapPlatoListItem(plato, index))
+    return (data ?? [])
+      .filter((plato) => plato.disponible !== false)
+      .map((plato, index) => mapPlatoListItem(plato, index))
   }
 
   return mockGetMostOrdered(limit)
@@ -154,4 +156,3 @@ export async function retryOrderPayment(orderId) {
 
   return mockRetryClientOrderPayment(getSessionToken(), orderId)
 }
-
