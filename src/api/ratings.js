@@ -1,6 +1,6 @@
 import { getSessionToken, getStoredUser } from '../lib/auth'
 import { apiFetch, apiFetchSafe, isApiConfigured } from './client'
-import { buildLocalClientFilterBody } from './backend/helpers'
+import { buildLocalClientFilterParams } from './backend/helpers'
 import { mapLocalClient, mapRatingSummary } from './backend/mappers'
 import {
   mockGetLocalClients,
@@ -86,10 +86,9 @@ export async function getLocalClients(filters = {}) {
   if (isApiConfigured()) {
     const user = getStoredUser()
     const localId = user.restaurantId ?? user.localId ?? user.id
-    const data = await apiFetch(`/locales/${localId}/clientes`, {
-      method: 'POST',
-      body: JSON.stringify(buildLocalClientFilterBody(filters)),
-    })
+    const params = buildLocalClientFilterParams(filters)
+    const qs = params.toString()
+    const data = await apiFetch(`/locales/${localId}/clientes${qs ? `?${qs}` : ''}`)
     return (data ?? []).map(mapLocalClient)
   }
   return mockGetLocalClients(getSessionToken(), filters)

@@ -210,3 +210,57 @@ export function buildOrderListParams(filters = {}) {
   if (filters.status) params.set('estado', mapFrontendStatusToBackend(filters.status))
   return params
 }
+export function buildSearchParams(query = '', options = {}) {
+  const params = new URLSearchParams()
+  if (query.trim()) params.set('nombre', query.trim())
+  if (options.promotionsOnly) params.set('promocionActiva', 'true')
+  if (options.sort === 'price-asc') params.set('precioMasBajo', 'true')
+  if (options.sort === 'price-desc') params.set('precioMasAlto', 'true')
+  if (options.sort === 'name') params.set('alfabetico', 'true')
+  if (options.localId) params.set('localId', String(Number(options.localId)))
+  return params
+}
+
+export function buildLocalListParams(filters = {}) {
+  const params = new URLSearchParams()
+  if (filters.search) params.set('nombre', filters.search)
+  if (filters.openOnly) params.set('estaAbierto', 'true')
+  if (filters.minRating) params.set('calificacionMinima', String(Number(filters.minRating)))
+  if (filters.sort === 'rating') {
+    params.set('ordenarPor', 'calificacion')
+    params.set('direccion', 'desc')
+  } else if (filters.sort === 'name') {
+    params.set('ordenarPor', 'nombre')
+    params.set('direccion', 'asc')
+  }
+  return params
+}
+
+export function buildLocalClientFilterParams(filters = {}) {
+  const params = new URLSearchParams()
+  if (filters.search) params.set('nombre', filters.search)
+  if (filters.minRating) params.set('calificacionMinima', String(Number(filters.minRating)))
+  return params
+}
+
+export function buildAdminUserFilterParams(filters = {}) {
+  const params = new URLSearchParams()
+  if (filters.search) params.set('texto', filters.search)
+  if (filters.role) params.set('tipoUsuario', filters.role)
+  if (filters.status === 'blocked') params.set('estado', 'Bloqueado')
+  if (filters.status === 'active') params.set('estado', 'Activo')
+  if (filters.status === 'pending') params.set('estado', 'Pendiente')
+  if (filters.sort) params.set('ordenarPor', filters.sort)
+  return params
+}
+
+export function buildClaimSearchParams(filters = {}) {
+  const params = new URLSearchParams()
+  if (filters.clientId) params.set('idCliente', String(Number(filters.clientId)))
+  if (filters.localId) params.set('idLocal', String(Number(filters.localId)))
+  if (filters.date) params.set('fechaReclamo', filters.date)
+  if (filters.orderStatus) params.set('estadoPedido', filters.orderStatus)
+  if (filters.claimStatus === 'pending') params.set('estadoReclamo', 'Pendiente')
+  if (filters.claimStatus === 'resolved') params.set('estadoReclamo', 'Atendido')
+  return params
+}

@@ -7,10 +7,8 @@ async function fetchLocalSummary(restaurantId) {
 }
 
 async function fetchLocalDishes(restaurantId) {
-  const response = await apiFetch('/clientes/busqueda', {
-    method: 'POST',
-    body: JSON.stringify({ dtLocal: { id: Number(restaurantId) } }),
-  })
+  const params = new URLSearchParams({ localId: String(Number(restaurantId)) })
+  const response = await apiFetch(`/clientes/busqueda?${params.toString()}`)
 
   return response?.platos ?? []
 }

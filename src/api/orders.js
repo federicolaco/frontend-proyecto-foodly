@@ -6,7 +6,7 @@ import milanesaCardImg from '../../img/milanesa-card.png'
 import iceCreamCardImg from '../../img/ice-cream-card.png'
 import { getSessionToken, getStoredUser } from '../lib/auth'
 import { apiFetch, apiFetchSafe, isApiConfigured } from './client'
-import { buildLocalListBody, buildOrderListParams, buildSearchFilter, getUserDeliveryAddress } from './backend/helpers'
+import { buildLocalListParams, buildOrderListParams, buildSearchParams, getUserDeliveryAddress } from './backend/helpers'
 import {
   buildOrderPayload,
   mapLocalListItem,
@@ -38,10 +38,9 @@ export function getPlaceholderImage(index = 0) {
 
 export async function getPopularRestaurants(filters = {}) {
   if (isApiConfigured()) {
-    const data = await apiFetchSafe('/clientes/listar_locales', {
-      method: 'POST',
-      body: JSON.stringify(buildLocalListBody(filters)),
-    })
+    const params = buildLocalListParams(filters)
+    const qs = params.toString()
+    const data = await apiFetchSafe(`/clientes/listar_locales${qs ? `?${qs}` : ''}`)
     if (!data) return []
     return data.map((local) => mapLocalListItem(local))
   }
@@ -60,10 +59,9 @@ export async function getMostOrderedDishes(limit = 4) {
 
 export async function searchDishes(query = '', options = {}) {
   if (isApiConfigured()) {
-    const response = await apiFetch('/clientes/busqueda', {
-      method: 'POST',
-      body: JSON.stringify(buildSearchFilter(query, options)),
-    })
+    const params = buildSearchParams(query, options)
+    const qs = params.toString()
+    const response = await apiFetch(`/clientes/busqueda${qs ? `?${qs}` : ''}`)
     return mapSearchResults(response, options)
   }
 

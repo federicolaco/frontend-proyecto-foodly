@@ -1,6 +1,6 @@
 import { getSessionToken } from '../lib/auth'
 import { apiFetch, isApiConfigured } from './client'
-import { buildAdminUserFilterBody } from './backend/helpers'
+import { buildAdminUserFilterParams } from './backend/helpers'
 import { mapPendingLocalRequest, mapUserListItem } from './backend/mappers'
 import {
   mockGetPendingLocalRequests,
@@ -49,10 +49,9 @@ export async function rejectLocalRequest(requestId) {
 
 export async function getUsers(filters = {}) {
   if (isApiConfigured()) {
-    const data = await apiFetch('/admins/usuarios', {
-      method: 'POST',
-      body: JSON.stringify(buildAdminUserFilterBody(filters)),
-    })
+    const params = buildAdminUserFilterParams(filters)
+    const qs = params.toString()
+    const data = await apiFetch(`/admins/usuarios${qs ? `?${qs}` : ''}`)
     return (data ?? []).map(mapUserListItem)
   }
 
