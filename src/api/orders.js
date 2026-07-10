@@ -51,8 +51,8 @@ export async function getPopularRestaurants(filters = {}) {
 
 export async function getMostOrderedDishes(limit = 4) {
   if (isApiConfigured()) {
-    const results = await searchDishes('', {})
-    return results.slice(0, limit)
+    const { items } = await searchDishes('', {})
+    return items.slice(0, limit)
   }
 
   return mockGetMostOrdered(limit)

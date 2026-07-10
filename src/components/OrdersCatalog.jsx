@@ -16,7 +16,14 @@ function SearchIcon() {
 }
 
 export function OrdersCatalog() {
-const [dishes, setDishes] = useState([])
+  const navigate = useNavigate()
+  const [query, setQuery] = useState('')
+  const [view, setView] = useState('all')
+  const [sort, setSort] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
+  const [category, setCategory] = useState('')
+  const [categories, setCategories] = useState([])
+  const [dishes, setDishes] = useState([])
 
   const [loading, setLoading] = useState(true)
 
