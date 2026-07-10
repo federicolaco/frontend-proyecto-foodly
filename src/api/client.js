@@ -1,6 +1,28 @@
-import { getSessionToken } from '../lib/auth'
+import { getSessionToken, clearSessionToken } from '../lib/auth'
 
 const DEFAULT_API_URL = 'https://proyectoequipo32026-testing.up.railway.app/api/v1'
+
+// Se dispara cuando el backend responde 403 fuera del login: en este proyecto
+// ese código siempre significa "token vencido o sesión invalidada" (Spring
+// Security lo devuelve como AccessDeniedException apenas la ruta requiere
+// autenticación y el JWT no es válido). Cualquier listener (ej. SessionWatcher)
+// puede escuchar este evento para limpiar la sesión y redirigir al login.
+export const SESSION_EXPIRED_EVENT = 'foodly:session-expired'
+
+let sessionExpiredNotified = false
+
+function notifySessionExpired() {
+  clearSessionToken()
+  if (sessionExpiredNotified) return
+  sessionExpiredNotified = true
+  window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT))
+  // Permite volver a notificar en el próximo request fallido, una vez que
+  // este ciclo de eventos terminó (evita disparos duplicados por requests
+  // concurrentes que fallan al mismo tiempo).
+  setTimeout(() => {
+    sessionExpiredNotified = false
+  }, 0)
+}
 
 const API_BASE =
   import.meta.env.VITE_USE_MOCK === 'true'
@@ -58,7 +80,20 @@ export async function apiFetch(path, options = {}) {
   })
 
   if (!response.ok) {
-    throw new ApiError(response.status, await parseErrorMessage(response))
+    const message = await parseErrorMessage(response)
+
+    // Importante: solo 403, no 401. En este backend, 401 se usa específicamente
+    // para credenciales incorrectas en /usuarios/login (BadCredentialsException /
+    // UsernameNotFoundException). Un token vencido o invalidado en cualquier otra
+    // ruta protegida siempre cae en AccessDeniedException -> 403. Si tratáramos
+    // 401 como "sesión muerta" acá, un simple error de contraseña en el login
+    // dispararía una redirección/mensaje de "sesión expirada" en vez de mostrar
+    // el error real de credenciales.
+    if (response.status === 403) {
+      notifySessionExpired()
+    }
+
+    throw new ApiError(response.status, message)
   }
 
   if (response.status === 204) return null

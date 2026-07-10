@@ -133,9 +133,15 @@ export function mapBackendStatusToFrontend(estado) {
   return map[normalized] ?? normalized
 }
 
+function base64UrlDecode(segment) {
+  const padded = segment.replace(/-/g, '+').replace(/_/g, '/')
+  const padding = padded.length % 4 === 0 ? '' : '='.repeat(4 - (padded.length % 4))
+  return atob(padded + padding)
+}
+
 export function isJwtExpired(token) {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
+    const payload = JSON.parse(base64UrlDecode(token.split('.')[1]))
     if (!payload?.exp) return false
     return Date.now() >= payload.exp * 1000
   } catch {

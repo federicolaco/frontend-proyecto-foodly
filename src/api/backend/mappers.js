@@ -263,6 +263,13 @@ export function mapSearchResults(response, options = {}, startIndex = 0) {
       startIndex + platos.length + index,
     )
 
+    // El backend pagina `platos` pero devuelve `promociones` completo, sin
+    // paginar, en cada request. Si el plato de esta promo no está entre los
+    // platos de la página actual, es que pertenece a otra página: no hay que
+    // agregarlo acá, o el mismo plato termina apareciendo duplicado en más
+    // de una página del catálogo del cliente.
+    if (!dishMap.has(promotedDish.id)) return
+
     dishMap.set(
       promotedDish.id,
       mergeDishWithPromotion(dishMap.get(promotedDish.id), promotedDish),
