@@ -25,7 +25,7 @@ export function Orders() {
         ])
 
         if (!cancelled) {
-          setRestaurants(restaurantsResult.items)
+          setRestaurants(restaurantsData.items)
           setMostOrdered(mostOrderedData)
         }
       } catch {
