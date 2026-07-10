@@ -139,7 +139,6 @@ export function Locales() {
                   <button
                     type="button"
                     className="panel-btn panel-btn--primary"
-                    disabled={!restaurant.isOpen}
                     onClick={() => navigate(buildRestaurantPath(restaurant.id))}
                   >
                     Ver menú
