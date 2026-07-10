@@ -1,5 +1,6 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { confirmOrder, getLocalOrders, rejectOrder } from '../../api/localPanel'
+import { usePolling } from '../../hooks/usePolling'
 import { formatPrice } from '../../lib/cart'
 import { formatDateTime } from '../../lib/format'
 import { ORDER_STATUS_LABELS } from '../../lib/roles'
@@ -35,21 +36,19 @@ export function LocalOrdersPage() {
   const toast = useToast()
   const confirmDialog = useConfirm()
 
-  const loadOrders = async () => {
-    setLoading(true)
+  const loadOrders = async (silent = false) => {
+    if (!silent) setLoading(true)
     try {
       const data = await getLocalOrders(statusFilter ? { status: statusFilter } : {})
       setOrders(data)
     } catch (err) {
-      toast.error(err.message ?? 'No pudimos cargar los pedidos.')
+      if (!silent) toast.error(err.message ?? 'No pudimos cargar los pedidos.')
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
-  useEffect(() => {
-    loadOrders()
-  }, [statusFilter])
+  usePolling(loadOrders, 15000, [statusFilter])
 
   const sortedOrders = useMemo(() => {
     const [field, dir] = sort.split('-')

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { usePolling } from '../hooks/usePolling'
 import { Link, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { getClaimForOrder, submitClaim } from '../api/claims'
@@ -105,8 +106,8 @@ export function MyOrders() {
     })
   }
 
-  const loadOrders = async () => {
-    setLoading(true)
+const loadOrders = async (silent = false) => {
+    if (!silent) setLoading(true)
 
     try {
       const data = await getMyOrders(statusFilter ? { status: statusFilter } : {})
@@ -144,15 +145,13 @@ export function MyOrders() {
 
       setOrderMeta(meta)
     } catch (err) {
-      toast.error(err.message ?? 'No pudimos cargar tus pedidos.')
+      if (!silent) toast.error(err.message ?? 'No pudimos cargar tus pedidos.')
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
-  useEffect(() => {
-    loadOrders()
-  }, [statusFilter])
+  usePolling(loadOrders, 15000, [statusFilter])
 
   const sortedOrders = useMemo(() => sortOrders(orders, sortBy), [orders, sortBy])
 
