@@ -12,6 +12,7 @@ import {
   mapLocalListItem,
   mapOrderListItem,
   mapSearchResults,
+  mapPlatoListItem,
 } from './backend/mappers'
 import {
   mockCancelClientOrder,
