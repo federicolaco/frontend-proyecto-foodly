@@ -25,6 +25,7 @@ const EMPTY_FORM = {
 
 export function LocalDishes() {
   const [dishes, setDishes] = useState([])
+  const [showInactive, setShowInactive] = useState(false)
   const [categories, setCategories] = useState([])
   const [creatingCategory, setCreatingCategory] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState('')
@@ -182,7 +183,7 @@ const loadDishes = async (silent = false) => {
   const handleDelete = async (dishId) => {
     const confirmed = await confirm({
       title: 'Eliminar plato',
-      message: '¿Desea eliminar este plato del catálogo?',
+      message: '¿Desea eliminar este plato del catálogo? Va a dejar de estar disponible para los clientes.',
       confirmText: 'Eliminar',
       variant: 'danger',
     })
@@ -196,6 +197,8 @@ const loadDishes = async (silent = false) => {
       toast.error(err.message)
     }
   }
+
+  const visibleDishes = showInactive ? dishes : dishes.filter((dish) => dish.active)
 
   return (
     <>
@@ -326,15 +329,31 @@ const loadDishes = async (silent = false) => {
       </section>
 
       <section className="panel-card">
-        <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>Catalogo</h2>
+        <div className="panel-actions" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h2 style={{ color: 'var(--gris-oscuro)', margin: 0 }}>Catalogo</h2>
+          <label className="panel-field" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem' }}>
+            <input
+              type="checkbox"
+              checked={showInactive}
+              onChange={(e) => setShowInactive(e.target.checked)}
+            />
+            <span className="panel-field__label" style={{ margin: 0 }}>
+              Mostrar platos eliminados / no disponibles
+            </span>
+          </label>
+        </div>
 
         {loading && <p className="panel-empty">Cargando platos...</p>}
 
-        {!loading && dishes.length === 0 && (
-          <p className="panel-empty">Aun no hay platos en el catalogo.</p>
+        {!loading && visibleDishes.length === 0 && (
+          <p className="panel-empty">
+            {showInactive || dishes.length === 0
+              ? 'Aun no hay platos en el catalogo.'
+              : 'No hay platos disponibles. Activá "Mostrar platos eliminados / no disponibles" para verlos.'}
+          </p>
         )}
 
-        {!loading && dishes.length > 0 && (
+        {!loading && visibleDishes.length > 0 && (
           <div style={{ overflowX: 'auto' }}>
             <table className="panel-table">
               <thead>
@@ -348,7 +367,7 @@ const loadDishes = async (silent = false) => {
                 </tr>
               </thead>
               <tbody>
-                {dishes.map((dish) => (
+                {visibleDishes.map((dish) => (
                   <tr key={dish.id}>
                     <td>
                       {dish.image && (
@@ -381,13 +400,23 @@ const loadDishes = async (silent = false) => {
                         >
                           Editar
                         </button>
-                        <button
-                          type="button"
-                          className="panel-btn panel-btn--danger"
-                          onClick={() => handleDelete(dish.id)}
-                        >
-                          Eliminar
-                        </button>
+                        {dish.active ? (
+                          <button
+                            type="button"
+                            className="panel-btn panel-btn--danger"
+                            onClick={() => handleDelete(dish.id)}
+                          >
+                            Eliminar
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="panel-btn panel-btn--outline"
+                            onClick={() => handleToggleActive(dish, true)}
+                          >
+                            Reactivar
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

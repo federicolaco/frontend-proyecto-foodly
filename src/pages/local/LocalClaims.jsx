@@ -17,7 +17,7 @@ export function LocalClaims() {
   const [statusFilter, setStatusFilter] = useState('pending')
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
-  const [sort, setSort] = useState('name-asc')
+  const [sort, setSort] = useState('id-asc')
   const [loading, setLoading] = useState(true)
   const [resolvingId, setResolvingId] = useState(null)
   const toast = useToast()
@@ -52,6 +52,10 @@ const load = async () => {
   const sortedClaims = useMemo(() => {
     const [field, dir] = sort.split('-')
     return [...claims].sort((a, b) => {
+      if (field === 'id') {
+        const cmp = Number(a.id) - Number(b.id)
+        return dir === 'asc' ? cmp : -cmp
+      }
       if (field === 'name') {
         const cmp = (a.clientName ?? '').localeCompare(b.clientName ?? '')
         return dir === 'asc' ? cmp : -cmp
@@ -101,6 +105,8 @@ const load = async () => {
           <label className="panel-field" style={{ minWidth: '220px' }}>
             <span className="panel-field__label">Ordenar por</span>
             <select className="panel-field__select" value={sort} onChange={(e) => setSort(e.target.value)}>
+              <option value="id-asc">ID: menor a mayor</option>
+              <option value="id-desc">ID: mayor a menor</option>
               <option value="name-asc">Nombre: A-Z</option>
               <option value="name-desc">Nombre: Z-A</option>
               <option value="amount-asc">Monto: menor a mayor</option>
