@@ -206,7 +206,36 @@ const loadOrders = async (silent = false) => {
 
                 <p>Cliente: {order.clientName}</p>
                 <p>Total: {formatPrice(order.total)}</p>
-                <p>Fecha: {formatDateTime(order.createdAt)}</p>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '0.75rem',
+                  }}
+                >
+                  <p style={{ margin: 0 }}>Fecha: {formatDateTime(order.createdAt)}</p>
+
+                  {order.status === 'pending' && confirmingId !== order.id && rejectingId !== order.id && (
+                    <div className="panel-actions" style={{ margin: 0 }}>
+                      <button
+                        type="button"
+                        className="panel-btn panel-btn--primary"
+                        onClick={() => { setConfirmingId(order.id); setRejectingId(null) }}
+                      >
+                        Confirmar pedido
+                      </button>
+                      <button
+                        type="button"
+                        className="panel-btn panel-btn--danger"
+                        onClick={() => handleOpenReject(order.id)}
+                      >
+                        Rechazar pedido
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 <ul style={{ margin: '0.5rem 0', paddingLeft: '1.25rem' }}>
                   {order.items.map((item) => (
@@ -216,7 +245,7 @@ const loadOrders = async (silent = false) => {
                   ))}
                 </ul>
 
-                {order.status === 'pending' && (
+                {order.status === 'pending' && (confirmingId === order.id || rejectingId === order.id) && (
                   <div className="panel-actions" style={{ marginTop: '0.75rem' }}>
                     {confirmingId === order.id ? (
                       <>
@@ -236,7 +265,7 @@ const loadOrders = async (silent = false) => {
                           Cancelar
                         </button>
                       </>
-                    ) : rejectingId === order.id ? (
+                    ) : (
                       <>
                         <select
                           className="panel-field__select"
@@ -267,23 +296,6 @@ const loadOrders = async (silent = false) => {
                         </button>
                         <button type="button" className="panel-btn panel-btn--outline" onClick={resetRejectState}>
                           Cancelar
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          type="button"
-                          className="panel-btn panel-btn--primary"
-                          onClick={() => { setConfirmingId(order.id); setRejectingId(null) }}
-                        >
-                          Confirmar pedido
-                        </button>
-                        <button
-                          type="button"
-                          className="panel-btn panel-btn--danger"
-                          onClick={() => handleOpenReject(order.id)}
-                        >
-                          Rechazar pedido
                         </button>
                       </>
                     )}

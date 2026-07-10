@@ -337,7 +337,7 @@ export function LocalStats() {
             </label>
           </div>
 
-          <div className="panel-actions">
+          <div className="panel-actions" style={{ justifyContent: 'center' }}>
             <button
               type="button"
               className="panel-btn panel-btn--outline"

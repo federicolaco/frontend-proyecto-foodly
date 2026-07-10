@@ -127,27 +127,37 @@ const load = async () => {
                 <p>Cliente: {claim.clientName}</p>
                 <p>Motivo: {claim.reason}</p>
                 <p>Compensación solicitada: {claim.compensationType}</p>
-                <p>Monto: {formatPrice(claim.amount)}</p>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '0.75rem',
+                  }}
+                >
+                  <p style={{ margin: 0 }}>Monto: {formatPrice(claim.amount)}</p>
 
-                {claim.status === 'pending' && (
-                  resolvingId === claim.id ? (
-                    <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.5rem' }}>
-                      <select className="panel-field__select" value={resolutionType} onChange={(e) => setResolutionType(e.target.value)}>
-                        {RESOLUTION_TYPES.map((t) => (
-                          <option key={t.id} value={t.id}>{t.label}</option>
-                        ))}
-                      </select>
-                      <textarea className="panel-field__textarea" rows={2} placeholder="Nota (opcional)" value={resolutionNote} onChange={(e) => setResolutionNote(e.target.value)} />
-                      <div className="panel-actions">
-                        <button type="button" className="panel-btn panel-btn--primary" onClick={() => handleResolve(claim.id)}>Confirmar resolución</button>
-                        <button type="button" className="panel-btn panel-btn--outline" onClick={() => setResolvingId(null)}>Cancelar</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button type="button" className="panel-btn panel-btn--primary" style={{ marginTop: '0.5rem' }} onClick={() => setResolvingId(claim.id)}>
+                  {claim.status === 'pending' && resolvingId !== claim.id && (
+                    <button type="button" className="panel-btn panel-btn--primary" onClick={() => setResolvingId(claim.id)}>
                       Atender reclamo
                     </button>
-                  )
+                  )}
+                </div>
+
+                {claim.status === 'pending' && resolvingId === claim.id && (
+                  <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.5rem' }}>
+                    <select className="panel-field__select" value={resolutionType} onChange={(e) => setResolutionType(e.target.value)}>
+                      {RESOLUTION_TYPES.map((t) => (
+                        <option key={t.id} value={t.id}>{t.label}</option>
+                      ))}
+                    </select>
+                    <textarea className="panel-field__textarea" rows={2} placeholder="Nota (opcional)" value={resolutionNote} onChange={(e) => setResolutionNote(e.target.value)} />
+                    <div className="panel-actions">
+                      <button type="button" className="panel-btn panel-btn--primary" onClick={() => handleResolve(claim.id)}>Confirmar resolución</button>
+                      <button type="button" className="panel-btn panel-btn--outline" onClick={() => setResolvingId(null)}>Cancelar</button>
+                    </div>
+                  </div>
                 )}
 
                 {claim.status === 'resolved' && claim.resolutionType && (

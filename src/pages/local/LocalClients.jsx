@@ -145,11 +145,22 @@ export function LocalClients() {
               const alreadyRated = hasExistingRating(client)
               return (
                 <article key={client.id} style={{ border: '1px solid #eee', borderRadius: '0.75rem', padding: '1rem' }}>
-                  <div className="panel-actions" style={{ justifyContent: 'space-between' }}>
+                  <div className="panel-actions" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
                     <strong>{client.name}</strong>
-                    <span>Calificación global: {client.rating ? client.rating.toFixed(1) : '—'}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <span>Calificación global: {client.rating ? client.rating.toFixed(1) : '—'}</span>
+                      {ratingClientId !== client.id && (
+                        <button
+                          type="button"
+                          className="panel-btn panel-btn--outline"
+                          onClick={() => handleOpenRating(client)}
+                        >
+                          {alreadyRated ? 'Editar calificación' : 'Calificar cliente'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  {ratingClientId === client.id ? (
+                  {ratingClientId === client.id && (
                     <div style={{ marginTop: '0.75rem' }}>
                       <StarRating value={score} onChange={setScore} />
                       <textarea
@@ -169,15 +180,6 @@ export function LocalClients() {
                         </button>
                       </div>
                     </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="panel-btn panel-btn--outline"
-                      style={{ marginTop: '0.5rem' }}
-                      onClick={() => handleOpenRating(client)}
-                    >
-                      {alreadyRated ? 'Editar calificación' : 'Calificar cliente'}
-                    </button>
                   )}
                 </article>
               )
