@@ -215,7 +215,7 @@ export function LocalPromotions() {
           </p>
         )}
         <p style={{ marginTop: '0.35rem' }}>Vigencia: {promo.startDate} — {promo.endDate}</p>
-        <div className="panel-actions" style={{ marginTop: '0.5rem' }}>
+        <div className="panel-actions" style={{ marginTop: '0.5rem', justifyContent: 'flex-end' }}>
           <button
             type="button"
             className="panel-btn panel-btn--outline"
