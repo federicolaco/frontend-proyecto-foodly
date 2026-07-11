@@ -12,11 +12,6 @@ const COMPENSATION_TYPES = [
   { id: 'compensacion', label: 'Compensación alternativa' },
 ]
 
-const RESOLUTION_STATUS_OPTIONS = [
-  { id: 'attended', label: 'Atendido' },
-  { id: 'rejected', label: 'Rechazado' },
-]
-
 function getClaimStatusLabel(status) {
   if (status === 'attended') return 'Atendido'
   if (status === 'rejected') return 'Rechazado'
@@ -36,16 +31,10 @@ function ResolveClaimForm({
   isSubmitting,
   initialStatus = 'attended',
 }) {
-  const [resolutionStatus, setResolutionStatus] = useState(initialStatus)
   const [compensationType, setCompensationType] = useState(COMPENSATION_TYPES[0].id)
   const [rejectionReason, setRejectionReason] = useState('')
 
-  useEffect(() => {
-    setResolutionStatus(initialStatus)
-  }, [initialStatus])
-
   const resetDraft = () => {
-    setResolutionStatus(initialStatus)
     setCompensationType(COMPENSATION_TYPES[0].id)
     setRejectionReason('')
   }
@@ -58,7 +47,7 @@ function ResolveClaimForm({
   const handleSubmit = () => {
     onResolve({
       claimId,
-      resolutionStatus,
+      resolutionStatus: initialStatus,
       compensationType,
       rejectionReason,
       resetDraft,
@@ -67,18 +56,7 @@ function ResolveClaimForm({
 
   return (
     <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.5rem' }}>
-      <select
-        className="panel-field__select"
-        value={resolutionStatus}
-        onChange={(e) => setResolutionStatus(e.target.value)}
-        disabled={isSubmitting}
-      >
-        {RESOLUTION_STATUS_OPTIONS.map((status) => (
-          <option key={status.id} value={status.id}>{status.label}</option>
-        ))}
-      </select>
-
-      {resolutionStatus === 'attended' && (
+      {initialStatus === 'attended' && (
         <select
           className="panel-field__select"
           value={compensationType}
@@ -91,7 +69,7 @@ function ResolveClaimForm({
         </select>
       )}
 
-      {resolutionStatus === 'rejected' && (
+      {initialStatus === 'rejected' && (
         <textarea
           className="panel-field__textarea"
           rows={3}
