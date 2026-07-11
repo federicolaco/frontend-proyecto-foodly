@@ -83,7 +83,7 @@ export function Locales() {
           <div className="panel-form panel-form--grid">
             <label className="panel-field">
               <span className="panel-field__label">Buscar</span>
-              <input className="panel-field__input" placeholder="Nombre o tipo de comida" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <input className="panel-field__input" placeholder="Nombre" value={search} onChange={(e) => setSearch(e.target.value)} />
             </label>
             <label className="panel-field">
               <span className="panel-field__label">Calificación mínima</span>
