@@ -28,6 +28,22 @@ import { MockApiError } from './mock/helpers'
 
 export { MockApiError as AuthError }
 
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
+async function resolveGooglePhotoValue(photo) {
+  if (!photo) return undefined
+  if (typeof photo === 'string') return photo
+  if (isApiConfigured()) return photo
+  return fileToDataUrl(photo)
+}
+
 async function resolveLocalEnabled() {
   return true
 }
@@ -131,6 +147,8 @@ export async function startGoogleRegistration(idToken) {
 }
 
 export async function completeGoogleRegistration(payload) {
+  const resolvedPhoto = await resolveGooglePhotoValue(payload.photo)
+
   if (isApiConfigured()) {
     const formData = new FormData()
     const datos = {
@@ -144,7 +162,9 @@ export async function completeGoogleRegistration(payload) {
       'datos',
       new Blob([JSON.stringify(datos)], { type: 'application/json' }),
     )
-    formData.append('foto', payload.photo)
+    if (resolvedPhoto) {
+      formData.append('foto', resolvedPhoto)
+    }
 
     const data = await apiFetchMultipart('/clientes/google/registro/completar', formData)
     const mapped = mapLoginResponse(data)
@@ -156,6 +176,7 @@ export async function completeGoogleRegistration(payload) {
 
   const data = await mockCompleteGoogleRegistration({
     ...payload,
+    photo: resolvedPhoto,
     address: formatAddress(normalizeAddress(payload.address)),
   })
   const addressNormalized = normalizeAddress(payload.address)

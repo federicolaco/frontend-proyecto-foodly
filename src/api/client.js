@@ -11,6 +11,19 @@ export const SESSION_EXPIRED_EVENT = 'foodly:session-expired'
 
 let sessionExpiredNotified = false
 
+const PUBLIC_AUTH_PATH_PREFIXES = [
+  '/usuarios/login',
+  '/usuarios/activar',
+  '/usuarios/recuperar',
+  '/usuarios/recuperar_contra_correo',
+  '/clientes/registro',
+  '/clientes/google',
+]
+
+function isPublicAuthPath(path = '') {
+  return PUBLIC_AUTH_PATH_PREFIXES.some((prefix) => path.startsWith(prefix))
+}
+
 function notifySessionExpired() {
   clearSessionToken()
   if (sessionExpiredNotified) return
@@ -59,14 +72,14 @@ async function parseErrorMessage(response) {
   }
 }
 
-function buildHeaders(options = {}, token = getSessionToken()) {
+function buildHeaders(path, options = {}, token = getSessionToken()) {
   const headers = { ...(options.headers ?? {}) }
 
   if (!(options.body instanceof FormData) && !headers['Content-Type']) {
     headers['Content-Type'] = 'application/json'
   }
 
-  if (token && !headers.Authorization) {
+  if (token && !headers.Authorization && !isPublicAuthPath(path)) {
     headers.Authorization = `Bearer ${token}`
   }
 
@@ -74,9 +87,10 @@ function buildHeaders(options = {}, token = getSessionToken()) {
 }
 
 export async function apiFetch(path, options = {}) {
+  const headers = buildHeaders(path, options)
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
-    headers: buildHeaders(options),
+    headers,
   })
 
   if (!response.ok) {
@@ -89,7 +103,7 @@ export async function apiFetch(path, options = {}) {
     // 401 como "sesión muerta" acá, un simple error de contraseña en el login
     // dispararía una redirección/mensaje de "sesión expirada" en vez de mostrar
     // el error real de credenciales.
-    if (response.status === 403) {
+    if (response.status === 403 && headers.Authorization && !isPublicAuthPath(path)) {
       notifySessionExpired()
     }
 
