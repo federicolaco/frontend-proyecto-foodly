@@ -4,6 +4,7 @@ import { mockDelay, MockApiError, sanitizeUser } from './helpers'
 
 const SESSIONS_KEY = 'foodly_mock_sessions'
 const GOOGLE_REGISTRATION_KEY = 'foodly_mock_google_registration'
+const ACTIVATION_TOKENS_KEY = 'foodly_mock_activation_tokens'
 
 function getSessions() {
   try {
@@ -15,6 +16,18 @@ function getSessions() {
 
 function saveSessions(sessions) {
   localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions))
+}
+
+function getActivationTokens() {
+  try {
+    return JSON.parse(localStorage.getItem(ACTIVATION_TOKENS_KEY) ?? '{}')
+  } catch {
+    return {}
+  }
+}
+
+function saveActivationTokens(tokens) {
+  localStorage.setItem(ACTIVATION_TOKENS_KEY, JSON.stringify(tokens))
 }
 
 function getPendingGoogleRegistrations() {
@@ -35,6 +48,10 @@ function createToken(userId) {
 
 function createRegistrationToken() {
   return `mock_google_registration_${Date.now()}`
+}
+
+function createActivationToken(userId) {
+  return `mock_activation_${userId}_${Date.now()}`
 }
 
 function findUserByToken(token) {
@@ -66,11 +83,18 @@ export function mockLogin(email, password) {
   )
 
   if (!user || user.password !== password) {
-    throw new MockApiError(401, 'El correo electrónico o la contraseña son incorrectos.')
+    throw new MockApiError(401, 'El correo electronico o la contrasena son incorrectos.')
   }
 
   if (user.blocked) {
-    throw new MockApiError(403, 'Su cuenta ha sido suspendida. Contacte al administrador para más información.')
+    throw new MockApiError(403, 'Su cuenta ha sido suspendida. Contacte al administrador para mas informacion.')
+  }
+
+  if (user.pendingActivation) {
+    throw new MockApiError(
+      403,
+      'Tu cuenta todavia no fue activada. Revisa tu correo y usa el enlace de activacion antes de iniciar sesion.',
+    )
   }
 
   const token = createToken(user.id)
@@ -91,16 +115,16 @@ export function mockRegister(payload) {
   if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password)) {
     throw new MockApiError(
       400,
-      'La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.',
+      'La contrasena debe tener al menos 8 caracteres, una letra mayuscula y un numero.',
     )
   }
 
-  const result = updateDb((db) => {
-    if (db.users.some((user) => user.email.toLowerCase() === email)) {
-      throw new MockApiError(409, 'El correo electrónico ingresado ya está asociado a una cuenta existente.')
+  const user = updateDb((db) => {
+    if (db.users.some((entry) => entry.email.toLowerCase() === email)) {
+      throw new MockApiError(409, 'El correo electronico ingresado ya esta asociado a una cuenta existente.')
     }
 
-    const user = {
+    const createdUser = {
       id: nextId(db, 'user'),
       email,
       password,
@@ -108,21 +132,29 @@ export function mockRegister(payload) {
       name: `${payload.firstName} ${payload.lastName}`.trim(),
       address: payload.address ?? '',
       blocked: false,
+      pendingActivation: true,
       localEnabled: false,
       restaurantId: null,
     }
 
-    db.users.push(user)
-
-    const token = createToken(user.id)
-    const sessions = getSessions()
-    sessions[token] = user.id
-    saveSessions(sessions)
-
-    return { token, user: sanitizeUser(user) }
+    db.users.push(createdUser)
+    return sanitizeUser(createdUser)
   })
 
-  return mockDelay(result)
+  const mockActivationToken = createActivationToken(user.id)
+  const activationTokens = getActivationTokens()
+  activationTokens[mockActivationToken] = {
+    userId: user.id,
+    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+  }
+  saveActivationTokens(activationTokens)
+
+  return mockDelay({
+    requiresActivation: true,
+    email,
+    mockActivationToken,
+    mockActivationPath: `/activar-cuenta?token=${encodeURIComponent(mockActivationToken)}`,
+  })
 }
 
 export function mockLoginWithGoogle(payload) {
@@ -134,7 +166,18 @@ export function mockLoginWithGoogle(payload) {
   if (!user) {
     throw new MockApiError(
       400,
-      `No existe una cuenta de cliente asociada al correo ${identity.email}. Regístrese con Google para continuar.`,
+      `No existe una cuenta de cliente asociada al correo ${identity.email}. Registrese con Google para continuar.`,
+    )
+  }
+
+  if (user.blocked) {
+    throw new MockApiError(403, 'Su cuenta ha sido suspendida. Contacte al administrador para mas informacion.')
+  }
+
+  if (user.pendingActivation) {
+    throw new MockApiError(
+      403,
+      'Tu cuenta todavia no fue activada. Revisa tu correo y usa el enlace de activacion antes de iniciar sesion.',
     )
   }
 
@@ -154,7 +197,7 @@ export function mockStartGoogleRegistration(payload) {
     if (db.users.some((user) => user.email.toLowerCase() === identity.email)) {
       throw new MockApiError(
         409,
-        `El correo ${identity.email} ya está asociado a una cuenta existente. ¿Desea iniciar sesión en su lugar?`,
+        `El correo ${identity.email} ya esta asociado a una cuenta existente. Desea iniciar sesion en su lugar?`,
       )
     }
 
@@ -181,7 +224,7 @@ export function mockCompleteGoogleRegistration(payload) {
   const registration = pending[payload.tokenRegistro]
 
   if (!registration) {
-    throw new MockApiError(400, 'El token de registro es inválido o expiró. Inicie el registro con Google nuevamente.')
+    throw new MockApiError(400, 'El token de registro es invalido o expiro. Inicie el registro con Google nuevamente.')
   }
 
   if (!payload.document?.trim()) {
@@ -189,14 +232,14 @@ export function mockCompleteGoogleRegistration(payload) {
   }
 
   if (!payload.acceptTerms) {
-    throw new MockApiError(400, 'Debe aceptar los términos para continuar.')
+    throw new MockApiError(400, 'Debe aceptar los terminos para continuar.')
   }
 
   const result = updateDb((db) => {
     if (db.users.some((user) => user.email.toLowerCase() === registration.email)) {
       throw new MockApiError(
         409,
-        `El correo ${registration.email} ya está asociado a una cuenta existente. ¿Desea iniciar sesión en su lugar?`,
+        `El correo ${registration.email} ya esta asociado a una cuenta existente. Desea iniciar sesion en su lugar?`,
       )
     }
 
@@ -240,12 +283,12 @@ export function mockLogout(token) {
 export function mockValidateSession(token) {
   const user = findUserByToken(token)
   if (!user) return mockDelay(null)
-  if (user.blocked) return mockDelay(null)
+  if (user.blocked || user.pendingActivation) return mockDelay(null)
 
   ensureMockDb()
   const db = getDb()
   const freshUser = db.users.find((entry) => entry.id === user.id)
-  if (!freshUser || freshUser.blocked) return mockDelay(null)
+  if (!freshUser || freshUser.blocked || freshUser.pendingActivation) return mockDelay(null)
 
   return mockDelay(sanitizeUser(freshUser))
 }
@@ -253,3 +296,33 @@ export function mockValidateSession(token) {
 export function mockGetUserFromToken(token) {
   return findUserByToken(token)
 }
+
+export function mockActivatePendingAccount(token) {
+  ensureMockDb()
+
+  if (!token) {
+    throw new MockApiError(400, 'El enlace de activacion no es valido.')
+  }
+
+  const activationTokens = getActivationTokens()
+  const entry = activationTokens[token]
+
+  if (!entry || Date.now() > entry.expiresAt) {
+    throw new MockApiError(400, 'El enlace de activacion no es valido o expiro.')
+  }
+
+  updateDb((db) => {
+    const index = db.users.findIndex((user) => user.id === entry.userId)
+    if (index < 0) {
+      throw new MockApiError(404, 'Usuario no encontrado.')
+    }
+
+    db.users[index].pendingActivation = false
+  })
+
+  delete activationTokens[token]
+  saveActivationTokens(activationTokens)
+
+  return mockDelay({ message: 'Cuenta activada correctamente.' })
+}
+

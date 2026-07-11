@@ -1,17 +1,19 @@
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { activateAccount } from '../api/account'
 import { AuthLayout } from '../components/AuthLayout'
 import { useToast } from '../context/ToastContext'
 import './AuthPages.css'
 
 export function ActivarCuenta() {
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') ?? ''
+  const helperMessage = location.state?.message ?? null
 
   const [estado, setEstado] = useState(token ? 'pendiente' : 'error')
   const [loading, setLoading] = useState(false)
-  const [mensaje, setMensaje] = useState(token ? null : 'El enlace de activación no es válido.')
+  const [mensaje, setMensaje] = useState(token ? null : 'El enlace de activacion no es valido.')
   const toast = useToast()
 
   const handleActivar = async () => {
@@ -32,8 +34,11 @@ export function ActivarCuenta() {
 
       {estado === 'pendiente' && (
         <>
+          {helperMessage && (
+            <p className="auth-pagesection-title">{helperMessage}</p>
+          )}
           <p className="auth-pagesection-title">
-            Hacé clic en el botón para activar tu cuenta.
+            Hace clic en el boton para activar tu cuenta.
           </p>
           <button
             className="auth-btn auth-btn--primary"
@@ -48,10 +53,10 @@ export function ActivarCuenta() {
       {estado === 'activado' && (
         <>
           <p className="auth-pagesection-title">
-            ¡Tu cuenta fue activada correctamente! Ya podés iniciar sesión.
+            Tu cuenta fue activada correctamente. Ya podes iniciar sesion.
           </p>
           <Link to="/iniciar-sesion" className="auth-btn auth-btn--primary" style={{ textAlign: 'center' }}>
-            IR AL INICIO DE SESIÓN
+            IR AL INICIO DE SESION
           </Link>
         </>
       )}
@@ -59,9 +64,9 @@ export function ActivarCuenta() {
       {estado === 'error' && (
         <>
           <p className="auth-page__error" role="alert">
-            {mensaje ?? 'Ocurrió un error al activar la cuenta.'}
+            {mensaje ?? 'Ocurrio un error al activar la cuenta.'}
           </p>
-          <Link to="/iniciar-sesion" className="auth-link">Volver al inicio de sesión</Link>
+          <Link to="/iniciar-sesion" className="auth-link">Volver al inicio de sesion</Link>
         </>
       )}
     </AuthLayout>

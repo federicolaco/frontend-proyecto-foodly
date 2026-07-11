@@ -126,6 +126,7 @@ export function Register() {
     onError: () => toast.error('No se pudo autenticar con Google.'),
   })
 
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (!isPasswordValid(password)) {
@@ -141,12 +142,23 @@ export function Register() {
     setLoading(true)
 
     try {
-      await register({
+      const result = await register({
         firstName, lastName, address, document, email, password, role: accountType,
       })
+
+      if (result?.mockActivationPath) {
+        navigate(result.mockActivationPath, {
+          replace: true,
+          state: {
+            message: 'Modo mock: simulamos el correo de activacion. Confirma la cuenta para continuar.',
+          },
+        })
+        return
+      }
+
       navigate('/iniciar-sesion', {
         replace: true,
-        state: { message: '¡Registro exitoso! Revisá tu correo para activar tu cuenta.' },
+        state: { message: 'Registro exitoso. Revisa tu correo para activar tu cuenta.' },
       })
     } catch (err) {
       toast.error(err.message ?? 'No pudimos crear la cuenta.')
@@ -553,3 +565,5 @@ export function Register() {
     </AuthLayout>
   )
 }
+
+
