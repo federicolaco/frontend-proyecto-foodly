@@ -193,7 +193,7 @@ export function RegisterLocal() {
                 <>
                   <div className="register-local-form__step">
                     <span className="register-local-form__step-index">02</span>
-                    <span className="register-local-form__step-label">Cuenta del local</span>
+                    <span className="register-local-form__step-label">Contraseña</span>
                   </div>
                   <PasswordField
                     id="register-local-password"
