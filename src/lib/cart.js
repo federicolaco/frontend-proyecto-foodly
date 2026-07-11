@@ -37,5 +37,5 @@ export function getCartSubtotal(items) {
 }
 
 export function formatPrice(amount) {
-  return `$ ${(amount ?? 0).toLocaleString('es-UY')}`
+  return `$ ${(amount ?? 0).toLocaleString('es-UY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }

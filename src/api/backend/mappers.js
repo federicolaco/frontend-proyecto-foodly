@@ -173,7 +173,7 @@ export function mapPromocionListItem(promo, index = 0) {
   const restaurantId = restaurant?.id
   const basePrice = plato?.precio ?? 0
   const discountPercent = promo.descuento ?? 0
-  const discountedPrice = Math.round(basePrice * (1 - discountPercent / 100))
+  const discountedPrice =Math.round(basePrice * (1 - discountPercent / 100) * 100) / 100
 
   return {
     id: `promo-${promo.id}`,
@@ -196,7 +196,7 @@ function mapPromotedDishListItem(promo, index = 0) {
   const restaurantId = restaurant?.id
   const basePrice = plato?.precio ?? 0
   const discountPercent = promo.descuento ?? 0
-  const discountedPrice = Math.round(basePrice * (1 - discountPercent / 100))
+  const discountedPrice = Math.round(basePrice * (1 - discountPercent / 100) * 100) / 100
   const dishId = plato?.id ?? promo.idPlato ?? `promo-dish-${promo.id}`
 
   return {

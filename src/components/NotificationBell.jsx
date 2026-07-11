@@ -32,7 +32,7 @@ export function NotificationBell() {
       const data = await getMyNotifications()
       setNotifications(data)
     } catch {
-     
+
     }
   }
 
@@ -64,7 +64,8 @@ export function NotificationBell() {
     }
   }, [open])
 
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const visibleNotifications = notifications.filter((n) => !n.read)
+  const unreadCount = visibleNotifications.length
 
   const handleToggle = () => {
     setOpen((prev) => !prev)
@@ -73,15 +74,13 @@ export function NotificationBell() {
   const handleNotificationClick = async (notification) => {
     if (notification.read) return
 
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
-    )
+    setNotifications((prev) => prev.filter((n) => n.id !== notification.id))
 
     try {
       setLoading(true)
       await markNotificationAsRead(notification.id)
     } catch {
-      
+
     } finally {
       setLoading(false)
     }
@@ -110,15 +109,15 @@ export function NotificationBell() {
         <div ref={menuRef} className="notification-bell__menu" role="menu" aria-label="Notificaciones">
           <div className="notification-bell__header">Notificaciones</div>
 
-          {notifications.length === 0 ? (
+          {visibleNotifications.length === 0 ? (
             <p className="notification-bell__empty">No tenés notificaciones.</p>
           ) : (
             <ul className="notification-bell__list">
-              {notifications.map((notification) => (
+              {visibleNotifications.map((notification) => (
                 <li key={notification.id}>
                   <button
                     type="button"
-                    className={`notification-bell__item${notification.read ? '' : ' notification-bell__item--unread'}`}
+                    className="notification-bell__item notification-bell__item--unread"
                     onClick={() => handleNotificationClick(notification)}
                     disabled={loading}
                   >

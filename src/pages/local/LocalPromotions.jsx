@@ -59,7 +59,7 @@ export function LocalPromotions() {
   const discount = Number(form.discountPercent)
   const hasValidDiscount = Number.isFinite(discount) && discount >= 1 && discount <= 100
   const discountedPrice = selectedDish && hasValidDiscount
-    ? Math.round(selectedDish.price * (1 - discount / 100))
+    ? Math.round(basePrice * (1 - discountPercent / 100) * 100) / 100
     : null
   const savings = selectedDish && discountedPrice != null
     ? selectedDish.price - discountedPrice
@@ -77,7 +77,7 @@ export function LocalPromotions() {
 
     const promoDiscount = Number(promo.discountPercent)
     const currentPrice = Number(dish.price ?? 0)
-    const finalPrice = Math.round(currentPrice * (1 - promoDiscount / 100))
+    const finalPrice = Math.round(basePrice * (1 - discountPercent / 100) * 100) / 100
 
     return {
       dishName: dish.name,
