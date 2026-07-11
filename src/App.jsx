@@ -28,6 +28,7 @@ import { ActivarCuenta } from './pages/ActivarCuenta'
 import { PaymentSuccess } from './pages/payment/PaymentSuccess'
 import { PaymentFailure } from './pages/payment/PaymentFailure'
 import { PaymentPending } from './pages/payment/PaymentPending'
+import { RegisterPendingActivation } from './pages/RegisterPendingActivation'
 import { SessionWatcher } from './components/SessionWatcher'
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/iniciar-sesion" element={<Login />} />
         <Route path="/registrarse" element={<Register />} />
+        <Route path="/registro/pendiente-activacion" element={<RegisterPendingActivation />} />
         <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
         <Route path="/restablecer-contrasena" element={<ResetPassword />} />
         <Route path="/confirmar-cambio-correo" element={<ConfirmEmailChange />} />
