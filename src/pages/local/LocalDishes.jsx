@@ -25,7 +25,7 @@ const EMPTY_FORM = {
 
 export function LocalDishes() {
   const [dishes, setDishes] = useState([])
-  const [showInactive, setShowInactive] = useState(false)
+  const [statusFilter, setStatusFilter] = useState('all')
   const [categories, setCategories] = useState([])
   const [creatingCategory, setCreatingCategory] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState('')
@@ -198,7 +198,10 @@ const loadDishes = async (silent = false) => {
     }
   }
 
-  const visibleDishes = showInactive ? dishes : dishes.filter((dish) => dish.active)
+  const visibleDishes =
+    statusFilter === 'all'
+      ? dishes
+      : dishes.filter((dish) => (statusFilter === 'available' ? dish.active : !dish.active))
 
   return (
     <>
@@ -332,14 +335,16 @@ const loadDishes = async (silent = false) => {
         <div className="panel-actions" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2 style={{ color: 'var(--gris-oscuro)', margin: 0 }}>Catalogo</h2>
           <label className="panel-field" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem' }}>
-            <input
-              type="checkbox"
-              checked={showInactive}
-              onChange={(e) => setShowInactive(e.target.checked)}
-            />
-            <span className="panel-field__label" style={{ margin: 0 }}>
-              Mostrar platos eliminados / no disponibles
-            </span>
+            <span className="panel-field__label" style={{ margin: 0 }}>Estado</span>
+            <select
+              className="panel-field__select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">Todos</option>
+              <option value="available">Disponible</option>
+              <option value="unavailable">No disponible</option>
+            </select>
           </label>
         </div>
 
@@ -347,9 +352,9 @@ const loadDishes = async (silent = false) => {
 
         {!loading && visibleDishes.length === 0 && (
           <p className="panel-empty">
-            {showInactive || dishes.length === 0
+            {dishes.length === 0
               ? 'Aun no hay platos en el catalogo.'
-              : 'No hay platos disponibles. Activá "Mostrar platos eliminados / no disponibles" para verlos.'}
+              : 'No hay platos que coincidan con el estado seleccionado.'}
           </p>
         )}
 
