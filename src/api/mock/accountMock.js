@@ -3,7 +3,7 @@ import { formatAddress, normalizeAddress } from '../backend/helpers'
 import { getDb, updateDb } from './db'
 import { mockDelay, MockApiError, sanitizeUser } from './helpers'
 import { ensureMockDb } from './seed'
-import { mockGetUserFromToken } from './authMock'
+import { mockActivatePendingAccount, mockGetUserFromToken } from './authMock'
 
 const CODES_KEY = 'foodly_mock_passwd_codes'
 
@@ -21,8 +21,9 @@ function saveCodes(codes) {
 
 function requireUser(token) {
   const user = mockGetUserFromToken(token)
-  if (!user) throw new MockApiError(401, 'Sesión inválida')
+  if (!user) throw new MockApiError(401, 'Sesion invalida')
   if (user.blocked) throw new MockApiError(403, 'Su cuenta ha sido suspendida.')
+  if (user.pendingActivation) throw new MockApiError(403, 'Debe activar su cuenta antes de continuar.')
   return user
 }
 
@@ -57,10 +58,7 @@ export function mockUpdateProfile(token, payload) {
   return mockDelay(updated)
 }
 export function mockActivateAccount(token) {
-  if (!token) {
-    throw new MockApiError(400, 'El enlace de activación no es válido.')
-  }
-  return mockDelay({ message: 'Cuenta activada correctamente.' })
+  return mockActivatePendingAccount(token)
 }
 export function mockStartPasswordChange(token, currentPassword) {
   ensureMockDb()
@@ -257,3 +255,4 @@ export function mockDeleteAccount(token) {
   clearSessionToken()
   return mockDelay({ deleted: true })
 }
+

@@ -68,17 +68,15 @@ export async function register(payload) {
     )
     formData.append('foto', payload.photo ?? createPlaceholderImage('perfil.png'))
 
+    const addressNormalized = normalizeAddress(payload.address)
     await apiFetchMultipart('/clientes/registro', formData)
 
-    const result = await login(payload.email, payload.password)
-    const addressNormalized = normalizeAddress(payload.address)
-    const user = {
-      ...result.user,
+    return {
+      requiresActivation: true,
+      email: payload.email.trim(),
       address: formatAddress(addressNormalized),
       addressDetails: addressNormalized,
     }
-    setStoredUser(user)
-    return { ...result, user }
   }
 
   const data = await mockRegister({
@@ -86,15 +84,11 @@ export async function register(payload) {
     address: formatAddress(normalizeAddress(payload.address)),
   })
   const addressNormalized = normalizeAddress(payload.address)
-  const user = {
-    ...data.user,
+
+  return {
+    ...data,
     addressDetails: addressNormalized,
   }
-
-  setSessionToken(data.token)
-  setStoredUser(user)
-
-  return { ...data, user }
 }
 
 export async function loginWithGoogle(idToken) {

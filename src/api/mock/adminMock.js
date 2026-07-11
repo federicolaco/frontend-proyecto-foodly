@@ -9,6 +9,12 @@ function requireAdmin(token) {
   return user
 }
 
+function resolveUserStatus(user) {
+  if (user.blocked) return 'blocked'
+  if (user.pendingActivation) return 'pending'
+  return 'active'
+}
+
 export function mockGetUsers(token, filters = {}) {
   ensureMockDb()
   requireAdmin(token)
@@ -21,7 +27,7 @@ export function mockGetUsers(token, filters = {}) {
       email: u.email,
       role: u.role,
       name: u.name,
-      status: u.blocked ? 'blocked' : 'active',
+      status: resolveUserStatus(u),
       rating: u.rating ?? 0,
     }))
 
@@ -38,10 +44,8 @@ export function mockGetUsers(token, filters = {}) {
     users = users.filter((u) => u.role === filters.role)
   }
 
-  if (filters.status === 'blocked') {
-    users = users.filter((u) => u.status === 'blocked')
-  } else if (filters.status === 'active') {
-    users = users.filter((u) => u.status === 'active')
+  if (filters.status) {
+    users = users.filter((u) => u.status === filters.status)
   }
 
   return mockDelay(users)
@@ -61,7 +65,7 @@ export function mockSetUserBlocked(token, userId, blocked) {
     db.users[index].blocked = blocked
     return {
       id: db.users[index].id,
-      status: blocked ? 'blocked' : 'active',
+      status: resolveUserStatus(db.users[index]),
     }
   })
 
