@@ -68,20 +68,33 @@ export function RegisterLocal() {
     event.preventDefault()
     setLoading(true)
 
-    if (!name.trim() || !email.trim() || !street.trim() || !streetNumber.trim() || !city.trim() || !postalCode.trim() || !description.trim()) {
-      toast.error('Los campos nombre, correo, dirección y descripción son requeridos.')
-      setLoading(false)
-      return
-    }
+    const requiredFields = [
+      { label: 'nombre del local', valid: Boolean(name.trim()) },
+      { label: 'correo electrónico', valid: Boolean(email.trim()) },
+      { label: 'calle', valid: Boolean(street.trim()) },
+      { label: 'número', valid: Boolean(streetNumber.trim()) },
+      { label: 'ciudad', valid: Boolean(city.trim()) },
+      { label: 'código postal', valid: Boolean(postalCode.trim()) },
+      { label: 'descripción del menú', valid: Boolean(description.trim()) },
+      { label: 'logo del local', valid: Boolean(logoFile) },
+      ...(isApiConfigured()
+        ? [
+            { label: 'contraseña', valid: Boolean(password) },
+            { label: 'confirmar contraseña', valid: Boolean(confirmPassword) },
+          ]
+        : []),
+    ]
 
-    if (!logoFile) {
-      toast.error('Debe subir un logo para el local.')
+    const missingFields = requiredFields.filter((field) => !field.valid).map((field) => field.label)
+
+    if (missingFields.length > 0) {
+      toast.error(`Los siguientes campos son requeridos: ${missingFields.join(', ')}. Por favor, complételos antes de enviar.`)
       setLoading(false)
       return
     }
 
     if (isApiConfigured()) {
-      if (!password || password.length < 8) {
+      if (password.length < 8) {
         toast.error('Debe indicar una contraseña de al menos 8 caracteres para la cuenta del local.')
         setLoading(false)
         return
