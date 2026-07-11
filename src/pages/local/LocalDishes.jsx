@@ -8,7 +8,7 @@ import {
 } from '../../api/localPanel'
 import { usePolling } from '../../hooks/usePolling'
 import { formatPrice } from '../../lib/cart'
-import { validateRequiredFields } from '../../lib/inputUtils'
+import { onlyDigits, validateRequiredFields } from '../../lib/inputUtils'
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
 import '../Panel.css'
@@ -97,6 +97,12 @@ const loadDishes = async (silent = false) => {
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (!validateRequiredFields(event.currentTarget, toast)) return
+    const normalizedPrice = onlyDigits(form.price)
+
+    if (!normalizedPrice || Number(normalizedPrice) < 1) {
+      toast.error('El precio debe ser un numero entero mayor a 0.')
+      return
+    }
 
     if (!form.id && !form.imageFile) {
       toast.error('Debe seleccionar una imagen para el plato.')
@@ -121,7 +127,7 @@ const loadDishes = async (silent = false) => {
         nuevaCategoriaNombre = created.name
       }
 
-      await saveDish({ ...form, categoryId })
+      await saveDish({ ...form, price: normalizedPrice, categoryId })
       setForm(EMPTY_FORM)
       setCreatingCategory(false)
       setNewCategoryName('')
@@ -146,7 +152,7 @@ const loadDishes = async (silent = false) => {
       id: dish.id,
       name: dish.name,
       description: dish.description ?? '',
-      price: String(dish.price),
+      price: onlyDigits(String(dish.price ?? '')),
       categoryId: String(dish.categoryId ?? ''),
       imageFile: null,
       imagePreview: dish.image ?? null,
@@ -226,11 +232,12 @@ const loadDishes = async (silent = false) => {
           <label className="panel-field">
             <span className="panel-field__label">Precio</span>
             <input
-              type="number"
-              min="1"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               className="panel-field__input"
               value={form.price}
-              onChange={(e) => setForm({ ...form, price: e.target.value })}
+              onChange={(e) => setForm({ ...form, price: onlyDigits(e.target.value) })}
               required
             />
           </label>

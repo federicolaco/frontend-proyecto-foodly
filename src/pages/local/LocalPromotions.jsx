@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { deletePromotion, getLocalDishes, getLocalPromotions, savePromotion } from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
-import { validateRequiredFields } from '../../lib/inputUtils'
+import { onlyDigits, validateRequiredFields } from '../../lib/inputUtils'
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
 import '../Panel.css'
@@ -139,7 +139,8 @@ export function LocalPromotions() {
     event.preventDefault()
     if (!validateRequiredFields(event.currentTarget, toast)) return
 
-    const discount = Number(form.discountPercent)
+    const normalizedDiscount = onlyDigits(form.discountPercent)
+    const discount = Number(normalizedDiscount)
     if (discount < 1 || discount > 100) {
       toast.error('El porcentaje de descuento debe estar entre 1% y 100%.')
       return
@@ -155,7 +156,7 @@ export function LocalPromotions() {
 
     setSaving(true)
     try {
-      await savePromotion(form)
+      await savePromotion({ ...form, discountPercent: normalizedDiscount })
       setForm(EMPTY_FORM)
       toast.success(form.id ? 'Promoción actualizada.' : 'Promoción creada.')
       await load()
@@ -232,7 +233,13 @@ export function LocalPromotions() {
             <button
               type="button"
               className="panel-btn panel-btn--outline"
-              onClick={() => setForm({ ...promo, dishId: String(promo.dishId) })}
+              onClick={() =>
+                setForm({
+                  ...promo,
+                  dishId: String(promo.dishId),
+                  discountPercent: onlyDigits(String(promo.discountPercent ?? '')),
+                })
+              }
             >
               Editar
             </button>
@@ -267,7 +274,16 @@ export function LocalPromotions() {
           </label>
           <label className="panel-field">
             <span className="panel-field__label">Descuento (%)</span>
-            <input type="number" min="1" max="100" className="panel-field__input" value={form.discountPercent} onChange={(e) => setForm({ ...form, discountPercent: e.target.value })} required />
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={3}
+              className="panel-field__input"
+              value={form.discountPercent}
+              onChange={(e) => setForm({ ...form, discountPercent: onlyDigits(e.target.value) })}
+              required
+            />
           </label>
           {selectedDish && (
             <div
