@@ -1,6 +1,6 @@
 import { getSessionToken } from '../lib/auth'
 import { apiFetch, apiFetchSafe, isApiConfigured } from './client'
-import { mapPagedResponse ,buildClaimSearchParams } from './backend/helpers'
+import { mapPagedResponse, buildClaimSearchParams } from './backend/helpers'
 import { mapClaim } from './backend/mappers'
 import {
   mockGetClientClaimsForOrder,
@@ -45,15 +45,20 @@ export async function getLocalClaims(filters = {}) {
 
 export async function resolveClaim(claimId, resolution) {
   if (isApiConfigured()) {
+    const isAttended = resolution.status === 'attended'
+
     await apiFetch('/reclamos/resolver_reclamo', {
       method: 'POST',
+      disableSessionExpiredOn403: true,
       body: JSON.stringify({
         id: Number(claimId),
-        tipoCompensacion: resolution.type,
-        motivo: resolution.note ?? '',
+        estado: isAttended ? 'Atendido' : 'Rechazado',
+        ...(isAttended
+          ? { tipoCompensacion: resolution.compensationType }
+          : { motivoRechazo: resolution.rejectionReason?.trim() ?? '' }),
       }),
     })
-    return { id: Number(claimId), status: 'resolved' }
+    return { id: Number(claimId), status: resolution.status }
   }
 
   return mockResolveClaim(getSessionToken(), claimId, resolution)

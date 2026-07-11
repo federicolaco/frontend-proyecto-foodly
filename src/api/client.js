@@ -88,9 +88,10 @@ function buildHeaders(path, options = {}, token = getSessionToken()) {
 }
 
 export async function apiFetch(path, options = {}) {
-  const headers = buildHeaders(path, options)
+  const { disableSessionExpiredOn403: _disableSessionExpiredOn403, ...requestOptions } = options
+  const headers = buildHeaders(path, requestOptions)
   const response = await fetch(`${API_BASE}${path}`, {
-    ...options,
+    ...requestOptions,
     headers,
   })
 
@@ -104,7 +105,12 @@ export async function apiFetch(path, options = {}) {
     // 401 como "sesión muerta" acá, un simple error de contraseña en el login
     // dispararía una redirección/mensaje de "sesión expirada" en vez de mostrar
     // el error real de credenciales.
-    if (response.status === 403 && headers.Authorization && !isPublicAuthPath(path)) {
+    if (
+      response.status === 403 &&
+      headers.Authorization &&
+      !isPublicAuthPath(path) &&
+      !options.disableSessionExpiredOn403
+    ) {
       notifySessionExpired()
     }
 

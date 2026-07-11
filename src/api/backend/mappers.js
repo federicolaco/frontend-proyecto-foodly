@@ -476,19 +476,26 @@ export function mapUserListItem(user) {
 export function mapClaim(claim) {
   const cliente = claim.dtPedido?.dtCliente ?? claim.dtPedido?.cliente
   const clientName = [cliente?.nombre, cliente?.apellido].filter(Boolean).join(' ').trim()
-  const isResolved = claim.estado === 'Atendido' || claim.status === 'resolved'
+  const rawStatus = String(claim.estado ?? claim.status ?? '').trim().toLowerCase()
+  const compensationType = claim.tipoCompensacion ?? claim.compensationType ?? null
+  const rejectionReason = claim.motivoRechazo ?? claim.rejectionReason ?? claim.resolutionNote ?? null
+
+  let status = 'pending'
+  if (['atendido', 'attended', 'resolved'].includes(rawStatus)) status = 'attended'
+  if (['rechazado', 'rejected'].includes(rawStatus)) status = 'rejected'
 
   return {
     id: claim.id,
     orderId: claim.dtPedido?.id ?? claim.orderId,
     clientName: clientName || claim.clientName || 'Cliente',
     reason: claim.motivo ?? claim.reason,
-    compensationType: claim.tipoCompensacion ?? claim.compensationType,
-    status: isResolved ? 'resolved' : 'pending',
+    compensationType,
+    status,
     amount: claim.montoReintegro ?? claim.amount ?? 0,
     createdAt: claim.fecha ?? claim.createdAt ?? new Date().toISOString(),
-    resolutionType: claim.resolutionType,
-    resolutionNote: claim.resolutionNote,
+    resolutionType: claim.resolutionType ?? compensationType,
+    resolutionNote: claim.resolutionNote ?? rejectionReason,
+    rejectionReason,
   }
 }
 

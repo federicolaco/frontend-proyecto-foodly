@@ -150,6 +150,12 @@ function getErrorStatus(error) {
   return null
 }
 
+function getClaimStatusLabel(claim) {
+  if (claim?.status === 'attended') return 'atendido'
+  if (claim?.status === 'rejected') return 'rechazado'
+  return 'pendiente'
+}
+
 export function MyOrders() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
@@ -460,7 +466,7 @@ export function MyOrders() {
                         <div className="my-orders__actions">
                           {meta.claim ? (
                             <p className="my-orders__claim-status">
-                              Reclamo presentado ({meta.claim.status === 'resolved' ? 'atendido' : 'pendiente'})
+                              Reclamo presentado ({getClaimStatusLabel(meta.claim)})
                             </p>
                           ) : meta.claimLookupError ? (
                             <p
