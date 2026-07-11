@@ -29,6 +29,73 @@ const SORT_OPTIONS = [
   { id: 'restaurant_desc', label: 'Restaurante (Z-A)' },
 ]
 
+function ClaimForm({ orderId, onSubmit, onCancel, isSubmitting }) {
+  const [reason, setReason] = useState('')
+  const [compensation, setCompensation] = useState(COMPENSATION_TYPES[0].id)
+
+  const resetDraft = () => {
+    setReason('')
+    setCompensation(COMPENSATION_TYPES[0].id)
+  }
+
+  const handleCancel = () => {
+    resetDraft()
+    onCancel()
+  }
+
+  const handleSubmit = () => {
+    onSubmit({
+      orderId,
+      reason,
+      compensation,
+      resetDraft,
+    })
+  }
+
+  return (
+    <div className="my-orders__claim-form">
+      <textarea
+        className="panel-field__textarea"
+        rows={3}
+        placeholder="Motivo del reclamo"
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        disabled={isSubmitting}
+      />
+      <select
+        className="panel-field__select"
+        value={compensation}
+        onChange={(e) => setCompensation(e.target.value)}
+        disabled={isSubmitting}
+      >
+        {COMPENSATION_TYPES.map((type) => (
+          <option key={type.id} value={type.id}>
+            {type.label}
+          </option>
+        ))}
+      </select>
+      <div className="panel-actions">
+        <button
+          type="button"
+          className="panel-btn panel-btn--primary"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Enviando reclamo...' : 'Enviar reclamo'}
+        </button>
+        <button
+          type="button"
+          className="panel-btn panel-btn--outline"
+          onClick={handleCancel}
+          disabled={isSubmitting}
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function getOrderBadgeVariant(status) {
   if (status === 'pending') return 'pending'
   if (status === 'confirmed') return 'confirmed'
@@ -92,8 +159,7 @@ export function MyOrders() {
   const [sortBy, setSortBy] = useState('date_desc')
   const [loading, setLoading] = useState(true)
   const [claimingId, setClaimingId] = useState(null)
-  const [claimReason, setClaimReason] = useState('')
-  const [claimCompensation, setClaimCompensation] = useState(COMPENSATION_TYPES[0].id)
+  const [submittingClaimId, setSubmittingClaimId] = useState(null)
   const [orderMeta, setOrderMeta] = useState({})
   const [hasAnyOrders, setHasAnyOrders] = useState(true)
   const [retryingId, setRetryingId] = useState(null)
@@ -206,17 +272,19 @@ export function MyOrders() {
     }
   }
 
-  const handleClaim = async (orderId) => {
-    if (!claimReason.trim()) {
+  const handleClaim = async ({ orderId, reason, compensation, resetDraft }) => {
+    if (!reason.trim()) {
       toast.error('Debe describir el motivo del reclamo antes de enviarlo.')
       return
     }
 
+    setSubmittingClaimId(orderId)
+
     try {
-      await submitClaim({ orderId, reason: claimReason, compensationType: claimCompensation })
+      await submitClaim({ orderId, reason, compensationType: compensation })
       toast.success('Reclamo registrado. El local fue notificado.')
+      resetDraft()
       setClaimingId(null)
-      setClaimReason('')
       await loadOrders()
     } catch (err) {
       const status = getErrorStatus(err)
@@ -228,8 +296,8 @@ export function MyOrders() {
 
       if (status === 409) {
         toast.info(err.message ?? 'Ya existe un reclamo para este pedido.')
+        resetDraft()
         setClaimingId(null)
-        setClaimReason('')
         await loadOrders()
         return
       }
@@ -240,6 +308,8 @@ export function MyOrders() {
       }
 
       toast.error(err.message ?? 'No pudimos registrar el reclamo.')
+    } finally {
+      setSubmittingClaimId(null)
     }
   }
 
@@ -404,6 +474,7 @@ export function MyOrders() {
                               type="button"
                               className="panel-btn panel-btn--outline my-orders__action-btn"
                               onClick={() => setClaimingId(order.id)}
+                              disabled={submittingClaimId !== null}
                             >
                               Realizar reclamo
                             </button>
@@ -424,42 +495,13 @@ export function MyOrders() {
                       claimingId === order.id &&
                       !meta.claim &&
                       !meta.claimLookupError && (
-                        <div className="my-orders__claim-form">
-                          <textarea
-                            className="panel-field__textarea"
-                            rows={3}
-                            placeholder="Motivo del reclamo"
-                            value={claimReason}
-                            onChange={(e) => setClaimReason(e.target.value)}
-                          />
-                          <select
-                            className="panel-field__select"
-                            value={claimCompensation}
-                            onChange={(e) => setClaimCompensation(e.target.value)}
-                          >
-                            {COMPENSATION_TYPES.map((type) => (
-                              <option key={type.id} value={type.id}>
-                                {type.label}
-                              </option>
-                            ))}
-                          </select>
-                          <div className="panel-actions">
-                            <button
-                              type="button"
-                              className="panel-btn panel-btn--primary"
-                              onClick={() => handleClaim(order.id)}
-                            >
-                              Enviar reclamo
-                            </button>
-                            <button
-                              type="button"
-                              className="panel-btn panel-btn--outline"
-                              onClick={() => setClaimingId(null)}
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        </div>
+                        <ClaimForm
+                          key={order.id}
+                          orderId={order.id}
+                          onSubmit={handleClaim}
+                          onCancel={() => setClaimingId(null)}
+                          isSubmitting={submittingClaimId === order.id}
+                        />
                       )}
                   </article>
                 )
