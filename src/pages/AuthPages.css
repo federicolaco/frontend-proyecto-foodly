@@ -288,6 +288,60 @@
   margin-bottom: 1rem;
 }
 
+.auth-google-photo {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 0.875rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(4, 144, 209, 0.18);
+  border-radius: 1rem;
+  background: rgba(4, 144, 209, 0.06);
+}
+
+.auth-google-photo__preview,
+.auth-google-photo__placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.auth-google-photo__preview {
+  object-fit: cover;
+  border: 2px solid rgba(4, 144, 209, 0.2);
+}
+
+.auth-google-photo__placeholder {
+  display: grid;
+  place-items: center;
+  background: rgba(4, 144, 209, 0.12);
+  color: var(--celeste);
+  font-weight: 800;
+}
+
+.auth-google-photo__content {
+  min-width: 0;
+}
+
+.auth-google-photo__title,
+.auth-google-photo__hint {
+  margin: 0;
+}
+
+.auth-google-photo__title {
+  color: var(--gris-oscuro);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.auth-google-photo__hint {
+  margin-top: 0.35rem;
+  color: var(--gris-intermedio);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .auth-checkbox {
   display: flex;
   align-items: center;

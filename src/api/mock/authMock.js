@@ -181,6 +181,13 @@ export function mockLoginWithGoogle(payload) {
     )
   }
 
+  if (!user.googleAuth) {
+    throw new MockApiError(
+      400,
+      `La cuenta asociada al correo ${identity.email} no esta vinculada a Google. Inicie sesion con correo y contrasena.`,
+    )
+  }
+
   const token = createToken(user.id)
   const sessions = getSessions()
   sessions[token] = user.id
@@ -243,6 +250,8 @@ export function mockCompleteGoogleRegistration(payload) {
       )
     }
 
+    const resolvedPhoto = payload.photo ?? registration.photo ?? null
+
     const user = {
       id: nextId(db, 'user'),
       email: registration.email,
@@ -254,7 +263,7 @@ export function mockCompleteGoogleRegistration(payload) {
       localEnabled: false,
       restaurantId: null,
       googleAuth: true,
-      photo: registration.photo,
+      photo: resolvedPhoto,
     }
 
     db.users.push(user)
