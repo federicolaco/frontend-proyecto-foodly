@@ -156,9 +156,9 @@ export function Register() {
         return
       }
 
-      navigate('/iniciar-sesion', {
+      navigate('/registro/pendiente-activacion', {
         replace: true,
-        state: { message: 'Registro exitoso. Revisa tu correo para activar tu cuenta.' },
+        state: { email: result?.email ?? email.trim() },
       })
     } catch (err) {
       toast.error(err.message ?? 'No pudimos crear la cuenta.')

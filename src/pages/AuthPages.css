@@ -317,3 +317,30 @@
   font-weight: 700;
   text-align: left;
 }
+
+.auth-status-card {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.125rem;
+  border: 1px solid rgba(4, 144, 209, 0.2);
+  border-radius: 1rem;
+  background: rgba(4, 144, 209, 0.08);
+  color: var(--gris-oscuro);
+}
+
+.auth-status-card__message {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.auth-status-card__hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--gris-intermedio);
+}
+
+.auth-page__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
