@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   completeGoogleRegistration,
@@ -69,7 +69,8 @@ export function Register() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [photoFile, setPhotoFile] = useState(null)
+  const [manualPhotoFile, setManualPhotoFile] = useState(null)
+  const [manualPhotoPreview, setManualPhotoPreview] = useState(null)
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [googleRegistration, setGoogleRegistration] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -92,11 +93,38 @@ export function Register() {
     setEmail(draft.email ?? '')
   }, [])
 
+  useEffect(() => {
+    return () => {
+      if (manualPhotoPreview?.startsWith('blob:')) {
+        URL.revokeObjectURL(manualPhotoPreview)
+      }
+    }
+  }, [manualPhotoPreview])
+
   const resetGoogleRegistration = () => {
     clearGoogleRegistrationDraft()
     setGoogleRegistration(null)
-    setPhotoFile(null)
+    setManualPhotoFile(null)
+    setManualPhotoPreview((prev) => {
+      if (prev?.startsWith('blob:')) {
+        URL.revokeObjectURL(prev)
+      }
+      return null
+    })
     setAcceptTerms(false)
+  }
+
+  const handleManualPhotoChange = (event) => {
+    const nextFile = event.target.files?.[0] ?? null
+
+    setManualPhotoPreview((prev) => {
+      if (prev?.startsWith('blob:')) {
+        URL.revokeObjectURL(prev)
+      }
+
+      return nextFile ? URL.createObjectURL(nextFile) : null
+    })
+    setManualPhotoFile(nextFile)
   }
 
   const handleGoogleLogin = useGoogleLogin({
@@ -114,6 +142,14 @@ export function Register() {
 
         setGoogleRegistrationDraft(draft)
         setGoogleRegistration(draft)
+        setManualPhotoFile(null)
+        setManualPhotoPreview((prev) => {
+          if (prev?.startsWith('blob:')) {
+            URL.revokeObjectURL(prev)
+          }
+          return null
+        })
+        setAcceptTerms(false)
         setFirstName(response.nombre ?? '')
         setLastName(response.apellido ?? '')
         setEmail(response.email ?? '')
@@ -125,7 +161,6 @@ export function Register() {
     },
     onError: () => toast.error('No se pudo autenticar con Google.'),
   })
-
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -150,7 +185,7 @@ export function Register() {
         navigate(result.mockActivationPath, {
           replace: true,
           state: {
-            message: 'Modo mock: simulamos el correo de activacion. Confirma la cuenta para continuar.',
+            message: 'Modo mock: simulamos el correo de activación. Confirmá la cuenta para continuar.',
           },
         })
         return
@@ -175,11 +210,6 @@ export function Register() {
       return
     }
 
-    if (!photoFile) {
-      toast.error('La foto de perfil es obligatoria para completar el registro con Google.')
-      return
-    }
-
     if (!acceptTerms) {
       toast.error('Debe aceptar los términos para completar el registro.')
       return
@@ -192,7 +222,7 @@ export function Register() {
         tokenRegistro: googleRegistration.tokenRegistro,
         document,
         address,
-        photo: photoFile,
+        photo: manualPhotoFile,
         acceptTerms,
       })
       resetGoogleRegistration()
@@ -205,6 +235,21 @@ export function Register() {
   }
 
   const isGoogleFlow = Boolean(googleRegistration?.tokenRegistro)
+  const googlePhotoUrl = googleRegistration?.foto ?? null
+  const photoSource = manualPhotoFile ? 'manual' : googlePhotoUrl ? 'google' : 'none'
+  const photoPreview = useMemo(
+    () => manualPhotoPreview ?? googlePhotoUrl,
+    [googlePhotoUrl, manualPhotoPreview],
+  )
+  const canSubmitGoogleRegistration =
+    Boolean(googleRegistration?.tokenRegistro) &&
+    Boolean(document.trim()) &&
+    Boolean(street.trim()) &&
+    Boolean(streetNumber.trim()) &&
+    Boolean(city.trim()) &&
+    Boolean(postalCode.trim()) &&
+    acceptTerms &&
+    !loading
 
   return (
     <AuthLayout>
@@ -375,14 +420,40 @@ export function Register() {
           </label>
 
           <label className="auth-field" htmlFor="google-register-photo">
-            <span className="auth-field__label">Foto de perfil</span>
+            <span className="auth-field__label">Foto de perfil opcional</span>
             <span className="auth-field__control">
+              <div className="auth-google-photo">
+                {photoPreview ? (
+                  <img
+                    className="auth-google-photo__preview"
+                    src={photoPreview}
+                    alt="Foto de perfil para el registro con Google"
+                  />
+                ) : (
+                  <div className="auth-google-photo__placeholder" aria-hidden="true">
+                    Foto
+                  </div>
+                )}
+
+                <div className="auth-google-photo__content">
+                  <p className="auth-google-photo__title">
+                    {photoSource === 'manual'
+                      ? 'Usaremos la foto manual que seleccionaste.'
+                      : 'Usaremos tu foto de Google como foto de perfil.'}
+                  </p>
+                  <p className="auth-google-photo__hint">
+                    {photoSource === 'manual'
+                      ? 'Si querés, podés elegir otra imagen antes de completar el alta.'
+                      : 'Podés reemplazarla por otra imagen, pero es opcional.'}
+                  </p>
+                </div>
+              </div>
+
               <input
                 id="google-register-photo"
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
-                onChange={(event) => setPhotoFile(event.target.files?.[0] ?? null)}
-                required
+                onChange={handleManualPhotoChange}
               />
             </span>
           </label>
@@ -398,7 +469,11 @@ export function Register() {
             <span>Acepto los términos y condiciones</span>
           </label>
 
-          <button type="submit" className="auth-btn auth-btn--primary auth-btn--register-submit" disabled={loading}>
+          <button
+            type="submit"
+            className="auth-btn auth-btn--primary auth-btn--register-submit"
+            disabled={!canSubmitGoogleRegistration}
+          >
             {loading ? 'COMPLETANDO...' : 'COMPLETAR REGISTRO CON GOOGLE'}
           </button>
 
@@ -565,5 +640,3 @@ export function Register() {
     </AuthLayout>
   )
 }
-
-
