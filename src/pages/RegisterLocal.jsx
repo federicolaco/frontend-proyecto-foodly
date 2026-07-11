@@ -6,6 +6,7 @@ import { submitLocalRegistration } from '../api/localPanel'
 import { addressFromFields } from '../api/backend/helpers'
 import { isApiConfigured } from '../api/client'
 import { getStoredUser } from '../lib/auth'
+import { onlyDigits } from '../lib/inputUtils'
 
 import { PasswordField } from '../components/PasswordField'
 import { useToast } from '../context/ToastContext'
@@ -238,9 +239,10 @@ export function RegisterLocal() {
                     type="text"
                     placeholder="Número"
                     inputMode="numeric"
+                    pattern="[0-9]*"
                     className="register-local-field__input"
                     value={streetNumber}
-                    onChange={(e) => setStreetNumber(e.target.value)}
+                    onChange={(e) => setStreetNumber(onlyDigits(e.target.value))}
                     required
                   />
                 </label>
@@ -264,9 +266,11 @@ export function RegisterLocal() {
                   <input
                     type="text"
                     placeholder="Código postal"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     className="register-local-field__input"
                     value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
+                    onChange={(e) => setPostalCode(onlyDigits(e.target.value))}
                     required
                   />
                 </label>

@@ -11,6 +11,7 @@ import {
   verifyPasswordChangeCode,
 } from '../../api/account'
 import { addressFromFields, splitAddressFields } from '../../api/backend/helpers'
+import { onlyDigits } from '../../lib/inputUtils'
 import { isMockMode } from '../../api/client'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
 import { StarRating } from '../../components/StarRating'
@@ -53,7 +54,14 @@ function AddressFields({ street, streetNumber, city, postalCode, onStreet, onStr
         </label>
         <label className="panel-field">
           <span className="panel-field__label">Número</span>
-          <input className="panel-field__input" value={streetNumber} onChange={onStreetNumber} required />
+          <input
+            className="panel-field__input"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={streetNumber}
+            onChange={(e) => onStreetNumber({ target: { value: onlyDigits(e.target.value) } })}
+            required
+          />
         </label>
       </div>
       <div className="panel-form__row panel-form__row--2">
@@ -63,7 +71,14 @@ function AddressFields({ street, streetNumber, city, postalCode, onStreet, onStr
         </label>
         <label className="panel-field">
           <span className="panel-field__label">Código postal</span>
-          <input className="panel-field__input" value={postalCode} onChange={onPostalCode} required />
+          <input
+            className="panel-field__input"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={postalCode}
+            onChange={(e) => onPostalCode({ target: { value: onlyDigits(e.target.value) } })}
+            required
+          />
         </label>
       </div>
     </>
@@ -465,4 +480,3 @@ export function AccountSettings() {
     </div>
   )
 }
-

@@ -7,6 +7,7 @@ import {
   startGoogleRegistration,
 } from '../api/auth'
 import { clearGoogleRegistrationDraft, getGoogleRegistrationDraft, setGoogleRegistrationDraft } from '../lib/auth'
+import { onlyDigits } from '../lib/inputUtils'
 import { AuthLayout } from '../components/AuthLayout'
 import { PasswordField } from '../components/PasswordField'
 import { useGoogleLogin } from '@react-oauth/google'
@@ -317,9 +318,10 @@ export function Register() {
                   type="text"
                   placeholder="Número"
                   inputMode="numeric"
+                  pattern="[0-9]*"
                   autoComplete="address-line2"
                   value={streetNumber}
-                  onChange={(e) => setStreetNumber(e.target.value)}
+                  onChange={(e) => setStreetNumber(onlyDigits(e.target.value))}
                   required
                 />
               </span>
@@ -348,9 +350,11 @@ export function Register() {
                 id="register-postal-code"
                 type="text"
                 placeholder="Código postal"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 autoComplete="postal-code"
                 value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
+                onChange={(e) => setPostalCode(onlyDigits(e.target.value))}
                 required
               />
             </span>
@@ -464,9 +468,10 @@ export function Register() {
                   type="text"
                   placeholder="Número"
                   inputMode="numeric"
+                  pattern="[0-9]*"
                   autoComplete="address-line2"
                   value={streetNumber}
-                  onChange={(e) => setStreetNumber(e.target.value)}
+                  onChange={(e) => setStreetNumber(onlyDigits(e.target.value))}
                   required
                 />
               </span>
@@ -495,9 +500,11 @@ export function Register() {
                 id="register-postal-code"
                 type="text"
                 placeholder="Código postal"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 autoComplete="postal-code"
                 value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
+                onChange={(e) => setPostalCode(onlyDigits(e.target.value))}
                 required
               />
             </span>
@@ -565,5 +572,3 @@ export function Register() {
     </AuthLayout>
   )
 }
-
-

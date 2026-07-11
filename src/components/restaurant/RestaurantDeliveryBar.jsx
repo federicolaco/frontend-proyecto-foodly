@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { normalizeAddress } from '../../api/backend/helpers'
+import { onlyDigits } from '../../lib/inputUtils'
 import './RestaurantDeliveryBar.css'
 
 function LocationIcon() {
@@ -86,8 +87,10 @@ export function RestaurantDeliveryBar({ address, onAddressChange }) {
               <span>Número</span>
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={draftAddress.numero}
-                onChange={(event) => handleFieldChange('numero', event.target.value)}
+                onChange={(event) => handleFieldChange('numero', onlyDigits(event.target.value))}
                 required
               />
             </label>
@@ -106,8 +109,10 @@ export function RestaurantDeliveryBar({ address, onAddressChange }) {
               <span>Código postal</span>
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={draftAddress.codigoPostal}
-                onChange={(event) => handleFieldChange('codigoPostal', event.target.value)}
+                onChange={(event) => handleFieldChange('codigoPostal', onlyDigits(event.target.value))}
                 required
               />
             </label>
