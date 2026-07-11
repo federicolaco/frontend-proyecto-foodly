@@ -368,7 +368,7 @@ const loadDishes = async (silent = false) => {
                   <th>Precio</th>
                   <th>Categoria</th>
                   <th>Estado</th>
-                  <th>Acciones</th>
+                  <th style={{ textAlign: 'right' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -396,8 +396,8 @@ const loadDishes = async (silent = false) => {
                         <option value="false">No disponible</option>
                       </select>
                     </td>
-                    <td>
-                      <div className="panel-actions">
+                    <td style={{ textAlign: 'right' }}>
+                      <div className="panel-actions" style={{ justifyContent: 'flex-end' }}>
                         <button
                           type="button"
                           className="panel-btn panel-btn--outline"
