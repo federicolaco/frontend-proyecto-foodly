@@ -29,7 +29,8 @@ function RestaurantLogo({ name, logo }) {
 }
 
 export function Locales() {
- const [restaurants, setRestaurants] = useState([])
+  const navigate = useNavigate()
+  const [restaurants, setRestaurants] = useState([])
   const [search, setSearch] = useState('')
   const [openOnly, setOpenOnly] = useState(false)
   const [minRating, setMinRating] = useState('')
