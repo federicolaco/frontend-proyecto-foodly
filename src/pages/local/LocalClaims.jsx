@@ -10,7 +10,6 @@ import '../Panel.css'
 const RESOLUTION_TYPES = [
   { id: 'reintegro', label: 'Reintegro del monto' },
   { id: 'compensacion', label: 'Compensación alternativa' },
-  { id: 'Rechazado', label: 'Rechazar reclamo.' },
 ]
 
 function ResolveClaimForm({ claimId, onResolve, onCancel, isSubmitting }) {
