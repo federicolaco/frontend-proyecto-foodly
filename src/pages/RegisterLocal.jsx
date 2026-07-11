@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { submitLocalRegistration } from '../api/localPanel'
 import { addressFromFields } from '../api/backend/helpers'
@@ -119,7 +119,7 @@ export function RegisterLocal() {
   return (
     <div className="register-local-page">
       <header className="register-local-page__header">
-        <span className="register-local-page__logo">Foodly</span>
+        <Link to="/" className="register-local-page__logo">Foodly</Link>
       </header>
 
       <main className="register-local-page__main contenedor">
@@ -339,6 +339,10 @@ export function RegisterLocal() {
             </div>
           </div>
         </form>
+
+        <p className="register-local-page__signin">
+          ¿Ya tenés cuenta? <Link to="/iniciar-sesion">Iniciá sesión</Link>
+        </p>
       </main>
     </div>
   )

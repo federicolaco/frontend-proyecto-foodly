@@ -40,6 +40,18 @@
   width: auto;
 }
 
+.register-local-page__signin {
+  margin: 24px 0 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.register-local-page__signin a {
+  color: var(--ember);
+  font-weight: 800;
+}
+
 /* ---------- Main / intro ---------- */
 .register-local-page__main.contenedor {
   max-width: 1040px;
