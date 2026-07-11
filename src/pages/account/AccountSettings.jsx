@@ -11,7 +11,7 @@ import {
   verifyPasswordChangeCode,
 } from '../../api/account'
 import { addressFromFields, splitAddressFields } from '../../api/backend/helpers'
-import { onlyDigits } from '../../lib/inputUtils'
+import { onlyDigits, validateRequiredFields } from '../../lib/inputUtils'
 import { isMockMode } from '../../api/client'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
 import { StarRating } from '../../components/StarRating'
@@ -142,6 +142,8 @@ export function AccountSettings() {
 
   const handleProfileSave = async (event) => {
     event.preventDefault()
+    if (!validateRequiredFields(event.currentTarget, toast)) return
+
     setLoading(true)
     try {
       await updateProfile({
@@ -163,6 +165,8 @@ export function AccountSettings() {
 
   const handleStartEmailChange = async (event) => {
     event.preventDefault()
+    if (!validateRequiredFields(event.currentTarget, toast)) return
+
     setEmailChangeLoading(true)
     try {
       const res = await startEmailChange(newEmail)
@@ -177,6 +181,8 @@ export function AccountSettings() {
 
   const handlePassStep1 = async (event) => {
     event.preventDefault()
+    if (!validateRequiredFields(event.currentTarget, toast)) return
+
     setLoading(true)
     try {
       const res = await startPasswordChange(currentPassword)
@@ -191,6 +197,8 @@ export function AccountSettings() {
 
   const handlePassStep2 = async (event) => {
     event.preventDefault()
+    if (!validateRequiredFields(event.currentTarget, toast)) return
+
     setLoading(true)
     try {
       await verifyPasswordChangeCode(code)
@@ -205,6 +213,8 @@ export function AccountSettings() {
 
   const handlePassStep3 = async (event) => {
     event.preventDefault()
+    if (!validateRequiredFields(event.currentTarget, toast)) return
+
     setLoading(true)
     try {
       const res = await confirmPasswordChange(newPassword, confirmPassword)
@@ -260,7 +270,7 @@ export function AccountSettings() {
 
         <section className="panel-card">
           {tab === 'profile' && (
-            <form className="panel-form panel-form--profile" onSubmit={handleProfileSave}>
+            <form className="panel-form panel-form--profile" onSubmit={handleProfileSave} noValidate>
               <div className="account-profile-layout">
                 <div className="account-photo">
                   <button
@@ -363,7 +373,7 @@ export function AccountSettings() {
           )}
 
           {tab === 'profile' && (
-            <form className="panel-form" onSubmit={handleStartEmailChange} style={{ marginTop: '2rem' }}>
+            <form className="panel-form" onSubmit={handleStartEmailChange} style={{ marginTop: '2rem' }} noValidate>
               <h3 className="panel-page__subtitle">Cambiar correo electr&oacute;nico</h3>
               <p className="panel-page__subtitle">
                 Por seguridad, te enviaremos un enlace de confirmaci&oacute;n a tu correo actual
@@ -388,7 +398,7 @@ export function AccountSettings() {
           {tab === 'password' && (
             <>
               {passStep === 1 && (
-                <form className="panel-form" onSubmit={handlePassStep1}>
+                <form className="panel-form" onSubmit={handlePassStep1} noValidate>
                   <label className="panel-field">
                     <span className="panel-field__label">Contraseña actual</span>
                     <input type="password" className="panel-field__input" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required />
@@ -398,7 +408,7 @@ export function AccountSettings() {
                 </form>
               )}
               {passStep === 2 && (
-                <form className="panel-form" onSubmit={handlePassStep2}>
+                <form className="panel-form" onSubmit={handlePassStep2} noValidate>
                   <label className="panel-field">
                     <span className="panel-field__label">Código de verificación (6 dígitos)</span>
                     <input className="panel-field__input" value={code} onChange={(e) => setCode(e.target.value)} maxLength={6} required />
@@ -407,7 +417,7 @@ export function AccountSettings() {
                 </form>
               )}
               {passStep === 3 && (
-                <form className="panel-form" onSubmit={handlePassStep3}>
+                <form className="panel-form" onSubmit={handlePassStep3} noValidate>
                   <label className="panel-field">
                     <span className="panel-field__label">Nueva contraseña</span>
                     <input type="password" className="panel-field__input" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />

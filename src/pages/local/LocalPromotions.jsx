@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { deletePromotion, getLocalDishes, getLocalPromotions, savePromotion } from '../../api/localPanel'
 import { formatPrice } from '../../lib/cart'
+import { validateRequiredFields } from '../../lib/inputUtils'
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
 import '../Panel.css'
@@ -136,6 +137,8 @@ export function LocalPromotions() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    if (!validateRequiredFields(event.currentTarget, toast)) return
+
     const discount = Number(form.discountPercent)
     if (discount < 1 || discount > 100) {
       toast.error('El porcentaje de descuento debe estar entre 1% y 100%.')
@@ -248,7 +251,7 @@ export function LocalPromotions() {
         <h2 style={{ marginBottom: '1rem', color: 'var(--gris-oscuro)' }}>
           {form.id ? 'Editar promoción' : 'Nueva promoción'}
         </h2>
-        <form className="panel-form panel-form--grid" onSubmit={handleSubmit}>
+        <form className="panel-form panel-form--grid" onSubmit={handleSubmit} noValidate>
           <label className="panel-field">
             <span className="panel-field__label">Plato</span>
             <select className="panel-field__select" value={form.dishId} onChange={(e) => setForm({ ...form, dishId: e.target.value })} required>

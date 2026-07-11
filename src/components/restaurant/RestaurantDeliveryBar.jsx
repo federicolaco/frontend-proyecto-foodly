@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { normalizeAddress } from '../../api/backend/helpers'
-import { onlyDigits } from '../../lib/inputUtils'
+import { onlyDigits, validateRequiredFields } from '../../lib/inputUtils'
+import { useToast } from '../../context/ToastContext'
 import './RestaurantDeliveryBar.css'
 
 function LocationIcon() {
@@ -27,6 +28,7 @@ export function RestaurantDeliveryBar({ address, onAddressChange }) {
   const normalizedAddress = useMemo(() => normalizeAddress(address), [address])
   const [isEditing, setIsEditing] = useState(false)
   const [draftAddress, setDraftAddress] = useState(normalizedAddress)
+  const toast = useToast()
 
   useEffect(() => {
     setDraftAddress(normalizedAddress)
@@ -51,6 +53,8 @@ export function RestaurantDeliveryBar({ address, onAddressChange }) {
 
   const handleSubmit = (event) => {
     event.preventDefault()
+    if (!validateRequiredFields(event.currentTarget, toast)) return
+
     onAddressChange(normalizeAddress(draftAddress))
     setIsEditing(false)
   }
@@ -69,7 +73,7 @@ export function RestaurantDeliveryBar({ address, onAddressChange }) {
       </button>
 
       {isEditing && (
-        <form className="restaurant-delivery-bar__editor" onSubmit={handleSubmit}>
+        <form className="restaurant-delivery-bar__editor" onSubmit={handleSubmit} noValidate>
           <p className="restaurant-delivery-bar__editor-title">Cambiar dirección solo para este envío</p>
 
           <div className="restaurant-delivery-bar__grid">

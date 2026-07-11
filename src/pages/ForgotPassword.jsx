@@ -4,6 +4,7 @@ import { requestPasswordRecovery } from '../api/account'
 import { isMockMode } from '../api/client'
 import { AuthLayout } from '../components/AuthLayout'
 import { useToast } from '../context/ToastContext'
+import { validateRequiredFields } from '../lib/inputUtils'
 import './AuthPages.css'
 
 export function ForgotPassword() {
@@ -14,6 +15,8 @@ export function ForgotPassword() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    if (!validateRequiredFields(event.currentTarget, toast)) return
+
     setLoading(true)
     setMockToken(null)
 
@@ -33,7 +36,7 @@ export function ForgotPassword() {
       <h1 className="auth-page__title">Recuperar contraseña</h1>
       <p className="auth-page__section-title">Ingresá tu correo y te enviaremos un enlace de recuperación.</p>
 
-      <form className="auth-form" onSubmit={handleSubmit}>
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <label className="auth-field" htmlFor="recovery-email">
           <span className="auth-field__label">Correo electrónico</span>
           <span className="auth-field__control">

@@ -8,6 +8,7 @@ import {
 } from '../../api/localPanel'
 import { usePolling } from '../../hooks/usePolling'
 import { formatPrice } from '../../lib/cart'
+import { validateRequiredFields } from '../../lib/inputUtils'
 import { useToast } from '../../context/ToastContext'
 import { useConfirm } from '../../context/ConfirmContext'
 import '../Panel.css'
@@ -95,6 +96,7 @@ const loadDishes = async (silent = false) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    if (!validateRequiredFields(event.currentTarget, toast)) return
 
     if (!form.id && !form.imageFile) {
       toast.error('Debe seleccionar una imagen para el plato.')
@@ -210,7 +212,7 @@ const loadDishes = async (silent = false) => {
           {form.id ? 'Editar plato' : 'Agregar plato'}
         </h2>
 
-        <form className="panel-form panel-form--grid" onSubmit={handleSubmit}>
+        <form className="panel-form panel-form--grid" onSubmit={handleSubmit} noValidate>
           <label className="panel-field">
             <span className="panel-field__label">Nombre</span>
             <input

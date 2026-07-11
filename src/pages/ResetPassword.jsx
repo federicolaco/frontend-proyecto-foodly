@@ -18,6 +18,10 @@ export function ResetPassword() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    if (!password.trim() || !confirmPassword.trim()) {
+      toast.error('Completá todos los campos obligatorios.')
+      return
+    }
     if (password !== confirmPassword) {
       toast.error('Las contraseñas ingresadas no coinciden.')
       return
@@ -43,7 +47,7 @@ export function ResetPassword() {
       <h1 className="auth-page__title">Nueva contraseña</h1>
       <p className="auth-page__section-title">Ingresá y confirmá tu nueva contraseña.</p>
 
-      <form className="auth-form" onSubmit={handleSubmit}>
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <PasswordField id="new-pass" label="Nueva contraseña" value={password} onChange={(e) => setPassword(e.target.value)} />
         <PasswordField id="confirm-pass" label="Confirmar contraseña" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
         <button type="submit" className="auth-btn auth-btn--primary" disabled={loading || !token}>

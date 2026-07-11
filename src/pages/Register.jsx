@@ -7,7 +7,7 @@ import {
   startGoogleRegistration,
 } from '../api/auth'
 import { clearGoogleRegistrationDraft, getGoogleRegistrationDraft, setGoogleRegistrationDraft } from '../lib/auth'
-import { onlyDigits } from '../lib/inputUtils'
+import { onlyDigits, validateRequiredFields } from '../lib/inputUtils'
 import { AuthLayout } from '../components/AuthLayout'
 import { PasswordField } from '../components/PasswordField'
 import { useGoogleLogin } from '@react-oauth/google'
@@ -165,6 +165,8 @@ export function Register() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    if (!validateRequiredFields(event.currentTarget, toast)) return
+
     if (!isPasswordValid(password)) {
       toast.error('La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.')
       return
@@ -205,6 +207,8 @@ export function Register() {
 
   const handleGoogleRegistrationSubmit = async (event) => {
     event.preventDefault()
+
+    if (!validateRequiredFields(event.currentTarget, toast)) return
 
     if (!googleRegistration?.tokenRegistro) {
       toast.error('No encontramos el token temporal de registro. Inicie el flujo con Google nuevamente.')
@@ -300,7 +304,7 @@ export function Register() {
       </h2>
 
       {isGoogleFlow ? (
-        <form className="auth-form auth-form--google-extra" onSubmit={handleGoogleRegistrationSubmit}>
+        <form className="auth-form auth-form--google-extra" onSubmit={handleGoogleRegistrationSubmit} noValidate>
           <label className="auth-field" htmlFor="google-register-email">
             <span className="auth-field__label">Correo electrónico</span>
             <span className="auth-field__control">
@@ -486,7 +490,7 @@ export function Register() {
           </button>
         </form>
       ) : (
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="auth-form__row">
             <label className="auth-field" htmlFor="register-first-name">
               <span className="auth-field__label">Nombre</span>

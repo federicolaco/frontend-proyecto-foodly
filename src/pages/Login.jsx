@@ -11,6 +11,7 @@ import { AuthLayout } from '../components/AuthLayout'
 
 import { PasswordField } from '../components/PasswordField'
 import { useToast } from '../context/ToastContext'
+import { validateRequiredFields } from '../lib/inputUtils'
 
 import './AuthPages.css'
 
@@ -98,6 +99,8 @@ export function Login() {
 
     event.preventDefault()
 
+    if (!validateRequiredFields(event.currentTarget, toast)) return
+
     setLoading(true)
 
 
@@ -149,7 +152,7 @@ export function Login() {
 
       </h2>
 
-      <form className="auth-form" onSubmit={handleSubmit}>
+      <form className="auth-form" onSubmit={handleSubmit} noValidate>
 
         <label className="auth-field" htmlFor="login-email">
 
