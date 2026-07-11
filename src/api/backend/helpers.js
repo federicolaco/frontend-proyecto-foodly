@@ -201,13 +201,15 @@ export function buildClaimSearchBody(filters = {}) {
   if (filters.date) body.fechaReclamo = filters.date
   if (filters.orderStatus) body.estadoPedido = filters.orderStatus
   if (filters.claimStatus === 'pending') body.estadoReclamo = 'Pendiente'
-  if (filters.claimStatus === 'resolved') body.estadoReclamo = 'Atendido'
+  if (filters.claimStatus === 'attended' || filters.claimStatus === 'resolved') body.estadoReclamo = 'Atendido'
+  if (filters.claimStatus === 'rejected') body.estadoReclamo = 'Rechazado'
   return body
 }
 
 function mapClaimStatus(status) {
   if (status === 'pending') return 'Pendiente'
-  if (status === 'resolved') return 'Resuelto'
+  if (status === 'attended' || status === 'resolved') return 'Atendido'
+  if (status === 'rejected') return 'Rechazado'
   return null
 }
 
@@ -276,7 +278,8 @@ export function buildClaimSearchParams(filters = {}, pagination = {}) {
   if (filters.date) params.set('fechaReclamo', filters.date)
   if (filters.orderStatus) params.set('estadoPedido', filters.orderStatus)
   if (filters.claimStatus === 'pending') params.set('estadoReclamo', 'Pendiente')
-  if (filters.claimStatus === 'resolved') params.set('estadoReclamo', 'Atendido')
+  if (filters.claimStatus === 'attended' || filters.claimStatus === 'resolved') params.set('estadoReclamo', 'Atendido')
+  if (filters.claimStatus === 'rejected') params.set('estadoReclamo', 'Rechazado')
   if (pagination.page !== undefined) params.set('pagina', String(pagination.page))
   if (pagination.pageSize !== undefined) params.set('tamanio', String(pagination.pageSize))
   return params
