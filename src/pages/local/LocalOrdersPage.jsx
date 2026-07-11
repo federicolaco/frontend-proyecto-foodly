@@ -17,6 +17,139 @@ const REJECTION_REASONS = [
 ]
 const CUSTOM_REJECTION_REASON = 'Otro'
 
+function ConfirmOrderForm({ orderId, onConfirm, onCancel, isSubmitting }) {
+  const [deliveryMinutes, setDeliveryMinutes] = useState('')
+
+  const resetDraft = () => {
+    setDeliveryMinutes('')
+  }
+
+  const handleCancel = () => {
+    resetDraft()
+    onCancel()
+  }
+
+  const handleSubmit = () => {
+    onConfirm({
+      orderId,
+      deliveryMinutes,
+      resetDraft,
+    })
+  }
+
+  return (
+    <>
+      <input
+        type="number"
+        min="1"
+        placeholder="Minutos de entrega"
+        className="panel-field__input"
+        style={{ maxWidth: '160px' }}
+        value={deliveryMinutes}
+        onChange={(e) => setDeliveryMinutes(e.target.value)}
+        disabled={isSubmitting}
+      />
+      <button
+        type="button"
+        className="panel-btn panel-btn--primary"
+        onClick={handleSubmit}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? 'Confirmando...' : 'Confirmar'}
+      </button>
+      <button
+        type="button"
+        className="panel-btn panel-btn--outline"
+        onClick={handleCancel}
+        disabled={isSubmitting}
+      >
+        Cancelar
+      </button>
+    </>
+  )
+}
+
+function RejectOrderForm({ orderId, onReject, onCancel, isSubmitting }) {
+  const [rejectReason, setRejectReason] = useState('')
+  const [customRejectReason, setCustomRejectReason] = useState('')
+
+  const resetDraft = () => {
+    setRejectReason('')
+    setCustomRejectReason('')
+  }
+
+  const getEffectiveRejectReason = () => {
+    if (rejectReason === CUSTOM_REJECTION_REASON) {
+      return customRejectReason.trim()
+    }
+
+    return rejectReason.trim()
+  }
+
+  const handleCancel = () => {
+    resetDraft()
+    onCancel()
+  }
+
+  const handleRejectReasonChange = (value) => {
+    setRejectReason(value)
+
+    if (value !== CUSTOM_REJECTION_REASON) {
+      setCustomRejectReason('')
+    }
+  }
+
+  const handleSubmit = () => {
+    onReject({
+      orderId,
+      reason: getEffectiveRejectReason(),
+      resetDraft,
+    })
+  }
+
+  return (
+    <>
+      <select
+        className="panel-field__select"
+        value={rejectReason}
+        onChange={(e) => handleRejectReasonChange(e.target.value)}
+        disabled={isSubmitting}
+      >
+        <option value="">Seleccionar motivo</option>
+        {REJECTION_REASONS.map((reason) => (
+          <option key={reason} value={reason}>{reason}</option>
+        ))}
+      </select>
+      {rejectReason === CUSTOM_REJECTION_REASON && (
+        <textarea
+          className="panel-field__textarea"
+          rows="3"
+          placeholder="Escriba el motivo del rechazo"
+          value={customRejectReason}
+          onChange={(e) => setCustomRejectReason(e.target.value)}
+          disabled={isSubmitting}
+        />
+      )}
+      <button
+        type="button"
+        className="panel-btn panel-btn--danger"
+        disabled={!getEffectiveRejectReason() || isSubmitting}
+        onClick={handleSubmit}
+      >
+        {isSubmitting ? 'Rechazando...' : 'Rechazar'}
+      </button>
+      <button
+        type="button"
+        className="panel-btn panel-btn--outline"
+        onClick={handleCancel}
+        disabled={isSubmitting}
+      >
+        Cancelar
+      </button>
+    </>
+  )
+}
+
 function getOrderBadgeVariant(status) {
   if (status === 'pending') return 'pending'
   if (status === 'confirmed') return 'confirmed'
@@ -32,10 +165,9 @@ export function LocalOrdersPage() {
   const [sort, setSort] = useState('date-desc')
   const [loading, setLoading] = useState(true)
   const [confirmingId, setConfirmingId] = useState(null)
-  const [deliveryMinutes, setDeliveryMinutes] = useState('')
   const [rejectingId, setRejectingId] = useState(null)
-  const [rejectReason, setRejectReason] = useState('')
-  const [customRejectReason, setCustomRejectReason] = useState('')
+  const [processingAction, setProcessingAction] = useState(null)
+  const [processingOrderId, setProcessingOrderId] = useState(null)
   const toast = useToast()
   const confirmDialog = useConfirm()
 
@@ -72,34 +204,14 @@ const loadOrders = async (silent = false) => {
 
   const resetRejectState = () => {
     setRejectingId(null)
-    setRejectReason('')
-    setCustomRejectReason('')
-  }
-
-  const getEffectiveRejectReason = () => {
-    if (rejectReason === CUSTOM_REJECTION_REASON) {
-      return customRejectReason.trim()
-    }
-
-    return rejectReason.trim()
   }
 
   const handleOpenReject = (orderId) => {
     setConfirmingId(null)
     setRejectingId(orderId)
-    setRejectReason('')
-    setCustomRejectReason('')
   }
 
-  const handleRejectReasonChange = (value) => {
-    setRejectReason(value)
-
-    if (value !== CUSTOM_REJECTION_REASON) {
-      setCustomRejectReason('')
-    }
-  }
-
-  const handleConfirm = async (orderId) => {
+  const handleConfirm = async ({ orderId, deliveryMinutes, resetDraft }) => {
     if (!deliveryMinutes || Number(deliveryMinutes) <= 0) {
       toast.error('Debe ingresar el tiempo estimado de entrega para confirmar el pedido.')
       return
@@ -110,20 +222,26 @@ const loadOrders = async (silent = false) => {
       confirmText: 'Confirmar',
     })
     if (!confirmed) return
+
+    setProcessingAction('confirm')
+    setProcessingOrderId(orderId)
+
     try {
       await confirmOrder(orderId, deliveryMinutes)
       toast.success('Pedido confirmado. Factura generada y cliente notificado.')
+      resetDraft()
       setConfirmingId(null)
-      setDeliveryMinutes('')
       await loadOrders()
     } catch (err) {
       toast.error(err.message)
+    } finally {
+      setProcessingAction(null)
+      setProcessingOrderId(null)
     }
   }
 
-  const handleReject = async (orderId) => {
-    const effectiveRejectReason = getEffectiveRejectReason()
-    if (!effectiveRejectReason) {
+  const handleReject = async ({ orderId, reason, resetDraft }) => {
+    if (!reason) {
       toast.error('Debe seleccionar o escribir un motivo de rechazo antes de continuar.')
       return
     }
@@ -134,13 +252,21 @@ const loadOrders = async (silent = false) => {
       variant: 'danger',
     })
     if (!confirmedReject) return
+
+    setProcessingAction('reject')
+    setProcessingOrderId(orderId)
+
     try {
-      await rejectOrder(orderId, effectiveRejectReason)
+      await rejectOrder(orderId, reason)
       toast.success('Pedido rechazado. Cliente notificado.')
+      resetDraft()
       resetRejectState()
       await loadOrders()
     } catch (err) {
       toast.error(err.message)
+    } finally {
+      setProcessingAction(null)
+      setProcessingOrderId(null)
     }
   }
 
@@ -223,6 +349,7 @@ const loadOrders = async (silent = false) => {
                         type="button"
                         className="panel-btn panel-btn--primary"
                         onClick={() => { setConfirmingId(order.id); setRejectingId(null) }}
+                        disabled={processingOrderId !== null}
                       >
                         Confirmar pedido
                       </button>
@@ -230,6 +357,7 @@ const loadOrders = async (silent = false) => {
                         type="button"
                         className="panel-btn panel-btn--danger"
                         onClick={() => handleOpenReject(order.id)}
+                        disabled={processingOrderId !== null}
                       >
                         Rechazar pedido
                       </button>
@@ -248,56 +376,21 @@ const loadOrders = async (silent = false) => {
                 {order.status === 'pending' && (confirmingId === order.id || rejectingId === order.id) && (
                   <div className="panel-actions" style={{ marginTop: '0.75rem' }}>
                     {confirmingId === order.id ? (
-                      <>
-                        <input
-                          type="number"
-                          min="1"
-                          placeholder="Minutos de entrega"
-                          className="panel-field__input"
-                          style={{ maxWidth: '160px' }}
-                          value={deliveryMinutes}
-                          onChange={(e) => setDeliveryMinutes(e.target.value)}
-                        />
-                        <button type="button" className="panel-btn panel-btn--primary" onClick={() => handleConfirm(order.id)}>
-                          Confirmar
-                        </button>
-                        <button type="button" className="panel-btn panel-btn--outline" onClick={() => setConfirmingId(null)}>
-                          Cancelar
-                        </button>
-                      </>
+                      <ConfirmOrderForm
+                        key={`confirm-${order.id}`}
+                        orderId={order.id}
+                        onConfirm={handleConfirm}
+                        onCancel={() => setConfirmingId(null)}
+                        isSubmitting={processingAction === 'confirm' && processingOrderId === order.id}
+                      />
                     ) : (
-                      <>
-                        <select
-                          className="panel-field__select"
-                          value={rejectReason}
-                          onChange={(e) => handleRejectReasonChange(e.target.value)}
-                        >
-                          <option value="">Seleccionar motivo</option>
-                          {REJECTION_REASONS.map((reason) => (
-                            <option key={reason} value={reason}>{reason}</option>
-                          ))}
-                        </select>
-                        {rejectReason === CUSTOM_REJECTION_REASON && (
-                          <textarea
-                            className="panel-field__textarea"
-                            rows="3"
-                            placeholder="Escriba el motivo del rechazo"
-                            value={customRejectReason}
-                            onChange={(e) => setCustomRejectReason(e.target.value)}
-                          />
-                        )}
-                        <button
-                          type="button"
-                          className="panel-btn panel-btn--danger"
-                          disabled={!getEffectiveRejectReason()}
-                          onClick={() => handleReject(order.id)}
-                        >
-                          Rechazar
-                        </button>
-                        <button type="button" className="panel-btn panel-btn--outline" onClick={resetRejectState}>
-                          Cancelar
-                        </button>
-                      </>
+                      <RejectOrderForm
+                        key={`reject-${order.id}`}
+                        orderId={order.id}
+                        onReject={handleReject}
+                        onCancel={resetRejectState}
+                        isSubmitting={processingAction === 'reject' && processingOrderId === order.id}
+                      />
                     )}
                   </div>
                 )}
