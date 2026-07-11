@@ -204,6 +204,10 @@ export function Login() {
           ¿Olvidaste tu contraseña?
         </Link>
 
+        <Link to="/reenviar-activacion" className="auth-link">
+          ¿No activaste tu cuenta? Reenviar correo de activación
+        </Link>
+
 
 
         <button type="submit" className="auth-btn auth-btn--primary" disabled={loading}>

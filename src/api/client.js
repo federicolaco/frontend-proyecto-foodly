@@ -14,6 +14,7 @@ let sessionExpiredNotified = false
 const PUBLIC_AUTH_PATH_PREFIXES = [
   '/usuarios/login',
   '/usuarios/activar',
+  '/usuarios/reenviar-activacion',
   '/usuarios/recuperar',
   '/usuarios/recuperar_contra_correo',
   '/clientes/registro',

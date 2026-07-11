@@ -66,6 +66,7 @@ export function ActivarCuenta() {
           <p className="auth-page__error" role="alert">
             {mensaje ?? 'Ocurrio un error al activar la cuenta.'}
           </p>
+          <Link to="/reenviar-activacion" className="auth-link">Reenviar correo de activación</Link>
           <Link to="/iniciar-sesion" className="auth-link">Volver al inicio de sesion</Link>
         </>
       )}

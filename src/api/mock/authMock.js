@@ -335,3 +335,40 @@ export function mockActivatePendingAccount(token) {
   return mockDelay({ message: 'Cuenta activada correctamente.' })
 }
 
+export function mockResendActivation(email) {
+  ensureMockDb()
+
+  const correoNormalizado = (email ?? '').trim().toLowerCase()
+  if (!correoNormalizado) {
+    throw new MockApiError(400, 'Debe ingresar un correo electronico.')
+  }
+
+  const db = getDb()
+  const user = db.users.find((entry) => entry.email.toLowerCase() === correoNormalizado)
+
+  if (!user) {
+    throw new MockApiError(404, 'No existe ninguna cuenta registrada con ese correo.')
+  }
+  if (!user.pendingActivation) {
+    throw new MockApiError(400, 'La cuenta ya se encuentra activada. Ya podes iniciar sesion.')
+  }
+
+  const activationTokens = getActivationTokens()
+  Object.keys(activationTokens).forEach((key) => {
+    if (activationTokens[key].userId === user.id) delete activationTokens[key]
+  })
+
+  const mockActivationToken = createActivationToken(user.id)
+  activationTokens[mockActivationToken] = {
+    userId: user.id,
+    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+  }
+  saveActivationTokens(activationTokens)
+
+  return mockDelay({
+    message: 'Te reenviamos el correo de activacion.',
+    mockActivationToken,
+    mockActivationPath: `/activar-cuenta?token=${encodeURIComponent(mockActivationToken)}`,
+  })
+}
+

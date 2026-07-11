@@ -29,6 +29,7 @@ import { PaymentSuccess } from './pages/payment/PaymentSuccess'
 import { PaymentFailure } from './pages/payment/PaymentFailure'
 import { PaymentPending } from './pages/payment/PaymentPending'
 import { RegisterPendingActivation } from './pages/RegisterPendingActivation'
+import { ResendActivation } from './pages/ResendActivation'
 import { SessionWatcher } from './components/SessionWatcher'
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
         <Route path="/restablecer-contrasena" element={<ResetPassword />} />
         <Route path="/confirmar-cambio-correo" element={<ConfirmEmailChange />} />
         <Route path="/activar-cuenta" element={<ActivarCuenta />} />
+        <Route path="/reenviar-activacion" element={<ResendActivation />} />
 
         <Route
           path="/cuenta"

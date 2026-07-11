@@ -1,10 +1,28 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { resendActivationLink } from '../api/account'
 import { AuthLayout } from '../components/AuthLayout'
+import { useToast } from '../context/ToastContext'
 import './AuthPages.css'
 
 export function RegisterPendingActivation() {
   const location = useLocation()
   const email = location.state?.email ?? ''
+  const [loading, setLoading] = useState(false)
+  const toast = useToast()
+
+  const handleResend = async () => {
+    if (!email) return
+    setLoading(true)
+    try {
+      const res = await resendActivationLink(email)
+      toast.success(res.message)
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <AuthLayout>
@@ -36,6 +54,16 @@ export function RegisterPendingActivation() {
         >
           YA ACTIVÉ MI CUENTA
         </Link>
+        {email && (
+          <button
+            type="button"
+            className="auth-btn auth-btn--outline"
+            onClick={handleResend}
+            disabled={loading}
+          >
+            {loading ? 'REENVIANDO...' : 'NO ME LLEGÓ EL CORREO, REENVIAR'}
+          </button>
+        )}
       </div>
     </AuthLayout>
   )

@@ -8,6 +8,7 @@ import {
   mockConfirmPasswordChange,
   mockDeleteAccount,
   mockRequestPasswordRecovery,
+  mockResendActivationLink,
   mockResetPassword,
   mockStartEmailChange,
   mockStartPasswordChange,
@@ -137,6 +138,19 @@ export async function activateAccount(token) {
   }
 
   return mockActivateAccount(token)
+}
+
+export async function resendActivationLink(email) {
+  if (isApiConfigured()) {
+    const message = await apiFetch('/usuarios/reenviar-activacion', {
+      method: 'POST',
+      body: JSON.stringify({ correo: email.trim() }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+    return { message: message ?? 'Te reenviamos el correo de activación.' }
+  }
+
+  return mockResendActivationLink(email)
 }
 
 export async function confirmPasswordChange(newPassword, confirmPassword) {

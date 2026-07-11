@@ -3,7 +3,7 @@ import { formatAddress, normalizeAddress } from '../backend/helpers'
 import { getDb, updateDb } from './db'
 import { mockDelay, MockApiError, sanitizeUser } from './helpers'
 import { ensureMockDb } from './seed'
-import { mockActivatePendingAccount, mockGetUserFromToken } from './authMock'
+import { mockActivatePendingAccount, mockGetUserFromToken, mockResendActivation } from './authMock'
 
 const CODES_KEY = 'foodly_mock_passwd_codes'
 
@@ -59,6 +59,9 @@ export function mockUpdateProfile(token, payload) {
 }
 export function mockActivateAccount(token) {
   return mockActivatePendingAccount(token)
+}
+export function mockResendActivationLink(email) {
+  return mockResendActivation(email)
 }
 export function mockStartPasswordChange(token, currentPassword) {
   ensureMockDb()
