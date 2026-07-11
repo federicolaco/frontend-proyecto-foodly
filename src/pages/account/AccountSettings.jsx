@@ -27,7 +27,7 @@ const TABS = [
   { id: 'profile', label: 'Mi perfil' },
   { id: 'password', label: 'Cambiar contraseña' },
   { id: 'rating', label: 'Mi calificación', roles: [ROLES.CLIENT] },
-  { id: 'danger', label: 'Eliminar cuenta', roles: [ROLES.CLIENT] },
+  { id: 'danger', label: 'Eliminar cuenta', roles: [ROLES.CLIENT, ROLES.LOCAL] },
 ]
 
 function CameraIcon() {

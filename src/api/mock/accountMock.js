@@ -231,21 +231,40 @@ export function mockConfirmEmailChange(mockToken) {
 export function mockDeleteAccount(token) {
   ensureMockDb()
   const user = requireUser(token)
-  if (user.role !== 'cliente') throw new MockApiError(403, 'Solo clientes pueden eliminar su cuenta.')
-
-  const db = getDb()
-  const activeOrders = db.orders.filter(
-    (o) => o.clientId === user.id && ['pending', 'confirmed'].includes(o.status),
-  )
-  if (activeOrders.length > 0) {
-    throw new MockApiError(400, 'No es posible eliminar la cuenta mientras tenga pedidos en curso.')
+  if (user.role !== 'cliente' && user.role !== 'local') {
+    throw new MockApiError(403, 'Solo clientes y locales pueden eliminar su cuenta.')
   }
 
-  const pendingClaims = db.claims.filter(
-    (c) => c.clientId === user.id && c.status === 'pending',
-  )
-  if (pendingClaims.length > 0) {
-    throw new MockApiError(400, 'No es posible eliminar la cuenta con reclamos pendientes.')
+  const db = getDb()
+
+  if (user.role === 'cliente') {
+    const activeOrders = db.orders.filter(
+      (o) => o.clientId === user.id && ['pending', 'confirmed'].includes(o.status),
+    )
+    if (activeOrders.length > 0) {
+      throw new MockApiError(400, 'No es posible eliminar la cuenta mientras tenga pedidos en curso.')
+    }
+
+    const pendingClaims = db.claims.filter(
+      (c) => c.clientId === user.id && c.status === 'pending',
+    )
+    if (pendingClaims.length > 0) {
+      throw new MockApiError(400, 'No es posible eliminar la cuenta con reclamos pendientes.')
+    }
+  } else {
+    const activeOrders = db.orders.filter(
+      (o) => o.restaurantId === user.restaurantId && ['pending', 'confirmed'].includes(o.status),
+    )
+    if (activeOrders.length > 0) {
+      throw new MockApiError(400, 'No es posible eliminar la cuenta mientras tenga pedidos en curso.')
+    }
+
+    const pendingClaims = db.claims.filter(
+      (c) => c.restaurantId === user.restaurantId && c.status === 'pending',
+    )
+    if (pendingClaims.length > 0) {
+      throw new MockApiError(400, 'No es posible eliminar la cuenta con reclamos pendientes.')
+    }
   }
 
   updateDb((dbState) => {
