@@ -54,7 +54,10 @@ export async function resolveClaim(claimId, resolution) {
         id: Number(claimId),
         estado: isAttended ? 'Atendido' : 'Rechazado',
         ...(isAttended
-          ? { tipoCompensacion: resolution.compensationType }
+          ? {
+              tipoCompensacion: resolution.compensationType,
+              motivo: resolution.resolutionNote?.trim() ?? '',
+            }
           : { motivoRechazo: resolution.rejectionReason?.trim() ?? '' }),
       }),
     })
