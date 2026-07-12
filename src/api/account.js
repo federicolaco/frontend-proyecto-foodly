@@ -35,28 +35,30 @@ async function resolvePhotoUrl(photo) {
 
 export async function updateProfile(payload) {
   const user = getStoredUser()
-  const address = normalizeAddress(payload.address)
+  const address = payload.address ? normalizeAddress(payload.address) : null
   const photoUrl = payload.photo ? await resolvePhotoUrl(payload.photo) : undefined
 
   if (isApiConfigured()) {
     const formData = new FormData()
+    const datos = {}
 
     if (user.role === 'cliente') {
-      if (payload.firstName) formData.append('nombre', payload.firstName.trim())
-      if (payload.lastName) formData.append('apellido', payload.lastName.trim())
-      if (payload.cellphone?.trim()) formData.append('celular', payload.cellphone.trim())
+      if (payload.firstName) datos.nombre = payload.firstName.trim()
+      if (payload.lastName) datos.apellido = payload.lastName.trim()
+      if (payload.cellphone?.trim()) datos.celular = payload.cellphone.trim()
     }
     if (user.role === 'local') {
-      if (payload.name) formData.append('nombre', payload.name.trim())
-      if (payload.description) formData.append('descripcion', payload.description.trim())
-      if (payload.cellphone?.trim()) formData.append('celular', payload.cellphone.trim())
-      if (payload.landline?.trim()) formData.append('telefonoFijo', payload.landline.trim())
+      if (payload.name) datos.nombre = payload.name.trim()
+      if (payload.description) datos.descripcion = payload.description.trim()
+      if (payload.cellphone?.trim()) datos.celular = payload.cellphone.trim()
+      if (payload.landline?.trim()) datos.telefonoFijo = payload.landline.trim()
     }
-    if (payload.address) {
-      formData.append('direccion.calle', address.calle)
-      formData.append('direccion.numero', address.numero)
-      formData.append('direccion.ciudad', address.ciudad)
-      formData.append('direccion.codigoPostal', address.codigoPostal)
+    if (address) {
+      datos.direccion = address
+    }
+
+    if (Object.keys(datos).length > 0) {
+      formData.append('datos', new Blob([JSON.stringify(datos)], { type: 'application/json' }))
     }
     if (payload.photo) {
       formData.append('foto', payload.photo)
@@ -76,8 +78,8 @@ export async function updateProfile(payload) {
     firstName: payload.firstName ?? user.firstName,
     lastName: payload.lastName ?? user.lastName,
     description: payload.description ?? user.description,
-    address: formatAddress(address),
-    addressDetails: address,
+    address: address ? formatAddress(address) : user.address,
+    addressDetails: address ?? user.addressDetails,
     cellphone: payload.cellphone?.trim() || user.cellphone,
     landline: payload.landline?.trim() || user.landline,
     ...(photoUrl ? { photo: photoUrl } : {}),
