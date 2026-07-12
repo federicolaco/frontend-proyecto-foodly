@@ -14,6 +14,8 @@ import { addressFromFields, splitAddressFields } from '../../api/backend/helpers
 import { isValidCelular, isValidTelefonoFijo, onlyDigits, validateRequiredFields } from '../../lib/inputUtils'
 import { isMockMode } from '../../api/client'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
+import { PhoneField } from '../../components/PhoneField'
+import { TelefonoFijoField } from '../../components/TelefonoFijoField'
 import { StarRating } from '../../components/StarRating'
 import { getStoredUser } from '../../lib/auth'
 import { formatDate } from '../../lib/format'
@@ -147,12 +149,12 @@ export function AccountSettings() {
     if (!validateRequiredFields(event.currentTarget, toast)) return
 
     if (cellphone.trim() && !isValidCelular(cellphone)) {
-      toast.error('El celular ingresado no tiene un formato válido. Ej: +598991234567.')
+      toast.error('El celular ingresado no tiene un formato válido. Verificá el código de país y el número.')
       return
     }
 
     if (user.role === ROLES.LOCAL && landline.trim() && !isValidTelefonoFijo(landline)) {
-      toast.error('El teléfono fijo ingresado no tiene un formato válido. Debe ser +598 seguido de 8 dígitos.')
+      toast.error('El teléfono fijo ingresado no tiene un formato válido. Debe tener 8 dígitos.')
       return
     }
 
@@ -344,16 +346,12 @@ export function AccountSettings() {
                           <input className="panel-field__input" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                         </label>
                       </div>
-                      <label className="panel-field">
-                        <span className="panel-field__label">Celular</span>
-                        <input
-                          type="tel"
-                          className="panel-field__input"
-                          placeholder="+598991234567"
-                          value={cellphone}
-                          onChange={(e) => setCellphone(e.target.value)}
-                        />
-                      </label>
+                      <PhoneField
+                        id="account-cellphone"
+                        label="Celular"
+                        value={cellphone}
+                        onChange={setCellphone}
+                      />
                       <AddressFields
                         street={street}
                         streetNumber={streetNumber}
@@ -377,26 +375,18 @@ export function AccountSettings() {
                         <textarea className="panel-field__textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
                       </label>
                       <div className="panel-form__row panel-form__row--2">
-                        <label className="panel-field">
-                          <span className="panel-field__label">Celular</span>
-                          <input
-                            type="tel"
-                            className="panel-field__input"
-                            placeholder="+598991234567"
-                            value={cellphone}
-                            onChange={(e) => setCellphone(e.target.value)}
-                          />
-                        </label>
-                        <label className="panel-field">
-                          <span className="panel-field__label">Tel&eacute;fono fijo</span>
-                          <input
-                            type="tel"
-                            className="panel-field__input"
-                            placeholder="+59827123456"
-                            value={landline}
-                            onChange={(e) => setLandline(e.target.value)}
-                          />
-                        </label>
+                        <PhoneField
+                          id="account-local-cellphone"
+                          label="Celular"
+                          value={cellphone}
+                          onChange={setCellphone}
+                        />
+                        <TelefonoFijoField
+                          id="account-local-landline"
+                          label="Teléfono fijo"
+                          value={landline}
+                          onChange={setLandline}
+                        />
                       </div>
                       <AddressFields
                         street={street}

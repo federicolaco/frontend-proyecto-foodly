@@ -13,7 +13,7 @@ import { RestaurantInfoModal } from '../components/restaurant/RestaurantInfoModa
 import { useCart } from '../context/CartContext'
 import { useToast } from '../context/ToastContext'
 import { getStoredUser } from '../lib/auth'
-import { formatDateTime } from '../lib/format'
+import { formatDate, formatDateTime } from '../lib/format'
 import './Restaurant.css'
 
 export function Restaurant() {
@@ -226,7 +226,7 @@ export function Restaurant() {
                   {currentRating?.createdAt && (
                     <p className="restaurant-page__rating-meta">
                       Última actualización:{' '}
-                      {formatDateTime(currentRating.createdAt)}
+                      {formatDate(currentRating.createdAt)}
                     </p>
                   )}
                 </div>

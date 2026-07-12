@@ -258,6 +258,7 @@ export function mockResolveLocalRequest(token, requestId, action) {
         image: null,
         foodType: request.description.slice(0, 40),
         telefonoFijo: request.landline ?? null,
+        celular: request.cellphone ?? null,
       })
 
       db.users[userIndex].cellphone = request.cellphone ?? db.users[userIndex].cellphone

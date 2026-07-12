@@ -152,6 +152,7 @@ export function mapLocalListItem(local) {
     description: local.descripcion ?? '',
     address: formatAddress(local.direccion),
     telefonoFijo: local.telefonoFijo ?? null,
+    celular: local.celular ?? null,
     images,
   }
 }

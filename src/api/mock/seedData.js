@@ -17,6 +17,7 @@ export const SEED_RESTAURANTS = [
     image: burgerCardImg,
     foodType: 'Hamburguesas',
     telefonoFijo: '+59824871234',
+    celular: '+598991234567',
   },
   {
     id: 2,

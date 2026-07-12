@@ -9,6 +9,8 @@ import { getStoredUser } from '../lib/auth'
 import { isValidCelular, isValidTelefonoFijo, onlyDigits } from '../lib/inputUtils'
 
 import { PasswordField } from '../components/PasswordField'
+import { PhoneField } from '../components/PhoneField'
+import { TelefonoFijoField } from '../components/TelefonoFijoField'
 import { useToast } from '../context/ToastContext'
 
 import './RegisterLocal.css'
@@ -138,13 +140,13 @@ export function RegisterLocal() {
     }
 
     if (cellphone.trim() && !isValidCelular(cellphone)) {
-      toast.error('El celular ingresado no es válido. Debe incluir el código de país, ej: +598991234567.')
+      toast.error('El celular ingresado no es válido. Verificá el código de país y el número.')
       setLoading(false)
       return
     }
 
     if (landline.trim() && !isValidTelefonoFijo(landline)) {
-      toast.error('El teléfono fijo ingresado no es válido. Debe tener el formato +598 seguido de 8 dígitos.')
+      toast.error('El teléfono fijo ingresado no es válido. Debe tener 8 dígitos.')
       setLoading(false)
       return
     }
@@ -268,29 +270,23 @@ export function RegisterLocal() {
               </label>
 
               <div className="register-local-field__row">
-                <label className="register-local-field">
-                  <span className="register-local-field__label">Celular (opcional)</span>
-                  <input
-                    type="tel"
-                    placeholder="+598991234567"
-                    className="register-local-field__input"
-                    autoComplete="tel"
-                    value={cellphone}
-                    onChange={(e) => setCellphone(e.target.value)}
-                  />
-                </label>
+                <PhoneField
+                  id="register-local-cellphone"
+                  label="Celular (opcional)"
+                  value={cellphone}
+                  onChange={setCellphone}
+                  wrapperClassName="register-local-field"
+                  labelClassName="register-local-field__label"
+                />
 
-                <label className="register-local-field">
-                  <span className="register-local-field__label">Teléfono fijo (opcional)</span>
-                  <input
-                    type="tel"
-                    placeholder="+59827123456"
-                    className="register-local-field__input"
-                    autoComplete="tel-national"
-                    value={landline}
-                    onChange={(e) => setLandline(e.target.value)}
-                  />
-                </label>
+                <TelefonoFijoField
+                  id="register-local-landline"
+                  label="Teléfono fijo (opcional)"
+                  value={landline}
+                  onChange={setLandline}
+                  wrapperClassName="register-local-field"
+                  labelClassName="register-local-field__label"
+                />
               </div>
 
               {isApiConfigured() && (

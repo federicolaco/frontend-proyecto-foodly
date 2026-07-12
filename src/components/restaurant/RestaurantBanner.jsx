@@ -1,3 +1,4 @@
+import { formatTelefonoFijo } from '../../lib/phone'
 import './RestaurantBanner.css'
 
 function StarIcon() {
@@ -46,7 +47,15 @@ export function RestaurantBanner({ restaurant, onShowComments, onShowPhotos }) {
               href={`tel:${restaurant.telefonoFijo}`}
               className="restaurant-banner__action-btn restaurant-banner__phone"
             >
-              Llamar: {restaurant.telefonoFijo}
+              Tel: {formatTelefonoFijo(restaurant.telefonoFijo)}
+            </a>
+          )}
+          {restaurant.celular && (
+            <a
+              href={`tel:${restaurant.celular}`}
+              className="restaurant-banner__action-btn restaurant-banner__phone"
+            >
+              Cel: {restaurant.celular}
             </a>
           )}
         </div>

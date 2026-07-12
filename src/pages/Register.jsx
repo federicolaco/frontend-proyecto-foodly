@@ -5,6 +5,7 @@ import { setGoogleRegistrationDraft } from '../lib/auth'
 import { isValidCelular, onlyDigits, validateRequiredFields } from '../lib/inputUtils'
 import { AuthLayout } from '../components/AuthLayout'
 import { PasswordField } from '../components/PasswordField'
+import { PhoneField } from '../components/PhoneField'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useToast } from '../context/ToastContext'
 import './AuthPages.css'
@@ -113,7 +114,7 @@ export function Register() {
     }
 
     if (cellphone.trim() && !isValidCelular(cellphone)) {
-      toast.error('El celular ingresado no es válido. Debe incluir el código de país, ej: +598991234567.')
+      toast.error('El celular ingresado no es válido. Verificá el código de país y el número.')
       return
     }
 
@@ -316,19 +317,14 @@ export function Register() {
           </span>
         </label>
 
-        <label className="auth-field" htmlFor="register-cellphone">
-          <span className="auth-field__label">Celular (opcional)</span>
-          <span className="auth-field__control">
-            <input
-              id="register-cellphone"
-              type="tel"
-              placeholder="+598991234567"
-              autoComplete="tel"
-              value={cellphone}
-              onChange={(e) => setCellphone(e.target.value)}
-            />
-          </span>
-        </label>
+        <PhoneField
+          id="register-cellphone"
+          label="Celular (opcional)"
+          value={cellphone}
+          onChange={setCellphone}
+          wrapperClassName="auth-field"
+          labelClassName="auth-field__label"
+        />
 
         <label className="auth-field" htmlFor="register-email">
           <span className="auth-field__label">Correo electrónico</span>

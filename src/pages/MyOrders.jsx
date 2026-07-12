@@ -6,6 +6,7 @@ import { getClaimForOrder, submitClaim } from '../api/claims'
 import { cancelOrder, getMyOrders, retryOrderPayment } from '../api/orders'
 import { hasRatedLocal } from '../api/ratings'
 import { getLocalContact } from '../api/restaurant'
+import { formatTelefonoFijo } from '../lib/phone'
 import { OrdersNavbar } from '../components/OrdersNavbar'
 import { clearSessionToken } from '../lib/auth'
 import { formatPrice } from '../lib/cart'
@@ -452,7 +453,7 @@ export function MyOrders() {
                       <div className="my-orders__details">
                         <p>Total: {formatPrice(order.total)}</p>
                         <p>{formatDateTime(order.createdAt)}</p>
-                        {localPhone && <p>Teléfono del local: {localPhone}</p>}
+                        {localPhone && <p>Teléfono del local: {formatTelefonoFijo(localPhone)}</p>}
                       </div>
 
                       {order.status === 'rejected' && motivoRechazo && (
