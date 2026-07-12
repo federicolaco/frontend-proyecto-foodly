@@ -172,7 +172,7 @@ export function LocalClients() {
                         onChange={(e) => setComment(e.target.value)}
                         style={{ marginTop: '0.5rem' }}
                       />
-                      <div className="panel-actions" style={{ marginTop: '0.5rem' }}>
+                      <div className="panel-actions panel-actions--center" style={{ marginTop: '0.5rem' }}>
                         <button type="button" className="panel-btn panel-btn--primary" onClick={() => handleRate(client.id)}>
                           Enviar calificación
                         </button>
