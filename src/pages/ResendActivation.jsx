@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { resendActivationLink } from '../api/account'
 import { isMockMode } from '../api/client'
 import { AuthLayout } from '../components/AuthLayout'
@@ -9,6 +9,7 @@ import './AuthPages.css'
 
 export function ResendActivation() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [email, setEmail] = useState(location.state?.email ?? '')
   const [mockActivationPath, setMockActivationPath] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -23,8 +24,17 @@ export function ResendActivation() {
 
     try {
       const res = await resendActivationLink(email)
-      toast.success(res.message)
-      if (res.mockActivationPath) setMockActivationPath(res.mockActivationPath)
+
+      if (isMockMode() && res.mockActivationPath) {
+        toast.success(res.message)
+        setMockActivationPath(res.mockActivationPath)
+        return
+      }
+
+      navigate('/iniciar-sesion', {
+        replace: true,
+        state: { message: res.message },
+      })
     } catch (err) {
       toast.error(err.message)
     } finally {
