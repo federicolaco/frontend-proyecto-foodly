@@ -48,7 +48,18 @@ export function ProtectedRoute({ children, roles = null }) {
   }
 
   if (user.role === 'local' && user.localEnabled === false && !location.pathname.startsWith('/registrar-local')) {
-    return <Navigate to="/registrar-local" replace />
+    return (
+      <Navigate
+        to="/registrar-local"
+        replace
+        state={{
+          entry: 'local-onboarding-required',
+          from: `${location.pathname}${location.search}${location.hash}`,
+          logoTo: '/',
+          fallbackTo: '/',
+        }}
+      />
+    )
   }
 
   return children
