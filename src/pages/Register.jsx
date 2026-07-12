@@ -160,7 +160,15 @@ export function Register() {
         <button
           type="button"
           className="auth-account-type__btn"
-          onClick={() => navigate('/registrar-local')}
+          onClick={() =>
+            navigate('/registrar-local', {
+              state: {
+                backTo: '/registrarse',
+                logoTo: '/',
+                source: 'register-account-type',
+              },
+            })
+          }
         >
           Local comercial
         </button>

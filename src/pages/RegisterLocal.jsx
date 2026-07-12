@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { submitLocalRegistration } from '../api/localPanel'
 import { addressFromFields } from '../api/backend/helpers'
@@ -28,6 +28,7 @@ function CameraIcon() {
 }
 
 export function RegisterLocal() {
+  const location = useLocation()
   const navigate = useNavigate()
   const user = getStoredUser()
   const logoInputRef = useRef(null)
@@ -50,6 +51,15 @@ export function RegisterLocal() {
   const [logoFile, setLogoFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const toast = useToast()
+  const navigationState = location.state ?? {}
+  const cameFromGuard = navigationState.entry === 'local-onboarding-required'
+  const canUseHistoryBack = typeof window !== 'undefined' && window.history.length > 1
+
+  const backLabel = navigationState.backTo === '/registrarse'
+    ? 'Volver al registro'
+    : cameFromGuard
+      ? 'Ir al inicio'
+      : 'Volver'
 
   const handleLogoChange = (event) => {
     const file = event.target.files?.[0]
@@ -62,6 +72,24 @@ export function RegisterLocal() {
   const handleImagesChange = (event) => {
     const files = Array.from(event.target.files ?? [])
     setSelectedImages(files)
+  }
+
+  const handleBackNavigation = () => {
+    if (navigationState.backTo) {
+      navigate(navigationState.backTo)
+      return
+    }
+
+    if (!cameFromGuard && canUseHistoryBack) {
+      navigate(-1)
+      return
+    }
+
+    navigate(navigationState.fallbackTo ?? '/')
+  }
+
+  const handleLogoNavigation = () => {
+    navigate(navigationState.logoTo ?? '/')
   }
 
   const handleSubmit = async (event) => {
@@ -132,7 +160,27 @@ export function RegisterLocal() {
   return (
     <div className="register-local-page">
       <header className="register-local-page__header">
-        <span className="register-local-page__logo">Foodly</span>
+        <div className="register-local-page__header-inner contenedor">
+          <button
+            type="button"
+            className="register-local-page__back"
+            onClick={handleBackNavigation}
+          >
+            <span aria-hidden="true">←</span>
+            <span>{backLabel}</span>
+          </button>
+
+          <button
+            type="button"
+            className="register-local-page__logo"
+            onClick={handleLogoNavigation}
+            aria-label="Ir al inicio de Foodly"
+          >
+            Foodly
+          </button>
+
+          <span className="register-local-page__header-spacer" aria-hidden="true" />
+        </div>
       </header>
 
       <main className="register-local-page__main contenedor">
