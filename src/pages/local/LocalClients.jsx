@@ -97,6 +97,7 @@ export function LocalClients() {
           <div
             style={{
               display: 'flex',
+              flexWrap: 'wrap',
               gap: '0.75rem',
               marginLeft: 'auto',
             }}

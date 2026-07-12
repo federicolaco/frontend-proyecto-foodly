@@ -344,24 +344,44 @@ const loadOrders = async (silent = false) => {
                 >
                   <p style={{ margin: 0 }}>Fecha: {formatDateTime(order.createdAt)}</p>
 
-                  {order.status === 'pending' && confirmingId !== order.id && rejectingId !== order.id && (
-                    <div className="panel-actions" style={{ margin: 0 }}>
-                      <button
-                        type="button"
-                        className="panel-btn panel-btn--primary"
-                        onClick={() => { setConfirmingId(order.id); setRejectingId(null) }}
-                        disabled={processingOrderId !== null}
-                      >
-                        Confirmar pedido
-                      </button>
-                      <button
-                        type="button"
-                        className="panel-btn panel-btn--danger"
-                        onClick={() => handleOpenReject(order.id)}
-                        disabled={processingOrderId !== null}
-                      >
-                        Rechazar pedido
-                      </button>
+                  {order.status === 'pending' && (
+                    <div className="panel-actions" style={{ margin: 0, justifyContent: 'flex-end' }}>
+                      {confirmingId === order.id ? (
+                        <ConfirmOrderForm
+                          key={`confirm-${order.id}`}
+                          orderId={order.id}
+                          onConfirm={handleConfirm}
+                          onCancel={() => setConfirmingId(null)}
+                          isSubmitting={processingAction === 'confirm' && processingOrderId === order.id}
+                        />
+                      ) : rejectingId === order.id ? (
+                        <RejectOrderForm
+                          key={`reject-${order.id}`}
+                          orderId={order.id}
+                          onReject={handleReject}
+                          onCancel={resetRejectState}
+                          isSubmitting={processingAction === 'reject' && processingOrderId === order.id}
+                        />
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="panel-btn panel-btn--primary"
+                            onClick={() => { setConfirmingId(order.id); setRejectingId(null) }}
+                            disabled={processingOrderId !== null}
+                          >
+                            Confirmar pedido
+                          </button>
+                          <button
+                            type="button"
+                            className="panel-btn panel-btn--danger"
+                            onClick={() => handleOpenReject(order.id)}
+                            disabled={processingOrderId !== null}
+                          >
+                            Rechazar pedido
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -373,28 +393,6 @@ const loadOrders = async (silent = false) => {
                     </li>
                   ))}
                 </ul>
-
-                {order.status === 'pending' && (confirmingId === order.id || rejectingId === order.id) && (
-                  <div className="panel-actions" style={{ marginTop: '0.75rem' }}>
-                    {confirmingId === order.id ? (
-                      <ConfirmOrderForm
-                        key={`confirm-${order.id}`}
-                        orderId={order.id}
-                        onConfirm={handleConfirm}
-                        onCancel={() => setConfirmingId(null)}
-                        isSubmitting={processingAction === 'confirm' && processingOrderId === order.id}
-                      />
-                    ) : (
-                      <RejectOrderForm
-                        key={`reject-${order.id}`}
-                        orderId={order.id}
-                        onReject={handleReject}
-                        onCancel={resetRejectState}
-                        isSubmitting={processingAction === 'reject' && processingOrderId === order.id}
-                      />
-                    )}
-                  </div>
-                )}
 
                 {['confirmed', 'delivered'].includes(order.status) && order.deliveryMinutes && (
                   <p>Entrega estimada: {order.deliveryMinutes} minutos</p>

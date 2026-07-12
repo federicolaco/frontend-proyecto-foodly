@@ -39,7 +39,7 @@ const MOCK_IMAGES = [
   iceCreamCardImg,
 ]
 
-const CLIENT_CATALOG_PAGE_SIZE = 8
+const CLIENT_CATALOG_PAGE_SIZE = 10
 const SEARCH_FETCH_PAGE_SIZE = 100
 let latestCatalogSnapshot = { key: '', items: [] }
 

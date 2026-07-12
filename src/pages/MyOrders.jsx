@@ -75,7 +75,7 @@ function ClaimForm({ orderId, onSubmit, onCancel, isSubmitting }) {
           </option>
         ))}
       </select>
-      <div className="panel-actions">
+      <div className="panel-actions panel-actions--center">
         <button
           type="button"
           className="panel-btn panel-btn--primary"

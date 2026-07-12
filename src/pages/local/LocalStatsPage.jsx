@@ -169,17 +169,7 @@ function AnalyticDishRow({ dish, index }) {
 
 function AnalyticDishCard({ dish }) {
   return (
-    <article
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(0, 1.5fr) repeat(2, minmax(120px, 0.75fr))',
-        gap: '1rem',
-        alignItems: 'center',
-        border: '1px solid #eee',
-        borderRadius: '0.75rem',
-        padding: '0.9rem 1rem',
-      }}
-    >
+    <article className="analytic-dish-card">
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
         <img
           src={dish.image}

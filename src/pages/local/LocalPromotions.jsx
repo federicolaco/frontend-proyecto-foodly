@@ -321,9 +321,9 @@ export function LocalPromotions() {
             <span className="panel-field__label">Fin</span>
             <input type="date" className="panel-field__input" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} required />
           </label>
-          <div className="panel-field">
+          <div className="panel-field" style={{ gridColumn: '1 / -1' }}>
             <span className="panel-field__label" style={{ visibility: 'hidden' }}>Acciones</span>
-            <div className="panel-actions">
+            <div className="panel-actions panel-actions--center">
               <button type="submit" className="panel-btn panel-btn--primary" disabled={saving}>
                 {form.id ? 'Guardar' : 'Crear promoción'}
               </button>

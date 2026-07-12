@@ -102,6 +102,20 @@
   margin-bottom: 1.75rem;
 }
 
+.auth-links-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.auth-links-row .auth-link {
+  align-self: auto;
+  margin-bottom: 0;
+}
+
 .auth-link:hover {
   opacity: 0.85;
 }

@@ -408,6 +408,23 @@
   margin-top: 0.75rem;
 }
 
+.analytic-dish-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(120px, 0.75fr));
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid #eee;
+  border-radius: 0.75rem;
+  padding: 0.9rem 1rem;
+}
+
+@media (max-width: 560px) {
+  .analytic-dish-card {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
 @media (min-width: 768px) {
   .panel-page__main {
     padding-top: 6rem;

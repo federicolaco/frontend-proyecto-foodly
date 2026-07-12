@@ -83,7 +83,7 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-right: 0.35rem;
+  padding-right: 0.9rem;
   scrollbar-width: thin;
   scrollbar-color: var(--celeste) var(--gris-claro);
 }

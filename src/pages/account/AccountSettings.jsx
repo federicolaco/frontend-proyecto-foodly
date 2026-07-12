@@ -524,7 +524,7 @@ export function AccountSettings() {
           )}
 
           {tab === 'danger' && (
-            <div>
+            <div style={{ textAlign: 'center' }}>
               <p className="panel-page__subtitle">Al eliminar su cuenta perderá el acceso y su historial quedará anonimizado.</p>
               <button type="button" className="panel-btn panel-btn--danger" disabled={loading} onClick={handleDelete}>
                 Eliminar cuenta

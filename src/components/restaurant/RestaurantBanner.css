@@ -55,7 +55,9 @@
 
 .restaurant-banner__info{
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
+  gap: 0.5rem 1rem;
 }
 
 .restaurant-banner__action-btn {
@@ -90,6 +92,10 @@
 @media (max-width: 640px) {
   .restaurant-banner {
     grid-template-columns: auto 1fr;
+  }
+
+  .restaurant-banner__info {
+    flex-direction: column;
   }
 
   .restaurant-banner__hours {

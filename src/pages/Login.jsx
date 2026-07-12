@@ -202,13 +202,15 @@ export function Login() {
 
 
 
-        <Link to="/recuperar-contrasena" className="auth-link">
-          ¿Olvidaste tu contraseña?
-        </Link>
+        <div className="auth-links-row">
+          <Link to="/recuperar-contrasena" className="auth-link">
+            ¿Olvidaste tu contraseña?
+          </Link>
 
-        <Link to="/reenviar-activacion" className="auth-link">
-          ¿No activaste tu cuenta? Reenviar correo de activación
-        </Link>
+          <Link to="/reenviar-activacion" className="auth-link">
+            ¿No activaste tu cuenta? Reenviar correo de activación
+          </Link>
+        </div>
 
 
 
