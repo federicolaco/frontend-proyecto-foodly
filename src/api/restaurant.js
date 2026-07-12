@@ -9,11 +9,11 @@ async function fetchLocalSummary(restaurantId) {
 export async function getLocalContact(restaurantId) {
   if (isApiConfigured()) {
     const local = await apiFetchSafe(`/locales/${Number(restaurantId)}/perfil`)
-    return { telefonoFijo: local?.telefonoFijo ?? null }
+    return { telefonoFijo: local?.telefonoFijo ?? null, celular: local?.celular ?? null }
   }
 
   const restaurant = await mockGetRestaurantById(restaurantId).catch(() => null)
-  return { telefonoFijo: restaurant?.telefonoFijo ?? null }
+  return { telefonoFijo: restaurant?.telefonoFijo ?? null, celular: restaurant?.celular ?? null }
 }
 
 async function fetchLocalDishes(restaurantId) {

@@ -437,6 +437,7 @@ export function MyOrders() {
                 const isRetryingPayment = retryingId === order.id
                 const isCancellingOrder = cancellingId === order.id
                 const localPhone = order.restaurantPhone ?? localContacts[order.restaurantId]?.telefonoFijo
+                const localCellphone = order.restaurantCellphone ?? localContacts[order.restaurantId]?.celular
 
                 return (
                   <article key={order.id} className="my-orders__card">
@@ -454,6 +455,7 @@ export function MyOrders() {
                         <p>Total: {formatPrice(order.total)}</p>
                         <p>{formatDateTime(order.createdAt)}</p>
                         {localPhone && <p>Teléfono del local: {formatTelefonoFijo(localPhone)}</p>}
+                        {localCellphone && <p>Celular del local: {localCellphone}</p>}
                       </div>
 
                       {order.status === 'rejected' && motivoRechazo && (

@@ -362,6 +362,7 @@ export function mapOrderListItem(pedido) {
     restaurantId: pedido.local?.id,
     restaurantName: pedido.local?.nombre ?? 'Local',
     restaurantPhone: pedido.local?.telefonoFijo ?? null,
+    restaurantCellphone: pedido.local?.celular ?? null,
     items: [],
     total: pedido.total ?? 0,
     status: mapBackendStatusToFrontend(pedido.estado),
