@@ -216,6 +216,7 @@ function mapClaimStatus(status) {
 export function buildOrderListParams(filters = {}) {
   const params = new URLSearchParams()
   if (filters.status) params.set('estado', mapFrontendStatusToBackend(filters.status))
+  if (filters.localName) params.set('nombreLocal', filters.localName)
   if (filters.page !== undefined) params.set('pagina', String(filters.page))
   if (filters.pageSize !== undefined) params.set('tamanio', String(filters.pageSize))
   return params

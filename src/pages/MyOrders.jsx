@@ -159,7 +159,8 @@ function getClaimStatusLabel(claim) {
 export function MyOrders() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
-  const [statusFilter, setStatusFilter] = useState('')
+  const [searchLocal, setSearchLocal] = useState('')
+  const [debouncedSearchLocal, setDebouncedSearchLocal] = useState('')
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
   const [sortBy, setSortBy] = useState('date_desc')
@@ -181,18 +182,19 @@ export function MyOrders() {
     })
   }
 
- const loadOrders = async (silent = false) => {
+  const loadOrders = async (silent = false) => {
     if (!silent) setLoading(true)
 
     try {
       const { items: data, totalPages: tp } = await getMyOrders({
         ...(statusFilter ? { status: statusFilter } : {}),
+        ...(debouncedSearchLocal ? { localName: debouncedSearchLocal } : {}),
         page,
       })
       setOrders(data)
       setTotalPages(tp)
 
-      if (!statusFilter) {
+      if (!statusFilter && !debouncedSearchLocal) {
         setHasAnyOrders(data.length > 0)
       }
 
@@ -231,10 +233,15 @@ export function MyOrders() {
   }
 
   useEffect(() => {
-    setPage(0)
-  }, [statusFilter])
+    const timer = setTimeout(() => setDebouncedSearchLocal(searchLocal.trim()), 300)
+    return () => clearTimeout(timer)
+  }, [searchLocal])
 
-  usePolling(loadOrders, 3000, [statusFilter, page])
+  useEffect(() => {
+    setPage(0)
+  }, [statusFilter, debouncedSearchLocal])
+
+  usePolling(loadOrders, 3000, [statusFilter, debouncedSearchLocal, page])
 
   const sortedOrders = useMemo(() => sortOrders(orders, sortBy), [orders, sortBy])
 
@@ -330,7 +337,7 @@ export function MyOrders() {
     })
   }
 
-  const emptyMessage = statusFilter
+  const emptyMessage = statusFilter || debouncedSearchLocal
     ? 'No se encontraron pedidos que coincidan con los criterios seleccionados.'
     : 'Aun no ha realizado ningun pedido.'
 
@@ -360,6 +367,16 @@ export function MyOrders() {
                 <option value="rejected">Rechazado</option>
                 <option value="cancelled">Cancelado</option>
               </select>
+            </label>
+
+            <label className="panel-field" style={{ maxWidth: '260px' }}>
+              <span className="panel-field__label">Buscar por local</span>
+              <input
+                className="panel-field__input"
+                placeholder="Nombre del local"
+                value={searchLocal}
+                onChange={(e) => setSearchLocal(e.target.value)}
+              />
             </label>
 
             <label className="panel-field" style={{ maxWidth: '260px', marginLeft: 'auto' }}>
