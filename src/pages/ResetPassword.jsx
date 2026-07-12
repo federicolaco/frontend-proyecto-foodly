@@ -48,8 +48,8 @@ export function ResetPassword() {
       <p className="auth-page__section-title">Ingresá y confirmá tu nueva contraseña.</p>
 
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
-        <PasswordField id="new-pass" label="Nueva contraseña" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <PasswordField id="confirm-pass" label="Confirmar contraseña" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+        <PasswordField id="new-pass" label="Nueva contraseña" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" required />
+        <PasswordField id="confirm-pass" label="Confirmar contraseña" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" required />
         <button type="submit" className="auth-btn auth-btn--primary" disabled={loading || !token}>
           {loading ? 'GUARDANDO...' : 'RESTABLECER'}
         </button>

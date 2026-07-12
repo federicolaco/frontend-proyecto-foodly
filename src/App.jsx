@@ -19,6 +19,7 @@ import { Login } from './pages/Login'
 import { MyOrders } from './pages/MyOrders'
 import { Orders } from './pages/Orders'
 import { Register } from './pages/Register'
+import { RegisterGoogle } from './pages/RegisterGoogle'
 import { RegisterLocal } from './pages/RegisterLocal'
 import { ResetPassword } from './pages/ResetPassword'
 import { ConfirmEmailChange } from './pages/ConfirmEmailChange'
@@ -41,6 +42,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/iniciar-sesion" element={<Login />} />
         <Route path="/registrarse" element={<Register />} />
+        <Route path="/registrarse/google" element={<RegisterGoogle />} />
         <Route path="/registro/pendiente-activacion" element={<RegisterPendingActivation />} />
         <Route path="/recuperar-contrasena" element={<ForgotPassword />} />
         <Route path="/restablecer-contrasena" element={<ResetPassword />} />

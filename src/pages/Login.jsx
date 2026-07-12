@@ -196,6 +196,8 @@ export function Login() {
 
           onChange={(e) => setPassword(e.target.value)}
 
+          required
+
         />
 
 
