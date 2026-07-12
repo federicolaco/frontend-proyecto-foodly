@@ -159,6 +159,7 @@ function getClaimStatusLabel(claim) {
 export function MyOrders() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
+  const [statusFilter, setStatusFilter] = useState('')
   const [searchLocal, setSearchLocal] = useState('')
   const [debouncedSearchLocal, setDebouncedSearchLocal] = useState('')
   const [page, setPage] = useState(0)
