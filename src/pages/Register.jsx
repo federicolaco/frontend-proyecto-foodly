@@ -62,6 +62,8 @@ export function Register() {
   const [city, setCity] = useState('')
   const [postalCode, setPostalCode] = useState('')
   const [document, setDocument] = useState('')
+  const [cellphone, setCellphone] = useState('')
+  const [landline, setLandline] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -119,6 +121,8 @@ export function Register() {
         lastName,
         address,
         document,
+        cellphone,
+        landline,
         email,
         password,
         role: accountType,
@@ -308,6 +312,37 @@ export function Register() {
             />
           </span>
         </label>
+
+        <div className="auth-form__row">
+          <label className="auth-field" htmlFor="register-cellphone">
+            <span className="auth-field__label">Celular</span>
+            <span className="auth-field__control">
+              <input
+                id="register-cellphone"
+                type="tel"
+                placeholder="+598 99 123 456"
+                autoComplete="tel"
+                value={cellphone}
+                onChange={(e) => setCellphone(e.target.value)}
+                required
+              />
+            </span>
+          </label>
+
+          <label className="auth-field" htmlFor="register-landline">
+            <span className="auth-field__label">Teléfono fijo (opcional)</span>
+            <span className="auth-field__control">
+              <input
+                id="register-landline"
+                type="tel"
+                placeholder="2712 3456"
+                autoComplete="tel-national"
+                value={landline}
+                onChange={(e) => setLandline(e.target.value)}
+              />
+            </span>
+          </label>
+        </div>
 
         <label className="auth-field" htmlFor="register-email">
           <span className="auth-field__label">Correo electrónico</span>

@@ -121,6 +121,8 @@ export function mapClienteRegistrationPayload(payload) {
     nombre: payload.firstName.trim(),
     apellido: payload.lastName.trim(),
     documento: payload.document ?? `DOC${Date.now()}`,
+    celular: payload.cellphone?.trim(),
+    telefonoFijo: payload.landline?.trim() || null,
     direccion: payload.addressParsed,
   }
 }
