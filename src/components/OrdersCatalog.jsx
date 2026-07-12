@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { buildRestaurantPath } from '../api/restaurant'
 import { searchDishes } from '../api/orders'
+import { buildRestaurantPath } from '../api/restaurant'
 import { DishCard } from './DishCard'
 import { Pagination } from './Pagination'
 import './OrdersCatalog.css'
@@ -24,66 +24,55 @@ export function OrdersCatalog() {
   const [category, setCategory] = useState('')
   const [categories, setCategories] = useState([])
   const [dishes, setDishes] = useState([])
-
   const [loading, setLoading] = useState(true)
-
   const [error, setError] = useState(null)
-
   const [page, setPage] = useState(0)
-
   const [totalPages, setTotalPages] = useState(1)
 
   useEffect(() => {
     setPage(0)
-  }, [query, view, sort, maxPrice])
+  }, [query, view, sort, maxPrice, category])
 
   useEffect(() => {
-
     let cancelled = false
 
     const timer = setTimeout(async () => {
-
       setLoading(true)
-
       setError(null)
 
-
-
       try {
-
         const options = { page }
 
         if (view === 'promotions') options.promotionsOnly = true
-
         if (sort) options.sort = sort
-
         if (maxPrice) options.maxPrice = maxPrice
+        if (category) options.category = category
 
-
-
-        const { items, totalPages: tp } = await searchDishes(query, options)
+        const {
+          items,
+          totalPages: nextTotalPages,
+          page: resolvedPage,
+          categories: availableCategories = [],
+        } = await searchDishes(query, options)
 
         if (!cancelled) {
           setDishes(items)
-          setTotalPages(tp)
-        }
+          setTotalPages(nextTotalPages)
+          setCategories(availableCategories)
 
+          if (resolvedPage !== page) {
+            setPage(resolvedPage)
+          }
+        }
       } catch {
-
         if (!cancelled) {
-
           setError('No pudimos cargar los platos. Intentá de nuevo.')
-
           setDishes([])
-
+          setCategories([])
         }
-
       } finally {
-
         if (!cancelled) setLoading(false)
-
       }
-
     }, 300)
 
     return () => {
@@ -93,7 +82,7 @@ export function OrdersCatalog() {
   }, [query, view, sort, maxPrice, category, page])
 
   useEffect(() => {
-    if (category && !categories.includes(category)) {
+    if (category && !categories.some((option) => option.key === category)) {
       setCategory('')
     }
   }, [categories, category])
@@ -142,9 +131,9 @@ export function OrdersCatalog() {
               disabled={categories.length === 0}
             >
               <option value="">Todas las categorías</option>
-              {categories.map((categoryName) => (
-                <option key={categoryName} value={categoryName}>
-                  {categoryName}
+              {categories.map((option) => (
+                <option key={option.key} value={option.key}>
+                  {option.name}
                 </option>
               ))}
             </select>
