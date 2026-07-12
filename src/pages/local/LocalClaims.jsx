@@ -32,10 +32,12 @@ function ResolveClaimForm({
   initialStatus = 'attended',
 }) {
   const [compensationType, setCompensationType] = useState(COMPENSATION_TYPES[0].id)
+  const [resolutionNote, setResolutionNote] = useState('')
   const [rejectionReason, setRejectionReason] = useState('')
 
   const resetDraft = () => {
     setCompensationType(COMPENSATION_TYPES[0].id)
+    setResolutionNote('')
     setRejectionReason('')
   }
 
@@ -49,6 +51,7 @@ function ResolveClaimForm({
       claimId,
       resolutionStatus: initialStatus,
       compensationType,
+      resolutionNote,
       rejectionReason,
       resetDraft,
     })
@@ -57,16 +60,27 @@ function ResolveClaimForm({
   return (
     <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.5rem' }}>
       {initialStatus === 'attended' && (
-        <select
-          className="panel-field__select"
-          value={compensationType}
-          onChange={(e) => setCompensationType(e.target.value)}
-          disabled={isSubmitting}
-        >
-          {COMPENSATION_TYPES.map((type) => (
-            <option key={type.id} value={type.id}>{type.label}</option>
-          ))}
-        </select>
+        <>
+          <select
+            className="panel-field__select"
+            value={compensationType}
+            onChange={(e) => setCompensationType(e.target.value)}
+            disabled={isSubmitting}
+          >
+            {COMPENSATION_TYPES.map((type) => (
+              <option key={type.id} value={type.id}>{type.label}</option>
+            ))}
+          </select>
+
+          <textarea
+            className="panel-field__textarea"
+            rows={2}
+            placeholder="Nota (opcional)"
+            value={resolutionNote}
+            onChange={(e) => setResolutionNote(e.target.value)}
+            disabled={isSubmitting}
+          />
+        </>
       )}
 
       {initialStatus === 'rejected' && (
@@ -161,6 +175,7 @@ export function LocalClaims() {
     claimId,
     resolutionStatus,
     compensationType,
+    resolutionNote,
     rejectionReason,
     resetDraft,
   }) => {
@@ -190,6 +205,7 @@ export function LocalClaims() {
       await resolveClaim(claimId, {
         status: resolutionStatus,
         compensationType,
+        resolutionNote,
         rejectionReason,
       })
       toast.success(
@@ -297,7 +313,10 @@ export function LocalClaims() {
                 )}
 
                 {claim.status === 'attended' && claim.resolutionType && (
-                  <p>Compensación aplicada: {claim.resolutionType}</p>
+                  <p>
+                    Compensación aplicada: {claim.resolutionType}
+                    {claim.resolutionNote ? ` — ${claim.resolutionNote}` : ''}
+                  </p>
                 )}
 
                 {claim.status === 'rejected' && claim.rejectionReason && (
