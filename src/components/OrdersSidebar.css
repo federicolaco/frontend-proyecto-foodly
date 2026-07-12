@@ -173,19 +173,7 @@
   .orders-sidebar__list {
     flex: 1;
     min-height: 0;
-    justify-content: space-between;
+    overflow-y: auto;
     gap: 0.75rem;
-  }
-
-  .orders-sidebar__list > li {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-  }
-
-  .orders-sidebar__restaurant-btn,
-  .orders-sidebar__dish-btn {
-    flex: 1;
-    min-height: 0;
   }
 }
