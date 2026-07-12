@@ -27,7 +27,16 @@ function EyeIcon({ open }) {
   )
 }
 
-export function PasswordField({ id, label, placeholder, hint, value, onChange }) {
+export function PasswordField({
+  id,
+  label,
+  placeholder,
+  hint,
+  value,
+  onChange,
+  autoComplete,
+  ...inputProps
+}) {
   const [visible, setVisible] = useState(false)
 
   return (
@@ -39,9 +48,10 @@ export function PasswordField({ id, label, placeholder, hint, value, onChange })
             id={id}
             type={visible ? 'text' : 'password'}
             placeholder={placeholder}
-            autoComplete={id.includes('confirm') ? 'new-password' : 'current-password'}
+            autoComplete={autoComplete ?? (id.includes('confirm') ? 'new-password' : 'current-password')}
             value={value}
             onChange={onChange}
+            {...inputProps}
           />
           <button
             type="button"
