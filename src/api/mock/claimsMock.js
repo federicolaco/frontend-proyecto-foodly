@@ -122,7 +122,9 @@ export function mockResolveClaim(token, claimId, resolution) {
     claim.resolutionType =
       normalizedStatus === 'attended' ? resolution.compensationType : null
     claim.resolutionNote =
-      normalizedStatus === 'rejected' ? resolution.rejectionReason.trim() : ''
+      normalizedStatus === 'attended'
+        ? resolution?.resolutionNote?.trim() ?? ''
+        : resolution.rejectionReason.trim()
     claim.rejectionReason =
       normalizedStatus === 'rejected' ? resolution.rejectionReason.trim() : null
     claim.resolvedAt = new Date().toISOString()
