@@ -436,8 +436,10 @@ export function MyOrders() {
                 const canRetryPayment = order.canRetryPayment ?? order.permiteReintentarPago
                 const isRetryingPayment = retryingId === order.id
                 const isCancellingOrder = cancellingId === order.id
-                const localPhone = order.restaurantPhone ?? localContacts[order.restaurantId]?.telefonoFijo
-                const localCellphone = order.restaurantCellphone ?? localContacts[order.restaurantId]?.celular
+                // El teléfono fijo ya viene directo en pedido.local, pero el celular
+                // solo está disponible vía el perfil público del local (localContacts).
+                const localPhone = order.restaurantPhone
+                const localCellphone = localContacts[order.restaurantId]?.celular
 
                 return (
                   <article key={order.id} className="my-orders__card">
