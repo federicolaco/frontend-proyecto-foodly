@@ -41,6 +41,14 @@ export function RestaurantBanner({ restaurant, onShowComments, onShowPhotos }) {
           <button type="button" className="restaurant-banner__action-btn" onClick={onShowPhotos}>
             Ver fotos del local
           </button>
+          {restaurant.telefonoFijo && (
+            <a
+              href={`tel:${restaurant.telefonoFijo}`}
+              className="restaurant-banner__action-btn restaurant-banner__phone"
+            >
+              Llamar: {restaurant.telefonoFijo}
+            </a>
+          )}
         </div>
       </div>
       <p className="restaurant-banner__hours">{restaurant.hours}</p>

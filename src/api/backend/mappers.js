@@ -121,8 +121,7 @@ export function mapClienteRegistrationPayload(payload) {
     nombre: payload.firstName.trim(),
     apellido: payload.lastName.trim(),
     documento: payload.document ?? `DOC${Date.now()}`,
-    celular: payload.cellphone?.trim(),
-    telefonoFijo: payload.landline?.trim() || null,
+    celular: payload.cellphone?.trim() || undefined,
     direccion: payload.addressParsed,
   }
 }
@@ -135,6 +134,8 @@ export function mapLocalRegistrationPayload(payload) {
     descripcion: payload.description.trim(),
     direccion: payload.addressParsed,
     estaAbierto: false,
+    celular: payload.cellphone?.trim() || undefined,
+    telefonoFijo: payload.landline?.trim() || undefined,
   }
 }
 
@@ -150,6 +151,7 @@ export function mapLocalListItem(local) {
     foodType: local.descripcion ?? '',
     description: local.descripcion ?? '',
     address: formatAddress(local.direccion),
+    telefonoFijo: local.telefonoFijo ?? null,
     images,
   }
 }
@@ -355,8 +357,10 @@ export function mapOrderListItem(pedido) {
     id: pedido.id,
     clientId: pedido.cliente?.id,
     clientName: clientName || 'Cliente',
+    clientPhone: pedido.cliente?.celular ?? null,
     restaurantId: pedido.local?.id,
     restaurantName: pedido.local?.nombre ?? 'Local',
+    restaurantPhone: pedido.local?.telefonoFijo ?? null,
     items: [],
     total: pedido.total ?? 0,
     status: mapBackendStatusToFrontend(pedido.estado),
@@ -490,6 +494,7 @@ export function mapClaim(claim) {
     id: claim.id,
     orderId: claim.dtPedido?.id ?? claim.orderId,
     clientName: clientName || claim.clientName || 'Cliente',
+    clientPhone: cliente?.celular ?? null,
     reason: claim.motivo ?? claim.reason,
     compensationType,
     status,

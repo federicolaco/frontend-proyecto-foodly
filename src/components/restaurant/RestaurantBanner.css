@@ -73,6 +73,12 @@
   background: var(--blanco);
 }
 
+.restaurant-banner__phone {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
 .restaurant-banner__hours {
   font-size: 0.8rem;
   font-weight: 700;

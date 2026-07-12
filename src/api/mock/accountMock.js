@@ -45,6 +45,8 @@ export function mockUpdateProfile(token, payload) {
       user.addressDetails = normalized
     }
     if (payload.description) user.description = payload.description.trim()
+    if (payload.cellphone?.trim()) user.cellphone = payload.cellphone.trim()
+    if (payload.landline?.trim()) user.landline = payload.landline.trim()
     if (payload.photoUrl) user.photo = payload.photoUrl
 
     const displayName =

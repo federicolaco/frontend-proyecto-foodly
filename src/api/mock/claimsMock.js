@@ -39,6 +39,7 @@ export function mockSubmitClaim(token, payload) {
       orderId: order.id,
       clientId: user.id,
       clientName: user.name,
+      clientPhone: user.cellphone ?? null,
       restaurantId: order.restaurantId,
       restaurantName: order.restaurantName,
       reason: payload.reason.trim(),

@@ -331,6 +331,7 @@ const loadOrders = async (silent = false) => {
                 </div>
 
                 <p>Cliente: {order.clientName}</p>
+                {order.clientPhone && <p>Teléfono: {order.clientPhone}</p>}
                 <p>Total: {formatPrice(order.total)}</p>
                 <div
                   style={{

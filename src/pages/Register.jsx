@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { register, startGoogleRegistration } from '../api/auth'
 import { setGoogleRegistrationDraft } from '../lib/auth'
-import { onlyDigits, validateRequiredFields } from '../lib/inputUtils'
+import { isValidCelular, onlyDigits, validateRequiredFields } from '../lib/inputUtils'
 import { AuthLayout } from '../components/AuthLayout'
 import { PasswordField } from '../components/PasswordField'
 import { useGoogleLogin } from '@react-oauth/google'
@@ -63,7 +63,6 @@ export function Register() {
   const [postalCode, setPostalCode] = useState('')
   const [document, setDocument] = useState('')
   const [cellphone, setCellphone] = useState('')
-  const [landline, setLandline] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -113,6 +112,11 @@ export function Register() {
       return
     }
 
+    if (cellphone.trim() && !isValidCelular(cellphone)) {
+      toast.error('El celular ingresado no es válido. Debe incluir el código de país, ej: +598991234567.')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -122,7 +126,6 @@ export function Register() {
         address,
         document,
         cellphone,
-        landline,
         email,
         password,
         role: accountType,
@@ -313,36 +316,19 @@ export function Register() {
           </span>
         </label>
 
-        <div className="auth-form__row">
-          <label className="auth-field" htmlFor="register-cellphone">
-            <span className="auth-field__label">Celular</span>
-            <span className="auth-field__control">
-              <input
-                id="register-cellphone"
-                type="tel"
-                placeholder="+598 99 123 456"
-                autoComplete="tel"
-                value={cellphone}
-                onChange={(e) => setCellphone(e.target.value)}
-                required
-              />
-            </span>
-          </label>
-
-          <label className="auth-field" htmlFor="register-landline">
-            <span className="auth-field__label">Teléfono fijo (opcional)</span>
-            <span className="auth-field__control">
-              <input
-                id="register-landline"
-                type="tel"
-                placeholder="2712 3456"
-                autoComplete="tel-national"
-                value={landline}
-                onChange={(e) => setLandline(e.target.value)}
-              />
-            </span>
-          </label>
-        </div>
+        <label className="auth-field" htmlFor="register-cellphone">
+          <span className="auth-field__label">Celular (opcional)</span>
+          <span className="auth-field__control">
+            <input
+              id="register-cellphone"
+              type="tel"
+              placeholder="+598991234567"
+              autoComplete="tel"
+              value={cellphone}
+              onChange={(e) => setCellphone(e.target.value)}
+            />
+          </span>
+        </label>
 
         <label className="auth-field" htmlFor="register-email">
           <span className="auth-field__label">Correo electrónico</span>

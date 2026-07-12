@@ -1,9 +1,19 @@
-import { apiFetch, isApiConfigured } from './client'
+import { apiFetch, apiFetchSafe, isApiConfigured } from './client'
 import { mapRestaurantDetail } from './backend/mappers'
 import { mockGetRestaurantById } from './mock/ordersMock'
 
 async function fetchLocalSummary(restaurantId) {
   return apiFetch(`/locales/${Number(restaurantId)}/perfil`)
+}
+
+export async function getLocalContact(restaurantId) {
+  if (isApiConfigured()) {
+    const local = await apiFetchSafe(`/locales/${Number(restaurantId)}/perfil`)
+    return { telefonoFijo: local?.telefonoFijo ?? null }
+  }
+
+  const restaurant = await mockGetRestaurantById(restaurantId).catch(() => null)
+  return { telefonoFijo: restaurant?.telefonoFijo ?? null }
 }
 
 async function fetchLocalDishes(restaurantId) {

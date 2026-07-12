@@ -44,10 +44,13 @@ export async function updateProfile(payload) {
     if (user.role === 'cliente') {
       if (payload.firstName) formData.append('nombre', payload.firstName.trim())
       if (payload.lastName) formData.append('apellido', payload.lastName.trim())
+      if (payload.cellphone?.trim()) formData.append('celular', payload.cellphone.trim())
     }
     if (user.role === 'local') {
       if (payload.name) formData.append('nombre', payload.name.trim())
       if (payload.description) formData.append('descripcion', payload.description.trim())
+      if (payload.cellphone?.trim()) formData.append('celular', payload.cellphone.trim())
+      if (payload.landline?.trim()) formData.append('telefonoFijo', payload.landline.trim())
     }
     if (payload.address) {
       formData.append('direccion.calle', address.calle)
@@ -75,6 +78,8 @@ export async function updateProfile(payload) {
     description: payload.description ?? user.description,
     address: formatAddress(address),
     addressDetails: address,
+    cellphone: payload.cellphone?.trim() || user.cellphone,
+    landline: payload.landline?.trim() || user.landline,
     ...(photoUrl ? { photo: photoUrl } : {}),
   }
   setStoredUser(updated)

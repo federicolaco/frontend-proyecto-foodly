@@ -266,6 +266,7 @@ export function LocalClaims() {
                   </span>
                 </div>
                 <p>Cliente: {claim.clientName}</p>
+                {claim.clientPhone && <p>Teléfono: {claim.clientPhone}</p>}
                 <p>Motivo: {claim.reason}</p>
                 <p>Compensación solicitada: {claim.compensationType ?? 'No especificada'}</p>
                 <div

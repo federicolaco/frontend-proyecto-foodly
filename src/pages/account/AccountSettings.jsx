@@ -11,7 +11,7 @@ import {
   verifyPasswordChangeCode,
 } from '../../api/account'
 import { addressFromFields, splitAddressFields } from '../../api/backend/helpers'
-import { onlyDigits, validateRequiredFields } from '../../lib/inputUtils'
+import { isValidCelular, isValidTelefonoFijo, onlyDigits, validateRequiredFields } from '../../lib/inputUtils'
 import { isMockMode } from '../../api/client'
 import { OrdersNavbar } from '../../components/OrdersNavbar'
 import { StarRating } from '../../components/StarRating'
@@ -104,6 +104,8 @@ export function AccountSettings() {
   const [lastName, setLastName] = useState(user.lastName ?? user.name?.split(' ').slice(1).join(' ') ?? '')
   const [localName, setLocalName] = useState(user.name ?? '')
   const [description, setDescription] = useState(user.description ?? '')
+  const [cellphone, setCellphone] = useState(user.cellphone ?? '')
+  const [landline, setLandline] = useState(user.landline ?? '')
   const [street, setStreet] = useState(initialAddress.street)
   const [streetNumber, setStreetNumber] = useState(initialAddress.streetNumber)
   const [city, setCity] = useState(initialAddress.city)
@@ -144,6 +146,16 @@ export function AccountSettings() {
     event.preventDefault()
     if (!validateRequiredFields(event.currentTarget, toast)) return
 
+    if (cellphone.trim() && !isValidCelular(cellphone)) {
+      toast.error('El celular ingresado no tiene un formato válido. Ej: +598991234567.')
+      return
+    }
+
+    if (user.role === ROLES.LOCAL && landline.trim() && !isValidTelefonoFijo(landline)) {
+      toast.error('El teléfono fijo ingresado no tiene un formato válido. Debe ser +598 seguido de 8 dígitos.')
+      return
+    }
+
     setLoading(true)
     try {
       await updateProfile({
@@ -151,6 +163,8 @@ export function AccountSettings() {
         lastName,
         name: localName,
         description,
+        cellphone,
+        ...(user.role === ROLES.LOCAL ? { landline } : {}),
         address: addressFromFields({ street, streetNumber, city, postalCode }),
         ...(photoFile ? { photo: photoFile } : {}),
       })
@@ -330,6 +344,16 @@ export function AccountSettings() {
                           <input className="panel-field__input" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                         </label>
                       </div>
+                      <label className="panel-field">
+                        <span className="panel-field__label">Celular</span>
+                        <input
+                          type="tel"
+                          className="panel-field__input"
+                          placeholder="+598991234567"
+                          value={cellphone}
+                          onChange={(e) => setCellphone(e.target.value)}
+                        />
+                      </label>
                       <AddressFields
                         street={street}
                         streetNumber={streetNumber}
@@ -352,6 +376,28 @@ export function AccountSettings() {
                         <span className="panel-field__label">Descripci&oacute;n</span>
                         <textarea className="panel-field__textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
                       </label>
+                      <div className="panel-form__row panel-form__row--2">
+                        <label className="panel-field">
+                          <span className="panel-field__label">Celular</span>
+                          <input
+                            type="tel"
+                            className="panel-field__input"
+                            placeholder="+598991234567"
+                            value={cellphone}
+                            onChange={(e) => setCellphone(e.target.value)}
+                          />
+                        </label>
+                        <label className="panel-field">
+                          <span className="panel-field__label">Tel&eacute;fono fijo</span>
+                          <input
+                            type="tel"
+                            className="panel-field__input"
+                            placeholder="+59827123456"
+                            value={landline}
+                            onChange={(e) => setLandline(e.target.value)}
+                          />
+                        </label>
+                      </div>
                       <AddressFields
                         street={street}
                         streetNumber={streetNumber}

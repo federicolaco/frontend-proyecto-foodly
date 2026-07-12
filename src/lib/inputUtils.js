@@ -2,6 +2,17 @@ export function onlyDigits(value) {
   return value.replace(/\D/g, '')
 }
 
+const CELULAR_REGEX = /^\+[1-9]\d{7,14}$/
+const TELEFONO_FIJO_UY_REGEX = /^\+598\d{8}$/
+
+export function isValidCelular(value) {
+  return CELULAR_REGEX.test(String(value ?? '').trim())
+}
+
+export function isValidTelefonoFijo(value) {
+  return TELEFONO_FIJO_UY_REGEX.test(String(value ?? '').trim())
+}
+
 // Busca el primer campo requerido vacío dentro de un <form>, para poder
 // avisar con un toast en vez de dejar que el navegador muestre su globo
 // de validación nativo pegado al campo.

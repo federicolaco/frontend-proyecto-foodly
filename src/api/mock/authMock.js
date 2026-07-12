@@ -131,6 +131,7 @@ export function mockRegister(payload) {
       role,
       name: `${payload.firstName} ${payload.lastName}`.trim(),
       address: payload.address ?? '',
+      cellphone: payload.cellphone?.trim() || undefined,
       blocked: false,
       pendingActivation: true,
       localEnabled: false,

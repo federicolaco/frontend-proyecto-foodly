@@ -191,6 +191,8 @@ export function mockSubmitLocalRequest(token, payload) {
       email: payload.email.trim(),
       address: payload.address.trim(),
       description: payload.description.trim(),
+      cellphone: payload.cellphone?.trim() || undefined,
+      landline: payload.landline?.trim() || undefined,
       imageCount: payload.imageCount ?? 0,
       status: 'pending',
       createdAt: new Date().toISOString(),
@@ -255,7 +257,10 @@ export function mockResolveLocalRequest(token, requestId, action) {
         deliveryTime: '30-40 minutos',
         image: null,
         foodType: request.description.slice(0, 40),
+        telefonoFijo: request.landline ?? null,
       })
+
+      db.users[userIndex].cellphone = request.cellphone ?? db.users[userIndex].cellphone
 
       db.users[userIndex].localEnabled = true
       db.users[userIndex].restaurantId = restaurantId

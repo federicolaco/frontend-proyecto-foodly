@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePolling } from '../hooks/usePolling'
 import { Link, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { getClaimForOrder, submitClaim } from '../api/claims'
 import { cancelOrder, getMyOrders, retryOrderPayment } from '../api/orders'
 import { hasRatedLocal } from '../api/ratings'
+import { getLocalContact } from '../api/restaurant'
 import { OrdersNavbar } from '../components/OrdersNavbar'
 import { clearSessionToken } from '../lib/auth'
 import { formatPrice } from '../lib/cart'
@@ -169,6 +170,8 @@ export function MyOrders() {
   const [claimingId, setClaimingId] = useState(null)
   const [submittingClaimId, setSubmittingClaimId] = useState(null)
   const [orderMeta, setOrderMeta] = useState({})
+  const [localContacts, setLocalContacts] = useState({})
+  const fetchedContactIdsRef = useRef(new Set())
   const [hasAnyOrders, setHasAnyOrders] = useState(true)
   const [retryingId, setRetryingId] = useState(null)
   const [cancellingId, setCancellingId] = useState(null)
@@ -197,6 +200,17 @@ export function MyOrders() {
 
       if (!statusFilter && !debouncedSearchLocal) {
         setHasAnyOrders(data.length > 0)
+      }
+
+      const restaurantIds = [...new Set(data.map((order) => order.restaurantId).filter(Boolean))]
+      const missingIds = restaurantIds.filter((id) => !fetchedContactIdsRef.current.has(id))
+
+      if (missingIds.length > 0) {
+        missingIds.forEach((id) => fetchedContactIdsRef.current.add(id))
+        const entries = await Promise.all(
+          missingIds.map(async (id) => [id, await getLocalContact(id).catch(() => null)]),
+        )
+        setLocalContacts((prev) => ({ ...prev, ...Object.fromEntries(entries) }))
       }
 
       const meta = {}
@@ -421,6 +435,7 @@ export function MyOrders() {
                 const canRetryPayment = order.canRetryPayment ?? order.permiteReintentarPago
                 const isRetryingPayment = retryingId === order.id
                 const isCancellingOrder = cancellingId === order.id
+                const localPhone = order.restaurantPhone ?? localContacts[order.restaurantId]?.telefonoFijo
 
                 return (
                   <article key={order.id} className="my-orders__card">
@@ -437,6 +452,7 @@ export function MyOrders() {
                       <div className="my-orders__details">
                         <p>Total: {formatPrice(order.total)}</p>
                         <p>{formatDateTime(order.createdAt)}</p>
+                        {localPhone && <p>Teléfono del local: {localPhone}</p>}
                       </div>
 
                       {order.status === 'rejected' && motivoRechazo && (

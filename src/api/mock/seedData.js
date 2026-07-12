@@ -16,6 +16,7 @@ export const SEED_RESTAURANTS = [
     deliveryTime: '25-30 minutos',
     image: burgerCardImg,
     foodType: 'Hamburguesas',
+    telefonoFijo: '+59824871234',
   },
   {
     id: 2,
@@ -158,6 +159,7 @@ export const SEED_USERS = [
     firstName: 'Juan',
     lastName: 'P?rez',
     address: 'Av. 18 de Julio 1234',
+    cellphone: '+598991234567',
     blocked: false,
     localEnabled: false,
     restaurantId: null,
