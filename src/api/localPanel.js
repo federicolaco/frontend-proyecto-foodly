@@ -299,7 +299,7 @@ export async function saveDish(payload) {
 
 export async function deleteDish(dishId) {
   if (isApiConfigured()) {
-    await apiFetch(`/locales//platos/elimina/${dishId}`, { method: 'DELETE' })
+    await apiFetch(`/locales//platos/eliminar/${dishId}`, { method: 'DELETE' })
     return { id: Number(dishId) }
   }
 
