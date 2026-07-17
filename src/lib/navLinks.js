@@ -1,5 +1,15 @@
 import { ROLES } from './roles'
 
+export const LOCAL_PANEL_TABS = [
+  { label: 'Inicio', to: '/local-panel' },
+  { label: 'Platos', to: '/local-panel/platos' },
+  { label: 'Promociones', to: '/local-panel/promociones' },
+  { label: 'Pedidos', to: '/local-panel/pedidos' },
+  { label: 'Reclamos', to: '/local-panel/reclamos' },
+  { label: 'Clientes', to: '/local-panel/clientes' },
+  { label: 'Estadísticas', to: '/local-panel/estadisticas' },
+]
+
 export function getAppNavLinks(user) {
   if (!user?.role) return []
 
@@ -20,15 +30,9 @@ export function getAppNavLinks(user) {
 
   if (user.role === ROLES.LOCAL) {
     if (user.localEnabled) {
-      return [
-        { label: 'Inicio', to: '/local-panel' },
-        { label: 'Platos', to: '/local-panel/platos' },
-        { label: 'Promociones', to: '/local-panel/promociones' },
-        { label: 'Pedidos', to: '/local-panel/pedidos' },
-        { label: 'Reclamos', to: '/local-panel/reclamos' },
-        { label: 'Clientes', to: '/local-panel/clientes' },
-        { label: 'Estadísticas', to: '/local-panel/estadisticas' },
-      ]
+      // Estos enlaces se muestran como tabs dentro del panel (ver
+      // LOCAL_PANEL_TABS / LocalLayout.jsx), no en la navbar superior.
+      return []
     }
 
     return [{ label: 'Registrar local', to: '/registrar-local' }]
