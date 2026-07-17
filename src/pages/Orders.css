@@ -41,7 +41,7 @@
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) and (min-height: 700px) {
   .orders-page {
     height: 100vh;
     overflow: hidden;

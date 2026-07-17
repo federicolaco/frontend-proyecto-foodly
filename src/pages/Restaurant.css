@@ -73,14 +73,14 @@
   }
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 699px) {
   .restaurant-page__menu-panel {
     min-height: 22rem;
     max-height: min(65vh, 36rem);
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) and (min-height: 700px) {
   .restaurant-page {
     height: 100vh;
     overflow: hidden;

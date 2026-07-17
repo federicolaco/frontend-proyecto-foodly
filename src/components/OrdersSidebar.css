@@ -131,7 +131,7 @@
   }
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 699px) {
   .orders-sidebar {
     width: 100%;
     flex-direction: row;
@@ -156,7 +156,7 @@
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1024px) and (min-height: 700px) {
   .orders-sidebar {
     height: 100%;
     min-height: 0;
