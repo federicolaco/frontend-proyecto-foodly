@@ -63,7 +63,7 @@
   padding-inline: 1rem;
 }
 
-/* Tablet y mobile: scroll horizontal sin espacio vacío después de la última tarjeta */
+
 @media (max-width: 1199px) {
   .most-ordered__scroll {
     scroll-padding-inline: 1rem;
@@ -75,7 +75,6 @@
   }
 }
 
-/* Mobile */
 @media (max-width: 767px) {
   .most-ordered__title {
     white-space: normal;
@@ -89,7 +88,6 @@
 
 }
 
-/* Desktop ancho */
 @media (min-width: 1200px) {
   .most-ordered__scroll {
     scroll-padding-inline: 1.5rem;

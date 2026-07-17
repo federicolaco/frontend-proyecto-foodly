@@ -275,7 +275,7 @@ const loadOrders = async (silent = false) => {
       <section className="panel-card">
         <div className="panel-actions" style={{ marginBottom: '1rem', justifyContent: 'space-between' }}>
 
-          {/* Izquierda */}
+          {}
           <label className="panel-field" style={{ minWidth: '200px' }}>
             <span className="panel-field__label">Filtrar por estado</span>
             <select
@@ -292,7 +292,7 @@ const loadOrders = async (silent = false) => {
             </select>
           </label>
 
-          {/* Derecha */}
+          {}
           <label className="panel-field" style={{ minWidth: '220px' }}>
             <span className="panel-field__label">Ordenar por</span>
             <select
