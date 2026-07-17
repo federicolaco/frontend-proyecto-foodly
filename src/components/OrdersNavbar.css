@@ -26,11 +26,30 @@
   min-width: 0;
   max-width: 100%;
   overflow-x: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.55) transparent;
+}
+
+/* Cuando hay más enlaces de los que entran (ej. panel del Local con 7
+   items), el borde derecho se desvanece para dar la pista visual de que
+   hay más contenido para scrollear en vez de que se vea "cortado". Se
+   aplica solo si JS detectó overflow real, ver OrdersNavbar.jsx. */
+.orders-navbar__links--overflowing {
+  mask-image: linear-gradient(to right, black calc(100% - 1.5rem), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 1.5rem), transparent 100%);
 }
 
 .orders-navbar__links::-webkit-scrollbar {
-  display: none;
+  height: 4px;
+}
+
+.orders-navbar__links::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+}
+
+.orders-navbar__links::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .orders-navbar__link {

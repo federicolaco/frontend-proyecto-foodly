@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getAppNavLinks, getProfileMenuItems } from '../lib/navLinks'
 import { getStoredUser } from '../lib/auth'
@@ -41,12 +41,27 @@ export function OrdersNavbar() {
   const location = useLocation()
   const user = getStoredUser()
   const profileBtnRef = useRef(null)
+  const linksRef = useRef(null)
   const { cart, itemCount } = useCart()
 
   const [profileOpen, setProfileOpen] = useState(false)
+  const [linksOverflowing, setLinksOverflowing] = useState(false)
 
   const navLinks = getAppNavLinks(user)
   const profileItems = getProfileMenuItems(user)
+
+  useEffect(() => {
+    const el = linksRef.current
+    if (!el) return
+
+    const checkOverflow = () => setLinksOverflowing(el.scrollWidth > el.clientWidth + 1)
+
+    checkOverflow()
+    const observer = new ResizeObserver(checkOverflow)
+    observer.observe(el)
+
+    return () => observer.disconnect()
+  }, [navLinks])
 
   const panelPath =
     user.role === 'admin'
@@ -69,7 +84,10 @@ export function OrdersNavbar() {
   return (
       <header className="orders-navbar">
         <nav className="orders-navbar__inner contenedor">
-          <ul className="orders-navbar__links">
+          <ul
+            ref={linksRef}
+            className={`orders-navbar__links${linksOverflowing ? ' orders-navbar__links--overflowing' : ''}`}
+          >
             {navLinks.map((link) => (
               <li key={link.to}>
                 <button
