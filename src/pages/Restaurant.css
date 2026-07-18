@@ -80,39 +80,17 @@
   }
 }
 
-/* Lado a lado (menú + carrito) como era originalmente, exigiendo solo
-   ancho. En notebooks (poca altura) la lista de platos queda acotada por
-   un alto máximo relativo al viewport y con scroll propio, y la página
-   scrollea con normalidad en vez de forzar un viewport fijo. */
+/* Lado a lado (menú + carrito), como era originalmente, a partir de 1024px
+   de ancho sin importar la altura. Menú y carrito se estiran para igualar
+   su altura entre sí y llegar hasta abajo del todo cuando el contenido no
+   la llena (gracias al min-height:100vh de .restaurant-page + flex:1 en
+   cadena). Si el contenido real necesita más lugar del que hay
+   (muchos platos, o una notebook con poca altura), no se recorta nada:
+   la lista de platos scrollea internamente, y si ni así alcanza, scrollea
+   la página — nunca se bloquea el viewport ni se esconde contenido. */
 @media (min-width: 1024px) {
-  .restaurant-page__layout {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 1.5rem;
-  }
-
-  .restaurant-page__menu-column {
-    flex: 1;
-  }
-
-  .restaurant-page__menu-panel {
-    min-height: 22rem;
-    max-height: min(65vh, 36rem);
-    padding: 1.5rem;
-  }
-
-  .restaurant-page__layout > :last-child {
-    flex: 0 0 min(42%, 420px);
-    min-width: 340px;
-  }
-}
-
-/* Con suficiente alto además de ancho, se recupera el modo "una sola
-   pantalla" con scroll interno prolijo en vez de scroll de página. */
-@media (min-width: 1024px) and (min-height: 700px) {
   .restaurant-page {
     height: 100vh;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
   }
@@ -120,29 +98,32 @@
   .restaurant-page__main {
     flex: 1;
     min-height: 0;
-    height: 100%;
     box-sizing: border-box;
     padding-bottom: 1.25rem;
-    overflow: hidden;
   }
 
   .restaurant-page__layout {
     flex: 1;
     min-height: 0;
+    flex-direction: row;
     align-items: stretch;
-    overflow: hidden;
+    gap: 1.5rem;
   }
 
   .restaurant-page__menu-column {
+    flex: 1;
     min-height: 0;
-    overflow: hidden;
   }
 
   .restaurant-page__menu-panel {
-    max-height: none;
+    flex: 1;
+    min-height: 22rem;
+    padding: 1.5rem;
   }
 
   .restaurant-page__layout > :last-child {
+    flex: 0 0 min(42%, 420px);
+    min-width: 340px;
     min-height: 0;
   }
 }

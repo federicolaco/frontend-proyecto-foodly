@@ -156,7 +156,7 @@
   }
 }
 
-@media (min-width: 1024px) and (min-height: 700px) {
+@media (min-width: 1024px) {
   .orders-sidebar {
     height: 100%;
     min-height: 0;

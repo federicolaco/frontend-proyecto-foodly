@@ -41,64 +41,46 @@
   }
 }
 
-/* A partir de acá el layout vuelve a ser lado a lado (sidebar + catálogo),
-   como era originalmente. Se separa en dos niveles: este primero solo exige
-   ancho, así que nunca se apila en pantallas anchas — si además hay poca
-   altura (notebooks), la página simplemente scrollea en vez de forzar el
-   viewport fijo del bloque de abajo. */
+/* Lado a lado (sidebar + catálogo), como era originalmente, a partir de
+   1024px de ancho sin importar la altura. Ambas columnas se estiran para
+   igualar su altura y llegar hasta abajo del todo cuando el contenido no
+   la llena (gracias al min-height:100vh de .orders-page + flex:1 en
+   cadena). Si el contenido real necesita más lugar (notebook con poca
+   altura), no se recorta nada: las listas scrollean internamente, y si ni
+   así alcanza, scrollea la página. */
 @media (min-width: 1024px) {
+  .orders-page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
   .orders-page__main {
+    flex: 1;
+    min-height: 0;
+    box-sizing: border-box;
     padding-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
   }
 
   .orders-page__layout {
+    flex: 1;
+    min-height: 0;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 1.5rem;
   }
 
   .orders-page__layout > :first-child {
     flex: 0 0 280px;
+    min-height: 0;
   }
 
   .orders-page__catalog-panel {
     display: flex;
     flex-direction: column;
+    min-height: 0;
     padding: 1.5rem;
-  }
-}
-
-/* Con suficiente alto además de ancho, se recupera el modo "una sola
-   pantalla" con scroll interno prolijo en vez de scroll de página. */
-@media (min-width: 1024px) and (min-height: 700px) {
-  .orders-page {
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .orders-page__main {
-    flex: 1;
-    min-height: 0;
-    height: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .orders-page__layout {
-    flex: 1;
-    min-height: 0;
-    align-items: stretch;
-  }
-
-  .orders-page__layout > :first-child {
-    min-height: 0;
-  }
-
-  .orders-page__catalog-panel {
-    min-height: 0;
-    height: 100%;
   }
 }
