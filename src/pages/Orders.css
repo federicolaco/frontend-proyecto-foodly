@@ -42,31 +42,13 @@
 }
 
 /* Lado a lado (sidebar + catálogo), como era originalmente, a partir de
-   1024px de ancho sin importar la altura. Ambas columnas se estiran para
-   igualar su altura y llegar hasta abajo del todo cuando el contenido no
-   la llena (gracias al min-height:100vh de .orders-page + flex:1 en
-   cadena). Si el contenido real necesita más lugar (notebook con poca
-   altura), no se recorta nada: las listas scrollean internamente, y si ni
-   así alcanza, scrollea la página. */
+   1024px de ancho sin importar la altura. La página fluye con su alto
+   natural (nada de height:100vh forzado en .orders-page): si el contenido
+   necesita más lugar del que entra en la pantalla, la página scrollea
+   normal, nunca se recorta ni se bloquea el scroll. align-items:stretch
+   iguala la altura del sidebar y el catálogo a la del más alto de los dos. */
 @media (min-width: 1024px) {
-  .orders-page {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .orders-page__main {
-    flex: 1;
-    min-height: 0;
-    box-sizing: border-box;
-    padding-bottom: 1.25rem;
-    display: flex;
-    flex-direction: column;
-  }
-
   .orders-page__layout {
-    flex: 1;
-    min-height: 0;
     flex-direction: row;
     align-items: stretch;
     gap: 1.5rem;
@@ -74,13 +56,10 @@
 
   .orders-page__layout > :first-child {
     flex: 0 0 280px;
-    min-height: 0;
   }
 
   .orders-page__catalog-panel {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    overflow: visible;
     padding: 1.5rem;
   }
 }

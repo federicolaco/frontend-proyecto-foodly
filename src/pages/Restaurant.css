@@ -48,7 +48,6 @@
   flex-direction: column;
   gap: 1rem;
   min-width: 0;
-  min-height: 0;
 }
 
 .restaurant-page__menu-column > :not(.restaurant-page__menu-panel) {
@@ -81,30 +80,14 @@
 }
 
 /* Lado a lado (menú + carrito), como era originalmente, a partir de 1024px
-   de ancho sin importar la altura. Menú y carrito se estiran para igualar
-   su altura entre sí y llegar hasta abajo del todo cuando el contenido no
-   la llena (gracias al min-height:100vh de .restaurant-page + flex:1 en
-   cadena). Si el contenido real necesita más lugar del que hay
-   (muchos platos, o una notebook con poca altura), no se recorta nada:
-   la lista de platos scrollea internamente, y si ni así alcanza, scrollea
-   la página — nunca se bloquea el viewport ni se esconde contenido. */
+   de ancho sin importar la altura. La página fluye con su alto natural
+   (nada de height:100vh forzado en .restaurant-page): si el contenido
+   necesita más lugar del que entra en la pantalla, la página scrollea
+   normal, nunca se recorta ni se bloquea el scroll. align-items:stretch
+   iguala la altura del carrito a la de la columna del menú (la más alta
+   de las dos). */
 @media (min-width: 1024px) {
-  .restaurant-page {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .restaurant-page__main {
-    flex: 1;
-    min-height: 0;
-    box-sizing: border-box;
-    padding-bottom: 1.25rem;
-  }
-
   .restaurant-page__layout {
-    flex: 1;
-    min-height: 0;
     flex-direction: row;
     align-items: stretch;
     gap: 1.5rem;
@@ -112,26 +95,18 @@
 
   .restaurant-page__menu-column {
     flex: 1;
-    min-height: 0;
+    min-width: 0;
   }
 
   .restaurant-page__menu-panel {
-    flex: 1;
-    /* Un piso chico a propósito: tiene que entrar cómodo dentro de lo que
-       la fila reparte incluso en una notebook baja (banner + calificación
-       ya ocupan buena parte de esa altura). Si el piso fuera más alto que
-       lo que queda disponible, este panel se desborda por fuera de su
-       columna y el carrito (que sí respeta el reparto real) termina más
-       corto, dejando un hueco vacío debajo — que es justo lo que pasaba
-       con 22rem. */
-    min-height: 10rem;
+    flex: none;
+    overflow: visible;
     padding: 1.5rem;
   }
 
   .restaurant-page__layout > :last-child {
     flex: 0 0 min(42%, 420px);
     min-width: 340px;
-    min-height: 0;
   }
 }
 
