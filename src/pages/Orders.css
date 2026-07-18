@@ -43,14 +43,14 @@
 
 /* Lado a lado (sidebar + catálogo), como era originalmente, a partir de
    1024px de ancho sin importar la altura. La página fluye con su alto
-   natural (nada de height:100vh forzado en .orders-page): si el contenido
-   necesita más lugar del que entra en la pantalla, la página scrollea
-   normal, nunca se recorta ni se bloquea el scroll. align-items:stretch
-   iguala la altura del sidebar y el catálogo a la del más alto de los dos. */
+   natural (nada de height:100vh forzado en .orders-page): cada columna
+   ocupa su alto natural de forma independiente, sin recortes ni scroll
+   interno forzado; si el contenido necesita más lugar del que entra en la
+   pantalla, la página scrollea normal. */
 @media (min-width: 1024px) {
   .orders-page__layout {
     flex-direction: row;
-    align-items: stretch;
+    align-items: flex-start;
     gap: 1.5rem;
   }
 

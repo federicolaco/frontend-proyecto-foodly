@@ -81,15 +81,14 @@
 
 /* Lado a lado (menú + carrito), como era originalmente, a partir de 1024px
    de ancho sin importar la altura. La página fluye con su alto natural
-   (nada de height:100vh forzado en .restaurant-page): si el contenido
-   necesita más lugar del que entra en la pantalla, la página scrollea
-   normal, nunca se recorta ni se bloquea el scroll. align-items:stretch
-   iguala la altura del carrito a la de la columna del menú (la más alta
-   de las dos). */
+   (nada de height:100vh forzado en .restaurant-page): cada columna ocupa
+   su alto natural de forma independiente, sin recortes ni scroll interno
+   forzado; si el contenido necesita más lugar del que entra en la
+   pantalla, la página scrollea normal. */
 @media (min-width: 1024px) {
   .restaurant-page__layout {
     flex-direction: row;
-    align-items: stretch;
+    align-items: flex-start;
     gap: 1.5rem;
   }
 
