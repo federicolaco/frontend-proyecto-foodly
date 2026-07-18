@@ -117,7 +117,14 @@
 
   .restaurant-page__menu-panel {
     flex: 1;
-    min-height: 22rem;
+    /* Un piso chico a propósito: tiene que entrar cómodo dentro de lo que
+       la fila reparte incluso en una notebook baja (banner + calificación
+       ya ocupan buena parte de esa altura). Si el piso fuera más alto que
+       lo que queda disponible, este panel se desborda por fuera de su
+       columna y el carrito (que sí respeta el reparto real) termina más
+       corto, dejando un hueco vacío debajo — que es justo lo que pasaba
+       con 22rem. */
+    min-height: 10rem;
     padding: 1.5rem;
   }
 
