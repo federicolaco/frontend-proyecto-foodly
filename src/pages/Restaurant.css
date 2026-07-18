@@ -73,13 +73,42 @@
   }
 }
 
-@media (max-width: 1023px), (max-height: 699px) {
+@media (max-width: 1023px) {
   .restaurant-page__menu-panel {
     min-height: 22rem;
     max-height: min(65vh, 36rem);
   }
 }
 
+/* Lado a lado (menú + carrito) como era originalmente, exigiendo solo
+   ancho. En notebooks (poca altura) la lista de platos queda acotada por
+   un alto máximo relativo al viewport y con scroll propio, y la página
+   scrollea con normalidad en vez de forzar un viewport fijo. */
+@media (min-width: 1024px) {
+  .restaurant-page__layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .restaurant-page__menu-column {
+    flex: 1;
+  }
+
+  .restaurant-page__menu-panel {
+    min-height: 22rem;
+    max-height: min(65vh, 36rem);
+    padding: 1.5rem;
+  }
+
+  .restaurant-page__layout > :last-child {
+    flex: 0 0 min(42%, 420px);
+    min-width: 340px;
+  }
+}
+
+/* Con suficiente alto además de ancho, se recupera el modo "una sola
+   pantalla" con scroll interno prolijo en vez de scroll de página. */
 @media (min-width: 1024px) and (min-height: 700px) {
   .restaurant-page {
     height: 100vh;
@@ -100,26 +129,20 @@
   .restaurant-page__layout {
     flex: 1;
     min-height: 0;
-    flex-direction: row;
     align-items: stretch;
-    gap: 1.5rem;
     overflow: hidden;
   }
 
   .restaurant-page__menu-column {
-    flex: 1;
     min-height: 0;
     overflow: hidden;
   }
 
   .restaurant-page__menu-panel {
-    padding: 1.5rem;
     max-height: none;
   }
 
   .restaurant-page__layout > :last-child {
-    flex: 0 0 min(42%, 420px);
-    min-width: 340px;
     min-height: 0;
   }
 }

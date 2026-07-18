@@ -131,7 +131,7 @@
   }
 }
 
-@media (max-width: 1023px), (max-height: 699px) {
+@media (max-width: 1023px) {
   .orders-sidebar {
     width: 100%;
     flex-direction: row;
