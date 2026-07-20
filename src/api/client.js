@@ -1,7 +1,5 @@
 import { getSessionToken, clearSessionToken } from '../lib/auth'
 
-const DEFAULT_API_URL = 'https://proyectoequipo32026-production-f1f5.up.railway.app/api/v1'
-
 // Se dispara cuando el backend responde 403 fuera del login: en este proyecto
 // ese código siempre significa "token vencido o sesión invalidada" (Spring
 // Security lo devuelve como AccessDeniedException apenas la ruta requiere
@@ -41,7 +39,7 @@ function notifySessionExpired() {
 const API_BASE =
   import.meta.env.VITE_USE_MOCK === 'true'
     ? ''
-    : (import.meta.env.VITE_API_URL ?? DEFAULT_API_URL)
+    : import.meta.env.VITE_API_URL
 
 export function isMockMode() {
   return import.meta.env.VITE_USE_MOCK === 'true'
