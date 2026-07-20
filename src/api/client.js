@@ -1,6 +1,6 @@
 import { getSessionToken, clearSessionToken } from '../lib/auth'
 
-const DEFAULT_API_URL = 'https://proyectoequipo32026-testing.up.railway.app/api/v1'
+const DEFAULT_API_URL = 'https://proyectoequipo32026-production-f1f5.up.railway.app/api/v1'
 
 // Se dispara cuando el backend responde 403 fuera del login: en este proyecto
 // ese código siempre significa "token vencido o sesión invalidada" (Spring
